@@ -1221,15 +1221,15 @@ _${desc}_`;
 // ─── Slack ───────────────────────────────────────────────
 const SLACK_CHANNELS = {
   prominent: [
-    { id: 'par-productieverstoring', name: '#par-productieverstoring', urgent: true },
-    { id: 'parro-support', name: '#parro-support', urgent: false },
-    { id: 'schoolkassa-support', name: '#schoolkassa-support', urgent: false },
+    { id: 'C02GR6XPUMV', name: '#par-productieverstoringen', urgent: true },
+    { id: 'C3FN5H274',   name: '#parro-support', urgent: false },
+    { id: 'C07NJLRG92S', name: '#schoolkassa-support', urgent: false },
   ],
   normal: [
-    { id: 'par-1stelijns', name: '#par-1stelijns' },
-    { id: 'par-pssys_sd_privé', name: '#par-pssys_sd_privé' },
-    { id: 'par-sd-inhoudelijke-mededelingen', name: '#par-sd-inhoudelijke-mededelingen' },
-    { id: 'par-lerenvanelkaar', name: '#par-lerenvanelkaar' },
+    { id: 'CENCH90EA',   name: '#par-1stelijns' },
+    { id: 'G6BSY0J1K',   name: '#par-pssys_sd_privé' },
+    { id: 'C027K52CM7B', name: '#par-sd-inhoudelijke-mededelingen' },
+    { id: 'CMKLHCAR5',   name: '#par-lerenvanelkaar' },
   ]
 };
 
@@ -1238,37 +1238,9 @@ let slackLastMsg = {};
 
 async function loadSlack() {
   renderSlackChannels();
-  if (!cfg.slackToken) {
-    document.getElementById('slack-status').textContent = 'Geen token';
-    document.getElementById('slack-status').className = 'card-badge badge-amber';
-    return;
-  }
-  await pollSlackUnread();
-  setInterval(pollSlackUnread, 60000);
-}
-
-async function pollSlackUnread() {
-  if (!cfg.slackToken) return;
-  try {
-    const res = await fetch('https://slack.com/api/conversations.list?types=public_channel,private_channel&limit=200', {
-      headers: { Authorization: `Bearer ${cfg.slackToken}` }
-    });
-    const data = await res.json();
-    if (!data.ok) throw new Error(data.error);
-    const channels = data.channels || [];
-    channels.forEach(ch => {
-      slackUnread[ch.name] = ch.num_members ? (ch.unread_count || 0) : 0;
-      if (ch.latest?.text) slackLastMsg[ch.name] = ch.latest.text.slice(0, 40);
-    });
-    renderSlackChannels();
-    const now = new Date();
-    document.getElementById('slack-refresh-time').textContent = now.toLocaleTimeString('nl-NL', {hour:'2-digit',minute:'2-digit'});
-    document.getElementById('slack-status').textContent = 'Verbonden';
-    document.getElementById('slack-status').className = 'card-badge badge-green';
-  } catch(e) {
-    document.getElementById('slack-status').textContent = 'Fout';
-    document.getElementById('slack-status').className = 'card-badge badge-red';
-  }
+  document.getElementById('slack-status').textContent = 'Klikbaar';
+  document.getElementById('slack-status').className = 'card-badge badge-green';
+  document.getElementById('slack-refresh-time').textContent = 'Opent in Slack app';
 }
 
 function renderSlackChannels() {
@@ -1276,37 +1248,36 @@ function renderSlackChannels() {
   const normalEl = document.getElementById('slack-normal');
 
   prominentEl.innerHTML = SLACK_CHANNELS.prominent.map(ch => {
-    const unread = slackUnread[ch.id] || 0;
-    const preview = slackLastMsg[ch.id] || 'Geen recente berichten';
-    const dotColor = ch.urgent ? 'var(--red)' : unread > 0 ? 'var(--amber)' : 'var(--green)';
     const urgentClass = ch.urgent ? ' urgent' : '';
-    return `<a class="slack-card prominent${urgentClass}" href="slack://channel?id=${ch.id}" onclick="openSlackChannel('${ch.id}');return false;">
+    const dotColor = ch.urgent ? 'var(--red)' : 'var(--green)';
+    return `<a class="slack-card prominent${urgentClass}" href="#" onclick="openSlackChannel('${ch.id}');return false;">
       <div class="slack-card-left">
         <div class="slack-card-dot" style="background:${dotColor}"></div>
         <div class="slack-card-info">
           <div class="slack-card-name">${ch.name}</div>
-          <div class="slack-card-preview">${preview}</div>
+          <div class="slack-card-preview">Klik om te openen in Slack</div>
         </div>
       </div>
-      <span class="slack-unread ${unread > 0 ? 'has' : 'none'}">${unread > 0 ? unread : '—'}</span>
+      <span style="font-size:13px;color:var(--text3);">↗</span>
     </a>`;
   }).join('');
 
   normalEl.innerHTML = SLACK_CHANNELS.normal.map(ch => {
-    const unread = slackUnread[ch.id] || 0;
-    const dotColor = unread > 0 ? 'var(--amber)' : 'var(--green)';
-    return `<a class="slack-card" href="slack://channel?id=${ch.id}" onclick="openSlackChannel('${ch.id}');return false;">
+    return `<a class="slack-card" href="#" onclick="openSlackChannel('${ch.id}');return false;">
       <div class="slack-card-left">
-        <div class="slack-card-dot" style="background:${dotColor}"></div>
+        <div class="slack-card-dot" style="background:var(--green)"></div>
         <div class="slack-card-name">${ch.name}</div>
       </div>
-      <span class="slack-unread ${unread > 0 ? 'has' : 'none'}">${unread > 0 ? unread : '—'}</span>
+      <span style="font-size:13px;color:var(--text3);">↗</span>
     </a>`;
   }).join('');
 }
 
 function openSlackChannel(channelId) {
-  window.open(`https://app.slack.com/client/`, '_blank');
+  window.location.href = `slack://channel?id=${channelId}`;
+  setTimeout(() => {
+    window.open(`https://app.slack.com/client/${channelId}`, '_blank');
+  }, 500);
 }
 
 // ─── To-do ───────────────────────────────────────────────
