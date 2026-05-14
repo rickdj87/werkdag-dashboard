@@ -252,6 +252,29 @@ body::before {
 
 /* Slack */
 .slack-channels { display: flex; flex-wrap: wrap; gap: 6px; }
+.slack-grid { display: flex; flex-direction: column; gap: 12px; }
+.slack-group-label { font-size: 10px; font-weight: 500; color: var(--text3); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
+.slack-prominent { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px; }
+.slack-normal { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 6px; }
+.slack-card {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 14px; border-radius: var(--r); border: 1px solid var(--border);
+  background: var(--bg3); cursor: pointer; text-decoration: none;
+  transition: all 0.15s;
+}
+.slack-card:hover { border-color: var(--border2); background: var(--bg4); }
+.slack-card.prominent { padding: 12px 16px; border-radius: var(--r-lg); }
+.slack-card.urgent { border-color: rgba(255,107,107,0.3); background: var(--red-dim); }
+.slack-card.urgent:hover { border-color: rgba(255,107,107,0.5); }
+.slack-card-left { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.slack-card-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.slack-card-info { min-width: 0; }
+.slack-card-name { font-size: 13px; color: var(--text); font-weight: 400; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.slack-card-preview { font-size: 11px; color: var(--text3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 140px; margin-top: 1px; }
+.slack-unread { min-width: 20px; height: 20px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 500; padding: 0 5px; flex-shrink: 0; margin-left: 8px; }
+.slack-unread.has { background: var(--red); color: #0E0E0C; }
+.slack-unread.none { background: transparent; color: var(--text3); font-size: 10px; }
+.slack-refresh { font-size: 11px; color: var(--text3); display: flex; align-items: center; gap: 4px; }
 .slack-chip {
   display: flex; align-items: center; gap: 6px; padding: 7px 12px;
   background: var(--bg3); border: 1px solid var(--border2); border-radius: 20px;
@@ -577,15 +600,21 @@ input[type=range].pct-slider {
     <div class="card">
       <div class="card-head">
         <span class="card-title"><span class="card-title-dot" style="background:var(--green)"></span>Slack kanalen</span>
-        <span class="card-badge badge-green">Verbonden</span>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <span class="slack-refresh" id="slack-refresh-time">Laden...</span>
+          <span class="card-badge badge-green" id="slack-status">Verbinden...</span>
+        </div>
       </div>
       <div class="divider"></div>
-      <div class="slack-channels" id="slack-channels">
-        <a class="slack-chip" href="#" onclick="openSlack('bugs-productie');return false;"><span class="slack-online"></span>#bugs-productie</a>
-        <a class="slack-chip" href="#" onclick="openSlack('dev-parnassys');return false;"><span class="slack-online"></span>#dev-parnassys</a>
-        <a class="slack-chip" href="#" onclick="openSlack('releases');return false;"><span class="slack-online"></span>#releases</a>
-        <a class="slack-chip" href="#" onclick="openSlack('klant-feedback');return false;"><span class="slack-online"></span>#klant-feedback</a>
-        <a class="slack-chip" href="#" onclick="openSlack('algemeen');return false;"><span class="slack-online"></span>#algemeen</a>
+      <div class="slack-grid" id="slack-channels">
+        <div>
+          <div class="slack-group-label">Prioriteit</div>
+          <div class="slack-prominent" id="slack-prominent"></div>
+        </div>
+        <div>
+          <div class="slack-group-label">Overige kanalen</div>
+          <div class="slack-normal" id="slack-normal"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -697,6 +726,7 @@ function startDashboard() {
   loadAgenda();
   loadProjects();
   loadBugs();
+  loadSlack();
   renderTodos();
   initChat();
 }
@@ -1170,9 +1200,94 @@ _${desc}_`;
 
 
 // ─── Slack ───────────────────────────────────────────────
-function openSlack(channel) {
+const SLACK_CHANNELS = {
+  prominent: [
+    { id: 'par-productieverstoring', name: '#par-productieverstoring', urgent: true },
+    { id: 'parro-support', name: '#parro-support', urgent: false },
+    { id: 'schoolkassa-support', name: '#schoolkassa-support', urgent: false },
+  ],
+  normal: [
+    { id: 'par-1stelijns', name: '#par-1stelijns' },
+    { id: 'par-pssys_sd_privé', name: '#par-pssys_sd_privé' },
+    { id: 'par-sd-inhoudelijke-mededelingen', name: '#par-sd-inhoudelijke-mededelingen' },
+    { id: 'par-lerenvanelkaar', name: '#par-lerenvanelkaar' },
+  ]
+};
+
+let slackUnread = {};
+let slackLastMsg = {};
+
+async function loadSlack() {
+  renderSlackChannels();
+  if (!cfg.slackToken) {
+    document.getElementById('slack-status').textContent = 'Geen token';
+    document.getElementById('slack-status').className = 'card-badge badge-amber';
+    return;
+  }
+  await pollSlackUnread();
+  setInterval(pollSlackUnread, 60000);
+}
+
+async function pollSlackUnread() {
+  if (!cfg.slackToken) return;
+  try {
+    const res = await fetch('https://slack.com/api/conversations.list?types=public_channel,private_channel&limit=200', {
+      headers: { Authorization: `Bearer ${cfg.slackToken}` }
+    });
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.error);
+    const channels = data.channels || [];
+    channels.forEach(ch => {
+      slackUnread[ch.name] = ch.num_members ? (ch.unread_count || 0) : 0;
+      if (ch.latest?.text) slackLastMsg[ch.name] = ch.latest.text.slice(0, 40);
+    });
+    renderSlackChannels();
+    const now = new Date();
+    document.getElementById('slack-refresh-time').textContent = now.toLocaleTimeString('nl-NL', {hour:'2-digit',minute:'2-digit'});
+    document.getElementById('slack-status').textContent = 'Verbonden';
+    document.getElementById('slack-status').className = 'card-badge badge-green';
+  } catch(e) {
+    document.getElementById('slack-status').textContent = 'Fout';
+    document.getElementById('slack-status').className = 'card-badge badge-red';
+  }
+}
+
+function renderSlackChannels() {
+  const prominentEl = document.getElementById('slack-prominent');
+  const normalEl = document.getElementById('slack-normal');
+
+  prominentEl.innerHTML = SLACK_CHANNELS.prominent.map(ch => {
+    const unread = slackUnread[ch.id] || 0;
+    const preview = slackLastMsg[ch.id] || 'Geen recente berichten';
+    const dotColor = ch.urgent ? 'var(--red)' : unread > 0 ? 'var(--amber)' : 'var(--green)';
+    const urgentClass = ch.urgent ? ' urgent' : '';
+    return `<a class="slack-card prominent${urgentClass}" href="slack://channel?id=${ch.id}" onclick="openSlackChannel('${ch.id}');return false;">
+      <div class="slack-card-left">
+        <div class="slack-card-dot" style="background:${dotColor}"></div>
+        <div class="slack-card-info">
+          <div class="slack-card-name">${ch.name}</div>
+          <div class="slack-card-preview">${preview}</div>
+        </div>
+      </div>
+      <span class="slack-unread ${unread > 0 ? 'has' : 'none'}">${unread > 0 ? unread : '—'}</span>
+    </a>`;
+  }).join('');
+
+  normalEl.innerHTML = SLACK_CHANNELS.normal.map(ch => {
+    const unread = slackUnread[ch.id] || 0;
+    const dotColor = unread > 0 ? 'var(--amber)' : 'var(--green)';
+    return `<a class="slack-card" href="slack://channel?id=${ch.id}" onclick="openSlackChannel('${ch.id}');return false;">
+      <div class="slack-card-left">
+        <div class="slack-card-dot" style="background:${dotColor}"></div>
+        <div class="slack-card-name">${ch.name}</div>
+      </div>
+      <span class="slack-unread ${unread > 0 ? 'has' : 'none'}">${unread > 0 ? unread : '—'}</span>
+    </a>`;
+  }).join('');
+}
+
+function openSlackChannel(channelId) {
   window.open(`https://app.slack.com/client/`, '_blank');
-  notify('Slack openen: #' + channel, 'info');
 }
 
 // ─── To-do ───────────────────────────────────────────────
