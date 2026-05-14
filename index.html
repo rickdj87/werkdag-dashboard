@@ -348,6 +348,36 @@ body::before {
 .notif.info { background: rgba(14,14,12,0.9); border-color: var(--border3); color: var(--text2); }
 @keyframes notifIn { from { opacity:0; transform: translateX(10px); } to { opacity:1; transform: translateX(0); } }
 
+/* Notities */
+.notes-area {
+  width: 100%; resize: none; font-size: 13px; font-family: var(--font-body);
+  background: var(--bg3); border: 1px solid var(--border); border-radius: var(--r);
+  color: var(--text); padding: 10px 12px; line-height: 1.7; min-height: 120px;
+  outline: none; transition: border-color 0.15s;
+}
+.notes-area:focus { border-color: var(--border2); }
+.notes-area::placeholder { color: var(--text3); }
+.notes-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 6px; }
+.notes-saved { font-size: 11px; color: var(--text3); }
+.notes-date-nav { display: flex; align-items: center; gap: 8px; }
+.notes-date-btn {
+  width: 24px; height: 24px; border-radius: 6px; background: transparent;
+  border: 1px solid var(--border2); color: var(--text2); cursor: pointer;
+  display: flex; align-items: center; justify-content: center; font-size: 13px;
+  transition: all 0.15s;
+}
+.notes-date-btn:hover { border-color: var(--border3); color: var(--text); }
+.notes-date-label { font-size: 12px; color: var(--text2); min-width: 60px; text-align: center; }
+
+/* Bug template */
+.template-btns { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+.template-btn {
+  font-size: 11px; padding: 5px 10px; border-radius: var(--r);
+  background: var(--bg3); border: 1px solid var(--border2);
+  color: var(--text2); cursor: pointer; transition: all 0.15s; font-family: var(--font-body);
+}
+.template-btn:hover { border-color: var(--border3); color: var(--text); background: var(--bg4); }
+
 /* Modal */
 .modal-overlay {
   display: none; position: fixed; inset: 0; z-index: 200;
@@ -540,6 +570,13 @@ input[type=range].pct-slider {
       </div>
       <div class="divider"></div>
       <div class="bug-form">
+        <div class="template-btns">
+          <button class="template-btn" onclick="applyTemplate('ui')">UI afwijking</button>
+          <button class="template-btn" onclick="applyTemplate('crash')">Crash / fout</button>
+          <button class="template-btn" onclick="applyTemplate('performance')">Trage werking</button>
+          <button class="template-btn" onclick="applyTemplate('data')">Verkeerde data</button>
+          <button class="template-btn" onclick="applyTemplate('toegang')">Toegangsprobleem</button>
+        </div>
         <div class="bug-form-row">
           <select class="form-select" id="bug-channel" disabled style="opacity:0.5;" title="Kanaal wordt automatisch bepaald op basis van project">
             <option value="auto">Kanaal automatisch</option>
@@ -595,7 +632,27 @@ input[type=range].pct-slider {
 
   </div>
 
-  <!-- Rij 3: Slack -->
+  <!-- Rij 3: Notities -->
+  <div class="grid-full">
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title"><span class="card-title-dot" style="background:var(--blue)"></span>Dagelijkse notities</span>
+        <div class="notes-date-nav">
+          <button class="notes-date-btn" onclick="changeNotesDate(-1)" title="Vorige dag">‹</button>
+          <span class="notes-date-label" id="notes-date-label">Vandaag</span>
+          <button class="notes-date-btn" onclick="changeNotesDate(1)" title="Volgende dag">›</button>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <textarea class="notes-area" id="notes-area" placeholder="Aantekeningen voor vandaag... (standup, klantgesprekken, actiepunten)" oninput="saveNotes()"></textarea>
+      <div class="notes-footer">
+        <span class="notes-saved" id="notes-saved">Automatisch opgeslagen</span>
+        <button class="topbar-btn" style="padding:4px 10px;font-size:11px;" onclick="clearNotes()">Leegmaken</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Rij 4: Slack -->
   <div class="grid-full">
     <div class="card">
       <div class="card-head">
@@ -747,6 +804,7 @@ function startDashboard() {
   loadBugs();
   loadSlack();
   renderTodos();
+  initNotes();
   initChat();
 }
 
@@ -1278,6 +1336,88 @@ function openSlackChannel(channelId) {
   setTimeout(() => {
     window.open(`https://app.slack.com/client/${channelId}`, '_blank');
   }, 500);
+}
+
+// ─── Dagelijkse notities ────────────────────────────────
+let notesDate = new Date();
+notesDate.setHours(0,0,0,0);
+let notesSaveTimer = null;
+
+function notesKey(date) {
+  return 'ps_notes_' + date.toISOString().split('T')[0];
+}
+
+function initNotes() {
+  loadNotesForDate(notesDate);
+}
+
+function loadNotesForDate(date) {
+  const key = notesKey(date);
+  const saved = localStorage.getItem(key) || '';
+  document.getElementById('notes-area').value = saved;
+  const today = new Date(); today.setHours(0,0,0,0);
+  const diff = Math.round((date - today) / 86400000);
+  const label = diff === 0 ? 'Vandaag' : diff === -1 ? 'Gisteren' : diff === 1 ? 'Morgen' :
+    date.toLocaleDateString('nl-NL', {day:'numeric', month:'short'});
+  document.getElementById('notes-date-label').textContent = label;
+  document.getElementById('notes-area').placeholder = diff === 0
+    ? 'Aantekeningen voor vandaag... (standup, klantgesprekken, actiepunten)'
+    : 'Notities van ' + label.toLowerCase() + '...';
+  document.getElementById('notes-saved').textContent = saved ? 'Opgeslagen' : 'Nog niets geschreven';
+}
+
+function saveNotes() {
+  clearTimeout(notesSaveTimer);
+  notesSaveTimer = setTimeout(() => {
+    const key = notesKey(notesDate);
+    localStorage.setItem(key, document.getElementById('notes-area').value);
+    document.getElementById('notes-saved').textContent = 'Opgeslagen om ' +
+      new Date().toLocaleTimeString('nl-NL', {hour:'2-digit', minute:'2-digit'});
+  }, 600);
+}
+
+function changeNotesDate(delta) {
+  notesDate.setDate(notesDate.getDate() + delta);
+  loadNotesForDate(notesDate);
+}
+
+function clearNotes() {
+  if (!confirm('Notities van deze dag verwijderen?')) return;
+  localStorage.removeItem(notesKey(notesDate));
+  document.getElementById('notes-area').value = '';
+  document.getElementById('notes-saved').textContent = 'Leeggemaakt';
+}
+
+// ─── Bug templates ───────────────────────────────────────
+const BUG_TEMPLATES = {
+  ui: {
+    title: "UI toont verkeerde weergave bij [beschrijf scherm/functie]",
+    desc: "Stappen:\n1. Ga naar [scherm]\n2. Klik op [actie]\n3. Zie: [wat er fout gaat]\n\nVerwacht: [wat er zou moeten staan]\nBrowser/app versie: "
+  },
+  crash: {
+    title: "Applicatie crasht / geeft foutmelding bij [actie]",
+    desc: "Stappen:\n1. Ga naar [scherm]\n2. Voer [actie] uit\n3. Foutmelding: [kopieer de melding]\n\nFrequentie: altijd / soms\nOmgeving: productie / test"
+  },
+  performance: {
+    title: "Trage werking bij [functie/scherm]",
+    desc: "Stappen:\n1. Ga naar [scherm]\n2. Voer [actie] uit\n3. Laadtijd: [X seconden]\n\nVerwachte laadtijd: [X seconden]\nAantal records/gebruikers: "
+  },
+  data: {
+    title: "Verkeerde data getoond bij [functie]",
+    desc: "Stappen:\n1. Ga naar [scherm]\n2. Zie: [verkeerde waarde]\n\nVerwacht: [juiste waarde]\nBetrokken record/ID: \nOmgeving: productie / test"
+  },
+  toegang: {
+    title: "Toegangsprobleem bij [functie/rol]",
+    desc: "Stappen:\n1. Log in als [rol/gebruiker]\n2. Ga naar [scherm]\n3. Zie: [foutmelding of blokkade]\n\nVerwacht: toegang tot [functie]\nGetroffen gebruikers: "
+  }
+};
+
+function applyTemplate(type) {
+  const t = BUG_TEMPLATES[type];
+  if (!t) return;
+  document.getElementById('bug-title').value = t.title;
+  document.getElementById('bug-desc').value = t.desc;
+  document.getElementById('bug-title').focus();
 }
 
 // ─── To-do ───────────────────────────────────────────────
