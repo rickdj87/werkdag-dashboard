@@ -1,0 +1,1198 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ParnasSys — Werkdag</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0E0E0C;
+  --bg2: #141412;
+  --bg3: #1C1C19;
+  --bg4: #242420;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.12);
+  --border3: rgba(255,255,255,0.18);
+  --text: #F0EDE6;
+  --text2: #9A9890;
+  --text3: #5A5955;
+  --accent: #C8F55A;
+  --accent-dim: rgba(200,245,90,0.12);
+  --accent-text: #0E0E0C;
+  --red: #FF6B6B;
+  --red-dim: rgba(255,107,107,0.12);
+  --amber: #FFB84D;
+  --amber-dim: rgba(255,184,77,0.12);
+  --blue: #6BA8FF;
+  --blue-dim: rgba(107,168,255,0.12);
+  --green: #5BDB8A;
+  --green-dim: rgba(91,219,138,0.12);
+  --font-display: 'Instrument Serif', Georgia, serif;
+  --font-body: 'Geist', system-ui, sans-serif;
+  --font-mono: 'Geist Mono', monospace;
+  --r: 10px;
+  --r-lg: 16px;
+}
+
+html { font-size: 14px; }
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  line-height: 1.6;
+}
+
+/* Grain overlay */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none; z-index: 0; opacity: 0.4;
+}
+
+.app { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; padding: 24px 24px 40px; }
+
+/* Setup screen */
+#setup-screen {
+  min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  flex-direction: column; gap: 32px; padding: 40px 24px;
+}
+.setup-logo { font-family: var(--font-display); font-size: 42px; color: var(--text); line-height: 1.1; text-align: center; }
+.setup-logo span { color: var(--accent); font-style: italic; }
+.setup-subtitle { font-size: 13px; color: var(--text2); text-align: center; max-width: 380px; line-height: 1.7; }
+.setup-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; width: 100%; max-width: 860px; }
+.setup-card {
+  background: var(--bg2); border: 1px solid var(--border2); border-radius: var(--r-lg);
+  padding: 20px 22px;
+}
+.setup-card-head { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.setup-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+.setup-card-title { font-size: 13px; font-weight: 500; color: var(--text); }
+.setup-card-sub { font-size: 12px; color: var(--text2); margin-top: 1px; }
+.setup-input {
+  width: 100%; padding: 9px 12px; font-size: 12px; font-family: var(--font-mono);
+  background: var(--bg3); border: 1px solid var(--border2); border-radius: var(--r);
+  color: var(--text); outline: none; transition: border-color 0.15s;
+}
+.setup-input:focus { border-color: var(--border3); }
+.setup-input::placeholder { color: var(--text3); }
+.setup-help { font-size: 11px; color: var(--text3); margin-top: 6px; line-height: 1.5; }
+.setup-help a { color: var(--accent); text-decoration: none; }
+.setup-btn {
+  width: 100%; max-width: 860px; padding: 14px; font-size: 14px; font-weight: 500;
+  font-family: var(--font-body); background: var(--accent); color: var(--accent-text);
+  border: none; border-radius: var(--r-lg); cursor: pointer;
+  transition: opacity 0.15s, transform 0.1s;
+}
+.setup-btn:hover { opacity: 0.9; }
+.setup-btn:active { transform: scale(0.99); }
+.setup-skip { font-size: 12px; color: var(--text3); cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+.setup-skip:hover { color: var(--text2); }
+
+/* Main dashboard */
+#dashboard { display: none; }
+#dashboard.visible { display: block; }
+
+/* Top bar */
+.topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 28px; padding-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+}
+.topbar-left { display: flex; flex-direction: column; gap: 2px; }
+.topbar-title { font-family: var(--font-display); font-size: 28px; color: var(--text); line-height: 1.1; }
+.topbar-title span { color: var(--accent); font-style: italic; }
+.topbar-date { font-size: 12px; color: var(--text3); }
+.topbar-right { display: flex; align-items: center; gap: 8px; }
+.topbar-btn {
+  padding: 7px 14px; font-size: 12px; font-family: var(--font-body); font-weight: 500;
+  background: transparent; border: 1px solid var(--border2); border-radius: 20px;
+  color: var(--text2); cursor: pointer; transition: all 0.15s;
+}
+.topbar-btn:hover { border-color: var(--border3); color: var(--text); }
+.topbar-btn.primary { background: var(--accent); color: var(--accent-text); border-color: var(--accent); }
+.topbar-btn.primary:hover { opacity: 0.9; }
+
+/* Grid layout */
+.grid-main { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+.grid-bottom { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+.grid-full { margin-bottom: 16px; }
+
+/* Cards */
+.card {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: var(--r-lg);
+  padding: 20px 22px; display: flex; flex-direction: column; gap: 14px;
+  animation: fadeUp 0.3s ease both;
+}
+@keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.card:nth-child(1) { animation-delay: 0.05s; }
+.card:nth-child(2) { animation-delay: 0.1s; }
+.card:nth-child(3) { animation-delay: 0.15s; }
+.card:nth-child(4) { animation-delay: 0.2s; }
+
+.card-head { display: flex; align-items: center; justify-content: space-between; }
+.card-title { font-size: 11px; font-weight: 500; color: var(--text3); text-transform: uppercase; letter-spacing: 0.08em; display: flex; align-items: center; gap: 6px; }
+.card-title-dot { width: 6px; height: 6px; border-radius: 50%; }
+.card-badge { font-size: 11px; padding: 3px 9px; border-radius: 20px; font-weight: 500; font-family: var(--font-mono); }
+.badge-accent { background: var(--accent-dim); color: var(--accent); }
+.badge-red { background: var(--red-dim); color: var(--red); }
+.badge-amber { background: var(--amber-dim); color: var(--amber); }
+.badge-blue { background: var(--blue-dim); color: var(--blue); }
+.badge-green { background: var(--green-dim); color: var(--green); }
+.badge-muted { background: var(--bg3); color: var(--text3); }
+
+/* Divider */
+.divider { height: 1px; background: var(--border); }
+
+/* Agenda */
+.agenda-list { display: flex; flex-direction: column; gap: 2px; }
+.agenda-item {
+  display: flex; align-items: flex-start; gap: 12px; padding: 10px 12px;
+  border-radius: var(--r); transition: background 0.12s; cursor: default;
+}
+.agenda-item:hover { background: var(--bg3); }
+.agenda-time { font-size: 11px; font-family: var(--font-mono); color: var(--text3); min-width: 80px; padding-top: 2px; }
+.agenda-bar { width: 2px; border-radius: 1px; min-height: 32px; flex-shrink: 0; margin-top: 3px; }
+.agenda-content { flex: 1; }
+.agenda-name { font-size: 13px; color: var(--text); font-weight: 400; }
+.agenda-meta { font-size: 11px; color: var(--text3); margin-top: 2px; }
+.agenda-link { font-size: 11px; color: var(--blue); text-decoration: none; margin-top: 3px; display: inline-block; }
+.agenda-link:hover { text-decoration: underline; }
+.empty-state { font-size: 12px; color: var(--text3); text-align: center; padding: 20px 0; font-style: italic; }
+.loading-state { font-size: 12px; color: var(--text3); text-align: center; padding: 16px 0; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.spin { width: 14px; height: 14px; border: 1.5px solid var(--border2); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Projecten */
+.project-list { display: flex; flex-direction: column; gap: 10px; }
+.project-item { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: var(--r); transition: background 0.12s; }
+.project-item:hover { background: var(--bg3); }
+.project-info { flex: 1; min-width: 0; }
+.project-name { font-size: 13px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.project-deadline { font-size: 11px; color: var(--text3); margin-top: 1px; }
+.project-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.progress-wrap { display: flex; align-items: center; gap: 7px; }
+.progress-track { width: 64px; height: 3px; background: var(--bg4); border-radius: 2px; overflow: hidden; }
+.progress-fill { height: 100%; border-radius: 2px; transition: width 0.6s ease; }
+.progress-pct { font-size: 11px; font-family: var(--font-mono); color: var(--text3); min-width: 28px; text-align: right; }
+
+/* Bugs */
+.bug-form { display: flex; flex-direction: column; gap: 8px; }
+.bug-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.form-input, .form-select, .form-textarea {
+  width: 100%; padding: 9px 12px; font-size: 12px; font-family: var(--font-body);
+  background: var(--bg3); border: 1px solid var(--border2); border-radius: var(--r);
+  color: var(--text); outline: none; transition: border-color 0.15s;
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--border3); }
+.form-input::placeholder, .form-textarea::placeholder { color: var(--text3); }
+.form-textarea { resize: none; height: 70px; line-height: 1.5; }
+.form-select option { background: var(--bg3); }
+.submit-btn {
+  padding: 10px 16px; font-size: 12px; font-weight: 500; font-family: var(--font-body);
+  background: var(--accent); color: var(--accent-text); border: none; border-radius: var(--r);
+  cursor: pointer; transition: opacity 0.15s, transform 0.1s; align-self: flex-end;
+}
+.submit-btn:hover { opacity: 0.9; }
+.submit-btn:active { transform: scale(0.98); }
+.submit-btn:disabled { opacity: 0.4; cursor: default; }
+
+/* Bug lijst */
+.bug-list { display: flex; flex-direction: column; gap: 2px; }
+.bug-row {
+  display: flex; align-items: center; gap: 10px; padding: 9px 12px;
+  border-radius: var(--r); transition: background 0.12s;
+}
+.bug-row:hover { background: var(--bg3); }
+.bug-id { font-size: 11px; font-family: var(--font-mono); color: var(--text3); min-width: 60px; }
+.bug-title { flex: 1; font-size: 12px; color: var(--text); }
+.bug-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+
+/* To-do */
+.todo-list { display: flex; flex-direction: column; gap: 2px; }
+.todo-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: var(--r); transition: background 0.12s; }
+.todo-item:hover { background: var(--bg3); }
+.todo-check {
+  width: 16px; height: 16px; border-radius: 4px; border: 1.5px solid var(--border3);
+  flex-shrink: 0; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s;
+}
+.todo-check.done { background: var(--accent); border-color: var(--accent); }
+.todo-check.done::after { content: ''; display: block; width: 8px; height: 5px; border-left: 1.5px solid var(--accent-text); border-bottom: 1.5px solid var(--accent-text); transform: rotate(-45deg) translateY(-1px); }
+.todo-text { flex: 1; font-size: 13px; color: var(--text); transition: color 0.15s; }
+.todo-text.done { color: var(--text3); text-decoration: line-through; text-decoration-color: var(--text3); }
+.todo-add { display: flex; gap: 8px; margin-top: 8px; }
+.todo-add input { flex: 1; padding: 8px 12px; font-size: 12px; font-family: var(--font-body); background: var(--bg3); border: 1px solid var(--border2); border-radius: var(--r); color: var(--text); outline: none; }
+.todo-add input::placeholder { color: var(--text3); }
+.todo-add input:focus { border-color: var(--border3); }
+.todo-add-btn { padding: 8px 14px; font-size: 12px; font-family: var(--font-body); background: var(--bg3); border: 1px solid var(--border2); border-radius: var(--r); color: var(--text2); cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+.todo-add-btn:hover { border-color: var(--border3); color: var(--text); }
+
+/* Slack */
+.slack-channels { display: flex; flex-wrap: wrap; gap: 6px; }
+.slack-chip {
+  display: flex; align-items: center; gap: 6px; padding: 7px 12px;
+  background: var(--bg3); border: 1px solid var(--border2); border-radius: 20px;
+  font-size: 12px; color: var(--text2); cursor: pointer; text-decoration: none;
+  transition: all 0.15s;
+}
+.slack-chip:hover { border-color: var(--border3); color: var(--text); background: var(--bg4); }
+.slack-online { width: 6px; height: 6px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
+
+/* Claude chat */
+.claude-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--r-lg); overflow: hidden; }
+.claude-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 20px; border-bottom: 1px solid var(--border);
+}
+.claude-head-left { display: flex; align-items: center; gap: 10px; }
+.claude-avatar {
+  width: 30px; height: 30px; border-radius: 8px;
+  background: var(--accent-dim); display: flex; align-items: center; justify-content: center;
+}
+.claude-avatar svg { width: 15px; height: 15px; stroke: var(--accent); fill: none; stroke-width: 1.8; }
+.claude-title { font-size: 13px; font-weight: 500; color: var(--text); }
+.claude-sub { font-size: 11px; color: var(--text3); }
+.chat-window { height: 260px; overflow-y: auto; padding: 16px 20px; display: flex; flex-direction: column; gap: 12px; scroll-behavior: smooth; }
+.chat-window::-webkit-scrollbar { width: 3px; }
+.chat-window::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+.chat-msg { display: flex; gap: 8px; align-items: flex-end; }
+.chat-msg.user { flex-direction: row-reverse; }
+.chat-bubble { max-width: 78%; padding: 9px 13px; font-size: 13px; line-height: 1.6; border-radius: 12px; }
+.chat-bubble.ai { background: var(--bg3); color: var(--text); border-bottom-left-radius: 3px; }
+.chat-bubble.user { background: var(--accent); color: var(--accent-text); border-bottom-right-radius: 3px; font-weight: 400; }
+.chat-bubble p { margin-bottom: 6px; }
+.chat-bubble p:last-child { margin-bottom: 0; }
+.chat-bubble strong { font-weight: 500; }
+.chat-bubble ul { padding-left: 16px; margin: 4px 0; }
+.chat-input-row { display: flex; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--border); }
+.chat-input {
+  flex: 1; padding: 9px 13px; font-size: 13px; font-family: var(--font-body);
+  background: var(--bg3); border: 1px solid var(--border2); border-radius: 20px;
+  color: var(--text); outline: none; transition: border-color 0.15s;
+}
+.chat-input:focus { border-color: var(--border3); }
+.chat-input::placeholder { color: var(--text3); }
+.chat-send {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: var(--accent); border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: opacity 0.15s; flex-shrink: 0;
+}
+.chat-send:hover { opacity: 0.85; }
+.chat-send:disabled { opacity: 0.3; cursor: default; }
+.chat-send svg { width: 14px; height: 14px; stroke: var(--accent-text); fill: none; stroke-width: 2.5; }
+.typing-dots { display: flex; gap: 4px; align-items: center; padding: 2px 0; }
+.tdot { width: 5px; height: 5px; border-radius: 50%; background: var(--text3); animation: tdot 1.2s infinite; }
+.tdot:nth-child(2) { animation-delay: 0.2s; }
+.tdot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes tdot { 0%,60%,100%{ transform:translateY(0);opacity:0.5; } 30%{ transform:translateY(-4px);opacity:1; } }
+
+/* Notifications */
+.notif-bar {
+  position: fixed; bottom: 24px; right: 24px; z-index: 100;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.notif {
+  padding: 12px 16px; border-radius: var(--r); font-size: 12px;
+  border: 1px solid var(--border2); backdrop-filter: blur(8px);
+  animation: notifIn 0.2s ease; max-width: 280px; line-height: 1.5;
+}
+.notif.success { background: rgba(14,14,12,0.9); border-color: var(--green); color: var(--green); }
+.notif.error { background: rgba(14,14,12,0.9); border-color: var(--red); color: var(--red); }
+.notif.info { background: rgba(14,14,12,0.9); border-color: var(--border3); color: var(--text2); }
+@keyframes notifIn { from { opacity:0; transform: translateX(10px); } to { opacity:1; transform: translateX(0); } }
+
+/* Modal */
+.modal-overlay {
+  display: none; position: fixed; inset: 0; z-index: 200;
+  background: rgba(0,0,0,0.7); align-items: center; justify-content: center;
+  padding: 24px;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--bg2); border: 1px solid var(--border2); border-radius: var(--r-lg);
+  width: 100%; max-width: 560px; max-height: 80vh; display: flex; flex-direction: column;
+  overflow: hidden;
+}
+.modal-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 20px; border-bottom: 1px solid var(--border);
+}
+.modal-title { font-size: 14px; font-weight: 500; color: var(--text); }
+.modal-close {
+  width: 28px; height: 28px; border-radius: 6px; background: transparent;
+  border: 1px solid var(--border2); color: var(--text2); cursor: pointer;
+  display: flex; align-items: center; justify-content: center; font-size: 16px;
+  transition: all 0.15s;
+}
+.modal-close:hover { background: var(--bg3); color: var(--text); }
+.modal-body { flex: 1; overflow-y: auto; padding: 16px 20px; display: flex; flex-direction: column; gap: 12px; }
+.modal-footer { padding: 12px 20px; border-top: 1px solid var(--border); display: flex; gap: 8px; justify-content: flex-end; }
+.project-edit-row {
+  display: flex; align-items: center; gap: 10px; padding: 12px 14px;
+  background: var(--bg3); border-radius: var(--r); border: 1px solid var(--border);
+}
+.project-edit-info { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+.project-edit-name { font-size: 13px; color: var(--text); font-weight: 500; }
+.project-edit-controls { display: flex; align-items: center; gap: 8px; }
+.pct-label { font-size: 11px; font-family: var(--font-mono); color: var(--text3); min-width: 32px; }
+input[type=range].pct-slider {
+  flex: 1; height: 3px; accent-color: var(--accent); cursor: pointer;
+}
+.project-delete-btn {
+  width: 26px; height: 26px; border-radius: 6px; background: transparent;
+  border: 1px solid var(--border2); color: var(--text3); cursor: pointer;
+  display: flex; align-items: center; justify-content: center; font-size: 14px;
+  transition: all 0.15s; flex-shrink: 0;
+}
+.project-delete-btn:hover { border-color: var(--red); color: var(--red); background: var(--red-dim); }
+.add-project-form { display: flex; flex-direction: column; gap: 8px; padding: 12px 14px; background: var(--bg3); border-radius: var(--r); border: 1px dashed var(--border2); }
+.add-project-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.status-select { font-size: 12px; }
+
+/* CORS waarschuwing */
+.cors-notice {
+  display: flex; align-items: flex-start; gap: 8px; padding: 10px 12px;
+  background: var(--amber-dim); border: 1px solid rgba(255,184,77,0.2);
+  border-radius: var(--r); font-size: 12px; color: var(--amber); line-height: 1.5;
+}
+.cors-notice a { color: var(--amber); }
+
+/* Scrollbar global */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+@media (max-width: 768px) {
+  .grid-main, .grid-bottom { grid-template-columns: 1fr; }
+  .topbar { flex-direction: column; align-items: flex-start; gap: 12px; }
+}
+</style>
+</head>
+<body>
+
+<!-- SETUP SCREEN -->
+<div id="setup-screen">
+  <div>
+    <div class="setup-logo">ParnasSys<br><span>Werkdag</span></div>
+    <p class="setup-subtitle" style="margin-top:10px;">Verbind je tools voor een live werkdag overzicht. Je tokens worden alleen lokaal opgeslagen.</p>
+  </div>
+
+  <div class="setup-cards">
+    <div class="setup-card">
+      <div class="setup-card-head">
+        <div class="setup-icon" style="background:rgba(0,120,212,0.15);">📅</div>
+        <div>
+          <div class="setup-card-title">Microsoft 365</div>
+          <div class="setup-card-sub">Agenda ophalen</div>
+        </div>
+      </div>
+      <input class="setup-input" id="ms-token" type="password" placeholder="Bearer token (Graph API)">
+      <p class="setup-help">Haal op via <a href="https://developer.microsoft.com/en-us/graph/graph-explorer" target="_blank">Graph Explorer</a> → inloggen → kopieer Access Token</p>
+    </div>
+
+    <div class="setup-card">
+      <div class="setup-card-head">
+        <div class="setup-icon" style="background:rgba(255,107,107,0.12);">🐛</div>
+        <div>
+          <div class="setup-card-title">Jira</div>
+          <div class="setup-card-sub">Bugs & projecten</div>
+        </div>
+      </div>
+      <input class="setup-input" id="jira-domain" type="text" placeholder="jouwbedrijf.atlassian.net">
+      <input class="setup-input" style="margin-top:6px;" id="jira-email" type="text" placeholder="jouw@email.nl">
+      <input class="setup-input" style="margin-top:6px;" id="jira-token" type="password" placeholder="API token">
+      <p class="setup-help">Token aanmaken via <a href="https://id.atlassian.com/manage-profile/security/api-tokens" target="_blank">Atlassian security</a></p>
+    </div>
+
+    <div class="setup-card">
+      <div class="setup-card-head">
+        <div class="setup-icon" style="background:rgba(91,219,138,0.12);">💬</div>
+        <div>
+          <div class="setup-card-title">Slack</div>
+          <div class="setup-card-sub">Berichten vanuit jouw account</div>
+        </div>
+      </div>
+      <input class="setup-input" id="slack-token" type="password" placeholder="User token (xoxp-...)">
+      <input class="setup-input" style="margin-top:6px;" id="slack-name" type="text" placeholder="Jouw naam (bijv. Rick de Jong)">
+      <p class="setup-help">Via <a href="https://api.slack.com/apps" target="_blank">api.slack.com/apps</a> → OAuth & Permissions → User OAuth Token</p>
+    </div>
+
+    <div class="setup-card">
+      <div class="setup-card-head">
+        <div class="setup-icon" style="background:rgba(200,245,90,0.12);">🤖</div>
+        <div>
+          <div class="setup-card-title">Anthropic (Claude)</div>
+          <div class="setup-card-sub">AI assistent</div>
+        </div>
+      </div>
+      <input class="setup-input" id="claude-token" type="password" placeholder="API key (sk-ant-...)">
+      <p class="setup-help">Key aanmaken via <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> → API Keys</p>
+    </div>
+  </div>
+
+  <button class="setup-btn" onclick="saveAndStart()">Dashboard starten →</button>
+  <span class="setup-skip" onclick="skipSetup()">Overslaan en demo-modus gebruiken</span>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard">
+<div class="app">
+
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-title">Goedemorgen, <span id="greeting-name">Productspecialist</span></div>
+      <div class="topbar-date" id="topbar-date"></div>
+    </div>
+    <div class="topbar-right">
+      <button class="topbar-btn" onclick="refreshAll()">↻ Vernieuwen</button>
+      <button class="topbar-btn" onclick="showSetup()">Instellingen</button>
+    </div>
+  </div>
+
+  <!-- Rij 1: Agenda + Projecten -->
+  <div class="grid-main">
+
+    <div class="card" id="agenda-card">
+      <div class="card-head">
+        <span class="card-title"><span class="card-title-dot" style="background:var(--blue)"></span>Agenda vandaag</span>
+        <span class="card-badge badge-blue" id="agenda-count">—</span>
+      </div>
+      <div class="divider"></div>
+      <div id="agenda-cors-notice" style="display:none;" class="cors-notice" style="margin-bottom:8px;">⚠ Agenda werkt pas na hosting op GitHub Pages. Zie instructies bij "Instellingen".</div>
+      <div class="agenda-list" id="agenda-list">
+        <div class="loading-state"><div class="spin"></div>Ophalen...</div>
+      </div>
+    </div>
+
+    <div class="card" id="projects-card">
+      <div class="card-head">
+        <span class="card-title"><span class="card-title-dot" style="background:var(--accent)"></span>Lopende projecten</span>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <span class="card-badge badge-accent" id="projects-count">—</span>
+          <button class="topbar-btn" style="padding:4px 10px;font-size:11px;" onclick="openProjectModal()">+ Beheren</button>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div class="project-list" id="project-list">
+        <div class="empty-state">Klik op "+ Beheren" om projecten toe te voegen</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Rij 2: Bug melden + Buglijst + To-do -->
+  <div class="grid-bottom">
+
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title"><span class="card-title-dot" style="background:var(--red)"></span>Bug melden</span>
+      </div>
+      <div class="divider"></div>
+      <div class="bug-form">
+        <div class="bug-form-row">
+          <select class="form-select" id="bug-channel">
+            <option value="bugs-productie">#bugs-productie</option>
+            <option value="dev-parnassys">#dev-parnassys</option>
+            <option value="releases">#releases</option>
+          </select>
+          <select class="form-select" id="bug-prio">
+            <option value="High">Hoog</option>
+            <option value="Medium" selected>Normaal</option>
+            <option value="Low">Laag</option>
+          </select>
+        </div>
+        <div class="bug-form-row">
+          <select class="form-select" id="bug-project">
+            <option value="PARRO">PARRO</option>
+            <option value="PARNASSYS">PARNASSYS</option>
+            <option value="LEERLING">LEERLING</option>
+            <option value="SSO">SSO</option>
+            <option value="OVERIG">OVERIG</option>
+          </select>
+          <input class="form-input" id="bug-zendesk" placeholder="Zendesk URL (optioneel)">
+        </div>
+        <input class="form-input" id="bug-title" placeholder="Korte omschrijving...">
+        <textarea class="form-textarea" id="bug-desc" placeholder="Stappen om te reproduceren, verwacht gedrag..."></textarea>
+        <button class="submit-btn" onclick="submitBug()">Verstuur naar Slack + Jira →</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title"><span class="card-title-dot" style="background:var(--red)"></span>Bug tracker</span>
+        <span class="card-badge badge-red" id="bugs-count">—</span>
+      </div>
+      <div class="divider"></div>
+      <div class="bug-list" id="bug-list">
+        <div class="loading-state"><div class="spin"></div>Ophalen uit Jira...</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title"><span class="card-title-dot" style="background:var(--amber)"></span>To-do</span>
+        <span class="card-badge badge-amber" id="todo-count">0 open</span>
+      </div>
+      <div class="divider"></div>
+      <div class="todo-list" id="todo-list"></div>
+      <div class="todo-add">
+        <input type="text" id="todo-input" placeholder="Nieuwe taak..." onkeydown="if(event.key==='Enter')addTodo()">
+        <button class="todo-add-btn" onclick="addTodo()">+ Voeg toe</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Rij 3: Slack -->
+  <div class="grid-full">
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title"><span class="card-title-dot" style="background:var(--green)"></span>Slack kanalen</span>
+        <span class="card-badge badge-green">Verbonden</span>
+      </div>
+      <div class="divider"></div>
+      <div class="slack-channels" id="slack-channels">
+        <a class="slack-chip" href="#" onclick="openSlack('bugs-productie');return false;"><span class="slack-online"></span>#bugs-productie</a>
+        <a class="slack-chip" href="#" onclick="openSlack('dev-parnassys');return false;"><span class="slack-online"></span>#dev-parnassys</a>
+        <a class="slack-chip" href="#" onclick="openSlack('releases');return false;"><span class="slack-online"></span>#releases</a>
+        <a class="slack-chip" href="#" onclick="openSlack('klant-feedback');return false;"><span class="slack-online"></span>#klant-feedback</a>
+        <a class="slack-chip" href="#" onclick="openSlack('algemeen');return false;"><span class="slack-online"></span>#algemeen</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Rij 4: Claude -->
+  <div class="grid-full">
+    <div class="claude-card">
+      <div class="claude-head">
+        <div class="claude-head-left">
+          <div class="claude-avatar">
+            <svg viewBox="0 0 24 24"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"/></svg>
+          </div>
+          <div>
+            <div class="claude-title">ParnasSys assistent</div>
+            <div class="claude-sub">Aangedreven door Claude — ken jouw werkcontext</div>
+          </div>
+        </div>
+        <span class="card-badge badge-accent">Actief</span>
+      </div>
+      <div class="chat-window" id="chat-window"></div>
+      <div class="chat-input-row">
+        <input class="chat-input" id="chat-input" placeholder="Stel een vraag over je werkdag, bugs, projecten..." onkeydown="if(event.key==='Enter')sendChat()">
+        <button class="chat-send" id="chat-send" onclick="sendChat()">
+          <svg viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- Notifications -->
+<div class="notif-bar" id="notif-bar"></div>
+
+<script>
+// ─── State ───────────────────────────────────────────────
+let cfg = {};
+let todos = JSON.parse(localStorage.getItem('ps_todos') || '[]');
+let bugs = JSON.parse(localStorage.getItem('ps_bugs') || '[]');
+let projects = JSON.parse(localStorage.getItem('ps_projects') || '[]');
+let chatHistory = [];
+let demoMode = false;
+
+const SYSTEM_PROMPT = `Je bent een behulpzame AI-assistent voor een productspecialist bij ParnasSys, een Nederlands softwarebedrijf dat administratiesoftware maakt voor het primair onderwijs.
+
+De gebruiker werkt met: Microsoft 365 agenda, Jira (bug tracking/sprints), Slack (#bugs-productie, #dev-parnassys, #releases), en dit dashboard.
+
+Help met: user stories, acceptatiecriteria, sprintreviews, backlog refinement, bug rapportages, klantcommunicatie, Agile/Scrum. 
+Antwoord altijd in het Nederlands. Wees direct en praktisch. Korte alinea's. Gebruik **vetgedrukte tekst** voor termen.`;
+
+// ─── Setup ───────────────────────────────────────────────
+function saveAndStart() {
+  cfg = {
+    msToken: document.getElementById('ms-token').value.trim(),
+    jiraDomain: document.getElementById('jira-domain').value.trim(),
+    jiraEmail: document.getElementById('jira-email').value.trim(),
+    jiraToken: document.getElementById('jira-token').value.trim(),
+    slackToken: document.getElementById('slack-token').value.trim(),
+    slackName: document.getElementById('slack-name').value.trim(),
+    claudeKey: document.getElementById('claude-token').value.trim(),
+  };
+  if (cfg.slackName) {
+    const first = cfg.slackName.split(' ')[0];
+    document.getElementById('greeting-name').textContent = first;
+  } else if (cfg.jiraEmail) {
+    const name = cfg.jiraEmail.split('@')[0];
+    document.getElementById('greeting-name').textContent = name.charAt(0).toUpperCase() + name.slice(1);
+  }
+  localStorage.setItem('ps_cfg', JSON.stringify(cfg));
+  startDashboard();
+}
+
+function skipSetup() {
+  demoMode = true;
+  cfg = {};
+  startDashboard();
+}
+
+function showSetup() {
+  document.getElementById('setup-screen').style.display = 'flex';
+  document.getElementById('dashboard').classList.remove('visible');
+}
+
+function loadSavedCfg() {
+  const saved = localStorage.getItem('ps_cfg');
+  if (saved) {
+    cfg = JSON.parse(saved);
+    if (cfg.slackName) {
+      const first = cfg.slackName.split(' ')[0];
+      document.getElementById('greeting-name').textContent = first;
+    } else if (cfg.jiraEmail) {
+      const name = cfg.jiraEmail.split('@')[0];
+      document.getElementById('greeting-name').textContent = name.charAt(0).toUpperCase() + name.slice(1);
+    }
+    return true;
+  }
+  return false;
+}
+
+// ─── Dashboard init ──────────────────────────────────────
+function startDashboard() {
+  document.getElementById('setup-screen').style.display = 'none';
+  document.getElementById('dashboard').classList.add('visible');
+  setDate();
+  loadAgenda();
+  loadProjects();
+  loadBugs();
+  renderTodos();
+  initChat();
+}
+
+function setDate() {
+  const d = new Date();
+  const days = ['Zondag','Maandag','Dinsdag','Woensdag','Donderdag','Vrijdag','Zaterdag'];
+  const months = ['januari','februari','maart','april','mei','juni','juli','augustus','september','oktober','november','december'];
+  document.getElementById('topbar-date').textContent = `${days[d.getDay()]} ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+}
+
+function refreshAll() {
+  loadAgenda(); loadProjects(); loadBugs();
+  notify('Dashboard vernieuwd', 'info');
+}
+
+// ─── Agenda (Microsoft Graph) ────────────────────────────
+async function loadAgenda() {
+  const list = document.getElementById('agenda-list');
+  list.innerHTML = '<div class="loading-state"><div class="spin"></div>Ophalen...</div>';
+
+  if (demoMode || !cfg.msToken) { renderAgendaDemo(); return; }
+
+  const now = new Date();
+  const start = new Date(now.setHours(0,0,0,0)).toISOString();
+  const end = new Date(now.setHours(23,59,59,999)).toISOString();
+
+  try {
+    const res = await fetch(
+      `https://graph.microsoft.com/v1.0/me/calendarView?startDateTime=${start}&endDateTime=${end}&$orderby=start/dateTime&$top=20`,
+      { headers: { Authorization: `Bearer ${cfg.msToken}`, 'Content-Type': 'application/json' } }
+    );
+    if (!res.ok) throw new Error('Graph API fout: ' + res.status);
+    const data = await res.json();
+    renderAgenda(data.value || []);
+  } catch(e) {
+    document.getElementById('agenda-cors-notice').style.display = 'flex';
+    renderAgendaDemo();
+  }
+}
+
+function renderAgenda(events) {
+  const list = document.getElementById('agenda-list');
+  document.getElementById('agenda-count').textContent = events.length + ' afspraken';
+  if (!events.length) { list.innerHTML = '<div class="empty-state">Geen afspraken vandaag</div>'; return; }
+  const colors = ['#6BA8FF','#C8F55A','#FFB84D','#FF6B6B','#5BDB8A','#C97FFF'];
+  list.innerHTML = events.map((e, i) => {
+    const start = new Date(e.start?.dateTime || e.start?.date);
+    const end = new Date(e.end?.dateTime || e.end?.date);
+    const fmt = t => t.toLocaleTimeString('nl-NL', {hour:'2-digit',minute:'2-digit'});
+    const color = colors[i % colors.length];
+    const loc = e.location?.displayName || '';
+    const teamsUrl = e.onlineMeeting?.joinUrl || '';
+    return `<div class="agenda-item">
+      <span class="agenda-time">${fmt(start)}<br>${fmt(end)}</span>
+      <div class="agenda-bar" style="background:${color}"></div>
+      <div class="agenda-content">
+        <div class="agenda-name">${e.subject || 'Geen titel'}</div>
+        ${loc ? `<div class="agenda-meta">${loc}</div>` : ''}
+        ${teamsUrl ? `<a class="agenda-link" href="${teamsUrl}" target="_blank">Teams → deelnemen</a>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderAgendaDemo() {
+  const demo = [
+    { subject: 'Stand-up sprint 24', start:{dateTime:'2026-05-14T09:00:00'}, end:{dateTime:'2026-05-14T09:30:00'}, location:{displayName:'Microsoft Teams'}, onlineMeeting:{joinUrl:'#'} },
+    { subject: 'Klantgesprek — Basisschool De Bron', start:{dateTime:'2026-05-14T10:00:00'}, end:{dateTime:'2026-05-14T11:00:00'}, location:{displayName:'Teams'}, onlineMeeting:{joinUrl:'#'} },
+    { subject: 'Backlog refinement', start:{dateTime:'2026-05-14T13:00:00'}, end:{dateTime:'2026-05-14T14:00:00'}, location:{displayName:'Vergaderzaal A'} },
+    { subject: 'Review: release 3.12', start:{dateTime:'2026-05-14T15:30:00'}, end:{dateTime:'2026-05-14T16:00:00'}, location:{displayName:'Teams'}, onlineMeeting:{joinUrl:'#'} },
+  ];
+  renderAgenda(demo);
+}
+
+// ─── Projecten (lokaal beheer + optioneel Jira) ─────────
+async function loadProjects() {
+  if (projects.length) { renderProjects(); return; }
+  if (demoMode || !cfg.jiraDomain) { renderProjectsDemo(); return; }
+  // Jira ophalen als token beschikbaar en niet lokaal
+  const auth = btoa(`${cfg.jiraEmail}:${cfg.jiraToken}`);
+  try {
+    const res = await fetch(
+      `https://${cfg.jiraDomain}/rest/api/3/project/search?maxResults=10`,
+      { headers: { Authorization: `Basic ${auth}`, Accept: 'application/json' } }
+    );
+    if (!res.ok) throw new Error('Jira API fout');
+    const data = await res.json();
+    projects = (data.values || []).slice(0,8).map(p => ({
+      id: p.id, name: p.name, pct: 0, status: 'Actief', deadline: '', color: '#C8F55A'
+    }));
+    localStorage.setItem('ps_projects', JSON.stringify(projects));
+    renderProjects();
+  } catch(e) {
+    renderProjectsDemo();
+  }
+}
+
+function renderProjects() {
+  const list = document.getElementById('project-list');
+  const active = projects.filter(p => p.status !== 'Afgerond');
+  document.getElementById('projects-count').textContent = active.length + ' actief';
+  if (!projects.length) {
+    list.innerHTML = '<div class="empty-state">Klik op "+ Beheren" om projecten toe te voegen</div>';
+    return;
+  }
+  const colors = ['#C8F55A','#6BA8FF','#5BDB8A','#FFB84D','#FF6B6B','#C97FFF'];
+  list.innerHTML = projects.map((p, i) => {
+    const color = p.color || colors[i % colors.length];
+    const statusMap = {
+      'Actief': 'badge-accent', 'In review': 'badge-amber',
+      'Bijna klaar': 'badge-green', 'In uitvoering': 'badge-blue', 'Afgerond': 'badge-muted'
+    };
+    const badgeClass = statusMap[p.status] || 'badge-accent';
+    const deadline = p.deadline ? new Date(p.deadline).toLocaleDateString('nl-NL', {day:'numeric',month:'short'}) : '';
+    return `<div class="project-item">
+      <div class="project-info">
+        <div class="project-name">${p.name}</div>
+        ${deadline ? `<div class="project-deadline">Deadline ${deadline}</div>` : '<div class="project-deadline">&nbsp;</div>'}
+      </div>
+      <div class="project-right">
+        <div class="progress-wrap">
+          <div class="progress-track"><div class="progress-fill" style="width:${p.pct}%;background:${color}"></div></div>
+          <span class="progress-pct">${p.pct}%</span>
+        </div>
+        <span class="card-badge ${badgeClass}">${p.status}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderProjectsDemo() {
+  projects = [
+    { name: 'Rapportmodule v2', pct: 72, status: 'In review', color: '#6BA8FF', deadline: '2026-05-15' },
+    { name: 'SSO integratie', pct: 45, status: 'Actief', color: '#C8F55A', deadline: '2026-06-01' },
+    { name: 'Leerling-import', pct: 88, status: 'Bijna klaar', color: '#5BDB8A', deadline: '2026-05-20' },
+    { name: 'Dashboard herdesign', pct: 20, status: 'In uitvoering', color: '#FFB84D', deadline: '2026-06-10' },
+    { name: 'API documentatie', pct: 60, status: 'Actief', color: '#C8F55A', deadline: '2026-05-30' },
+  ];
+  renderProjects();
+}
+
+// ─── Project modal ────────────────────────────────────────
+function openProjectModal() {
+  renderProjectEditList();
+  document.getElementById('project-modal').classList.add('open');
+}
+
+function closeProjectModal() {
+  document.getElementById('project-modal').classList.remove('open');
+  renderProjects();
+}
+
+function renderProjectEditList() {
+  const list = document.getElementById('project-edit-list');
+  if (!projects.length) { list.innerHTML = '<div class="empty-state" style="padding:8px 0;">Nog geen projecten</div>'; return; }
+  const colors = ['#C8F55A','#6BA8FF','#5BDB8A','#FFB84D','#FF6B6B','#C97FFF'];
+  list.innerHTML = projects.map((p, i) => {
+    const color = p.color || colors[i % colors.length];
+    return `<div class="project-edit-row">
+      <div class="project-edit-info">
+        <div class="project-edit-name">${p.name}</div>
+        <div class="project-edit-controls">
+          <input type="range" class="pct-slider" min="0" max="100" value="${p.pct}" step="5"
+            oninput="updateProjectPct(${i}, this.value); this.nextElementSibling.textContent=this.value+'%'">
+          <span class="pct-label" style="color:${color}">${p.pct}%</span>
+          <select class="form-select" style="font-size:11px;padding:4px 8px;height:28px;" onchange="updateProjectStatus(${i}, this.value)">
+            ${['Actief','In review','Bijna klaar','In uitvoering','Afgerond'].map(s =>
+              `<option value="${s}" ${p.status===s?'selected':''}>${s}</option>`
+            ).join('')}
+          </select>
+        </div>
+      </div>
+      <button class="project-delete-btn" onclick="deleteProject(${i})" title="Verwijderen">×</button>
+    </div>`;
+  }).join('');
+}
+
+function updateProjectPct(i, val) {
+  projects[i].pct = parseInt(val);
+  localStorage.setItem('ps_projects', JSON.stringify(projects));
+}
+
+function updateProjectStatus(i, val) {
+  projects[i].status = val;
+  localStorage.setItem('ps_projects', JSON.stringify(projects));
+  renderProjectEditList();
+}
+
+function deleteProject(i) {
+  projects.splice(i, 1);
+  localStorage.setItem('ps_projects', JSON.stringify(projects));
+  renderProjectEditList();
+}
+
+function addProject() {
+  const name = document.getElementById('new-project-name').value.trim();
+  const status = document.getElementById('new-project-status').value;
+  const deadline = document.getElementById('new-project-deadline').value;
+  if (!name) { notify('Vul een projectnaam in', 'error'); return; }
+  const colors = ['#C8F55A','#6BA8FF','#5BDB8A','#FFB84D','#FF6B6B','#C97FFF'];
+  projects.push({ name, pct: 0, status, deadline, color: colors[projects.length % colors.length] });
+  localStorage.setItem('ps_projects', JSON.stringify(projects));
+  document.getElementById('new-project-name').value = '';
+  document.getElementById('new-project-deadline').value = '';
+  renderProjectEditList();
+  notify('Project toegevoegd: ' + name, 'success');
+}
+
+// ─── Jira bugs ───────────────────────────────────────────
+async function loadBugs() {
+  const list = document.getElementById('bug-list');
+  list.innerHTML = '<div class="loading-state"><div class="spin"></div>Ophalen...</div>';
+
+  if (demoMode || !cfg.jiraDomain) { renderBugsFromLocal(); return; }
+
+  const auth = btoa(`${cfg.jiraEmail}:${cfg.jiraToken}`);
+  try {
+    const jql = encodeURIComponent('issuetype = Bug AND project = PS ORDER BY created DESC');
+    const res = await fetch(
+      `https://${cfg.jiraDomain}/rest/api/3/search?jql=${jql}&maxResults=15&fields=summary,status,priority`,
+      { headers: { Authorization: `Basic ${auth}`, Accept: 'application/json' } }
+    );
+    if (!res.ok) throw new Error('Jira fout: ' + res.status);
+    const data = await res.json();
+    const mapped = (data.issues || []).map(i => ({
+      id: i.key,
+      title: i.fields.summary,
+      status: i.fields.status?.name || 'Open',
+      prio: i.fields.priority?.name || 'Medium',
+    }));
+    bugs = [...mapped, ...bugs.filter(b => b.local)];
+    renderBugList();
+  } catch(e) {
+    renderBugsFromLocal();
+  }
+}
+
+function renderBugsFromLocal() {
+  if (!bugs.length) {
+    bugs = [
+      { id: 'PS-1042', title: 'Rapport export crasht bij >500 leerlingen', status: 'Open', prio: 'High' },
+      { id: 'PS-1038', title: 'Inlogprobleem SSO bij Safari 17', status: 'Done', prio: 'Medium' },
+    ];
+  }
+  renderBugList();
+}
+
+function renderBugList() {
+  const list = document.getElementById('bug-list');
+  const open = bugs.filter(b => b.status !== 'Done' && b.status !== 'Opgelost').length;
+  document.getElementById('bugs-count').textContent = open + ' open';
+  if (!bugs.length) { list.innerHTML = '<div class="empty-state">Geen bugs gevonden</div>'; return; }
+  list.innerHTML = bugs.slice(0, 8).map(b => {
+    const isDone = b.status === 'Done' || b.status === 'Opgelost';
+    const isHigh = b.prio === 'High' || b.prio === 'Hoog' || b.prio === 'Highest';
+    const badgeClass = isDone ? 'badge-green' : isHigh ? 'badge-red' : 'badge-amber';
+    const badgeLabel = isDone ? 'Opgelost' : isHigh ? 'Hoog' : 'Open';
+    return `<div class="bug-row">
+      <span class="bug-id">${b.id}</span>
+      <span class="bug-title">${b.title}</span>
+      <div class="bug-right">
+        <span class="card-badge ${badgeClass}">${badgeLabel}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ─── Bug submitten ───────────────────────────────────────
+async function submitBug() {
+  const title = document.getElementById('bug-title').value.trim();
+  const desc = document.getElementById('bug-desc').value.trim();
+  const channel = document.getElementById('bug-channel').value;
+  const prio = document.getElementById('bug-prio').value;
+  const project = document.getElementById('bug-project').value;
+  const zendesk = document.getElementById('bug-zendesk').value.trim();
+  if (!title) { notify('Vul een omschrijving in', 'error'); return; }
+
+  const btn = document.querySelector('.submit-btn');
+  btn.disabled = true; btn.textContent = 'Bezig...';
+
+  let jiraId = 'LOCAL-' + Date.now().toString().slice(-4);
+  let jiraUrl = '';
+
+  // Jira ticket aanmaken
+  if (cfg.jiraDomain && cfg.jiraToken) {
+    try {
+      const auth = btoa(`${cfg.jiraEmail}:${cfg.jiraToken}`);
+      const descContent = [];
+      if (desc) descContent.push({ type: 'paragraph', content: [{ type: 'text', text: desc }] });
+      if (zendesk) descContent.push({ type: 'paragraph', content: [{ type: 'text', text: 'Zendesk: ' + zendesk }] });
+      const body = {
+        fields: {
+          project: { key: 'PS' },
+          summary: `[${project}] ${title}`,
+          description: { type: 'doc', version: 1, content: descContent.length ? descContent : [{ type: 'paragraph', content: [{ type: 'text', text: title }] }] },
+          issuetype: { name: 'Bug' },
+          priority: { name: prio },
+        }
+      };
+      const res = await fetch(`https://${cfg.jiraDomain}/rest/api/3/issue`, {
+        method: 'POST',
+        headers: { Authorization: `Basic ${auth}`, 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify(body),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        jiraId = data.key;
+        jiraUrl = `https://${cfg.jiraDomain}/browse/${jiraId}`;
+        notify('Jira ticket aangemaakt: ' + jiraId, 'success');
+      }
+    } catch(e) { notify('Jira: ' + e.message, 'error'); }
+  }
+
+  // Slack bericht sturen — format zoals Rick het doet
+  if (cfg.slackToken) {
+    try {
+      const name = cfg.slackName || 'Rick de Jong';
+      let msg = `[${project}] ${title}`;
+      if (jiraUrl) msg += `\n${jiraUrl}`;
+      if (zendesk) msg += `\n${zendesk}`;
+      if (desc) msg += `\n_${desc}_`;
+      await fetch('https://slack.com/api/chat.postMessage', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${cfg.slackToken}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ channel: '#' + channel, text: msg }),
+      });
+      notify('Bericht verstuurd naar #' + channel, 'success');
+    } catch(e) { notify('Slack: ' + e.message, 'error'); }
+  }
+
+  // Lokaal opslaan
+  const newBug = { id: jiraId, title: `[${project}] ${title}`, status: 'Open', prio, local: true };
+  bugs.unshift(newBug);
+  localStorage.setItem('ps_bugs', JSON.stringify(bugs.filter(b => b.local)));
+  renderBugList();
+
+  document.getElementById('bug-title').value = '';
+  document.getElementById('bug-desc').value = '';
+  document.getElementById('bug-zendesk').value = '';
+  btn.disabled = false; btn.textContent = 'Verstuur naar Slack + Jira →';
+
+  if (demoMode) notify('Demo: bug toegevoegd (geen echte API)', 'info');
+}
+
+// ─── Slack ───────────────────────────────────────────────
+function openSlack(channel) {
+  window.open(`https://app.slack.com/client/`, '_blank');
+  notify('Slack openen: #' + channel, 'info');
+}
+
+// ─── To-do ───────────────────────────────────────────────
+function renderTodos() {
+  const list = document.getElementById('todo-list');
+  const open = todos.filter(t => !t.done).length;
+  document.getElementById('todo-count').textContent = open + ' open';
+  if (!todos.length) {
+    list.innerHTML = '<div class="empty-state">Nog geen taken</div>';
+    return;
+  }
+  list.innerHTML = todos.map((t, i) => `
+    <div class="todo-item">
+      <div class="todo-check ${t.done ? 'done' : ''}" onclick="toggleTodo(${i})"></div>
+      <span class="todo-text ${t.done ? 'done' : ''}">${t.text}</span>
+      <span class="card-badge ${t.priority === 'Vandaag' ? 'badge-amber' : 'badge-muted'}">${t.priority}</span>
+    </div>
+  `).join('');
+}
+
+function toggleTodo(i) {
+  todos[i].done = !todos[i].done;
+  localStorage.setItem('ps_todos', JSON.stringify(todos));
+  renderTodos();
+}
+
+function addTodo() {
+  const input = document.getElementById('todo-input');
+  const text = input.value.trim();
+  if (!text) return;
+  todos.push({ text, done: false, priority: 'Vandaag' });
+  localStorage.setItem('ps_todos', JSON.stringify(todos));
+  input.value = '';
+  renderTodos();
+}
+
+// ─── Claude chat ─────────────────────────────────────────
+function initChat() {
+  addChatMsg('ai', 'Hoi! Ik ben je ParnasSys assistent. Ik ken jouw werkcontext en help je met vragen over bugs, projecten, klantgesprekken en sprintprocessen. Waar kan ik je mee helpen?');
+}
+
+function addChatMsg(role, text) {
+  const win = document.getElementById('chat-window');
+  const div = document.createElement('div');
+  div.className = 'chat-msg ' + role;
+  const html = formatChat(text);
+  div.innerHTML = `<div class="chat-bubble ${role}">${html}</div>`;
+  win.appendChild(div);
+  win.scrollTop = win.scrollHeight;
+}
+
+function formatChat(t) {
+  return t
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+    .split(/\n\n+/).map(p => {
+      if (p.startsWith('- ')) {
+        return '<ul>' + p.split('\n').map(l => `<li>${l.replace(/^- /,'')}</li>`).join('') + '</ul>';
+      }
+      return `<p>${p.replace(/\n/g,'<br>')}</p>`;
+    }).join('');
+}
+
+async function sendChat() {
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if (!text) return;
+  const btn = document.getElementById('chat-send');
+  btn.disabled = true;
+  addChatMsg('user', text);
+  chatHistory.push({ role: 'user', content: text });
+  input.value = '';
+
+  // Typing indicator
+  const win = document.getElementById('chat-window');
+  const typing = document.createElement('div');
+  typing.className = 'chat-msg ai'; typing.id = 'typing';
+  typing.innerHTML = '<div class="chat-bubble ai"><div class="typing-dots"><div class="tdot"></div><div class="tdot"></div><div class="tdot"></div></div></div>';
+  win.appendChild(typing); win.scrollTop = win.scrollHeight;
+
+  if (!cfg.claudeKey && !demoMode) {
+    typing.remove();
+    addChatMsg('ai', 'Geen Claude API key ingesteld. Ga naar Instellingen om hem toe te voegen.');
+    btn.disabled = false; return;
+  }
+
+  if (demoMode && !cfg.claudeKey) {
+    await new Promise(r => setTimeout(r, 800));
+    typing.remove();
+    addChatMsg('ai', 'Dit is de demo-modus. Voeg een Claude API key toe in Instellingen voor echte antwoorden.');
+    btn.disabled = false; return;
+  }
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': cfg.claudeKey, 'anthropic-version': '2023-06-01' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: SYSTEM_PROMPT,
+        messages: chatHistory,
+      }),
+    });
+    const data = await res.json();
+    const reply = data.content?.[0]?.text || 'Er ging iets mis.';
+    typing.remove();
+    addChatMsg('ai', reply);
+    chatHistory.push({ role: 'assistant', content: reply });
+  } catch(e) {
+    typing.remove();
+    addChatMsg('ai', 'Verbindingsfout: ' + e.message);
+  }
+  btn.disabled = false;
+}
+
+// ─── Notificaties ────────────────────────────────────────
+function notify(msg, type = 'info') {
+  const bar = document.getElementById('notif-bar');
+  const div = document.createElement('div');
+  div.className = 'notif ' + type;
+  div.textContent = msg;
+  bar.appendChild(div);
+  setTimeout(() => { div.style.opacity = '0'; div.style.transition = 'opacity 0.3s'; setTimeout(() => div.remove(), 300); }, 3000);
+}
+
+// ─── Init ────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  if (loadSavedCfg()) {
+    const email = cfg.jiraEmail || '';
+    if (email) {
+      const name = email.split('@')[0];
+      document.getElementById('greeting-name').textContent = name.charAt(0).toUpperCase() + name.slice(1);
+    }
+    startDashboard();
+  }
+});
+</script>
+
+<!-- Project beheer modal -->
+<div class="modal-overlay" id="project-modal">
+  <div class="modal">
+    <div class="modal-head">
+      <span class="modal-title">Projecten beheren</span>
+      <button class="modal-close" onclick="closeProjectModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="cors-notice">
+        ⚠ Live Jira-koppeling werkt pas na hosting op GitHub Pages. Hieronder kun je projecten handmatig beheren — deze worden lokaal opgeslagen.
+      </div>
+      <div id="project-edit-list"></div>
+      <div class="add-project-form">
+        <div style="font-size:12px;font-weight:500;color:var(--text2);margin-bottom:2px;">Nieuw project toevoegen</div>
+        <input class="form-input" id="new-project-name" placeholder="Projectnaam...">
+        <div class="add-project-row">
+          <select class="form-select status-select" id="new-project-status">
+            <option value="Actief">Actief</option>
+            <option value="In review">In review</option>
+            <option value="Bijna klaar">Bijna klaar</option>
+            <option value="In uitvoering">In uitvoering</option>
+            <option value="Afgerond">Afgerond</option>
+          </select>
+          <input class="form-input" id="new-project-deadline" type="date" style="color-scheme:dark;">
+        </div>
+        <button class="submit-btn" style="align-self:flex-start;" onclick="addProject()">+ Toevoegen</button>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="topbar-btn" onclick="closeProjectModal()">Sluiten</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
