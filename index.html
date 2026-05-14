@@ -204,6 +204,11 @@ body::before {
 
 /* Bug lijst */
 .bug-list { display: flex; flex-direction: column; gap: 2px; }
+.bug-section-title {
+  font-size: 11px; font-weight: 500; color: var(--text3); text-transform: uppercase;
+  letter-spacing: 0.08em; padding: 4px 2px 6px; display: flex; align-items: center; gap: 6px;
+}
+.bug-section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
 .bug-row {
   display: flex; align-items: center; gap: 10px; padding: 9px 12px;
   border-radius: var(--r); transition: background 0.12s;
@@ -497,10 +502,8 @@ input[type=range].pct-slider {
       <div class="divider"></div>
       <div class="bug-form">
         <div class="bug-form-row">
-          <select class="form-select" id="bug-channel">
-            <option value="bugs-productie">#bugs-productie</option>
-            <option value="dev-parnassys">#dev-parnassys</option>
-            <option value="releases">#releases</option>
+          <select class="form-select" id="bug-channel" disabled style="opacity:0.5;" title="Kanaal wordt automatisch bepaald op basis van project">
+            <option value="auto">Kanaal automatisch</option>
           </select>
           <select class="form-select" id="bug-prio">
             <option value="High">Hoog</option>
@@ -509,12 +512,10 @@ input[type=range].pct-slider {
           </select>
         </div>
         <div class="bug-form-row">
-          <select class="form-select" id="bug-project">
-            <option value="PARRO">PARRO</option>
-            <option value="PARNASSYS">PARNASSYS</option>
-            <option value="LEERLING">LEERLING</option>
-            <option value="SSO">SSO</option>
-            <option value="OVERIG">OVERIG</option>
+          <select class="form-select" id="bug-project" onchange="updateChannelLabel(this.value)">
+            <option value="PARRO">PARRO → #parro-bugs + #par-bugs</option>
+            <option value="SCHOOLKASSA">SCHOOLKASSA → #par-bugs</option>
+            <option value="OVERIG">OVERIG → #par-bugs</option>
           </select>
           <input class="form-input" id="bug-zendesk" placeholder="Zendesk URL (optioneel)">
         </div>
@@ -527,12 +528,17 @@ input[type=range].pct-slider {
     <div class="card">
       <div class="card-head">
         <span class="card-title"><span class="card-title-dot" style="background:var(--red)"></span>Bug tracker</span>
-        <span class="card-badge badge-red" id="bugs-count">—</span>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <span class="card-badge badge-red" id="bugs-count">—</span>
+          <button class="topbar-btn" style="padding:4px 10px;font-size:11px;" onclick="openBugModal()">+ Beheren</button>
+        </div>
       </div>
       <div class="divider"></div>
-      <div class="bug-list" id="bug-list">
-        <div class="loading-state"><div class="spin"></div>Ophalen uit Jira...</div>
-      </div>
+      <div class="bug-section-title">Parro</div>
+      <div class="bug-list" id="bug-list-parro"></div>
+      <div class="divider" style="margin:10px 0;"></div>
+      <div class="bug-section-title">Schoolkassa</div>
+      <div class="bug-list" id="bug-list-schoolkassa"></div>
     </div>
 
     <div class="card">
@@ -603,7 +609,10 @@ input[type=range].pct-slider {
 // ─── State ───────────────────────────────────────────────
 let cfg = {};
 let todos = JSON.parse(localStorage.getItem('ps_todos') || '[]');
-let bugs = JSON.parse(localStorage.getItem('ps_bugs') || '[]');
+let bugs = JSON.parse(localStorage.getItem('ps_bugs') || JSON.stringify([
+  { id: 'PRO-001', title: 'Voortgangsbalk verkeerde weergave', status: 'Open', prio: 'Normaal', category: 'parro', jiraUrl: '', zendesk: '' },
+  { id: 'SK-001', title: 'Voorbeeld Schoolkassa bug', status: 'Open', prio: 'Normaal', category: 'schoolkassa', jiraUrl: '', zendesk: '' }
+]));
 let projects = JSON.parse(localStorage.getItem('ps_projects') || '[]');
 let chatHistory = [];
 let demoMode = false;
@@ -881,66 +890,124 @@ function addProject() {
   notify('Project toegevoegd: ' + name, 'success');
 }
 
-// ─── Jira bugs ───────────────────────────────────────────
+// ─── Bug tracker ────────────────────────────────────────
 async function loadBugs() {
-  const list = document.getElementById('bug-list');
-  list.innerHTML = '<div class="loading-state"><div class="spin"></div>Ophalen...</div>';
-
-  if (demoMode || !cfg.jiraDomain) { renderBugsFromLocal(); return; }
-
-  const auth = btoa(`${cfg.jiraEmail}:${cfg.jiraToken}`);
-  try {
-    const jql = encodeURIComponent('issuetype = Bug AND project = PS ORDER BY created DESC');
-    const res = await fetch(
-      `https://${cfg.jiraDomain}/rest/api/3/search?jql=${jql}&maxResults=15&fields=summary,status,priority`,
-      { headers: { Authorization: `Basic ${auth}`, Accept: 'application/json' } }
-    );
-    if (!res.ok) throw new Error('Jira fout: ' + res.status);
-    const data = await res.json();
-    const mapped = (data.issues || []).map(i => ({
-      id: i.key,
-      title: i.fields.summary,
-      status: i.fields.status?.name || 'Open',
-      prio: i.fields.priority?.name || 'Medium',
-    }));
-    bugs = [...mapped, ...bugs.filter(b => b.local)];
-    renderBugList();
-  } catch(e) {
-    renderBugsFromLocal();
-  }
-}
-
-function renderBugsFromLocal() {
-  if (!bugs.length) {
-    bugs = [
-      { id: 'PS-1042', title: 'Rapport export crasht bij >500 leerlingen', status: 'Open', prio: 'High' },
-      { id: 'PS-1038', title: 'Inlogprobleem SSO bij Safari 17', status: 'Done', prio: 'Medium' },
-    ];
-  }
   renderBugList();
 }
 
 function renderBugList() {
-  const list = document.getElementById('bug-list');
-  const open = bugs.filter(b => b.status !== 'Done' && b.status !== 'Opgelost').length;
+  const parro = bugs.filter(b => b.category === 'parro');
+  const schoolkassa = bugs.filter(b => b.category === 'schoolkassa');
+  const open = bugs.filter(b => b.status !== 'Opgelost').length;
   document.getElementById('bugs-count').textContent = open + ' open';
-  if (!bugs.length) { list.innerHTML = '<div class="empty-state">Geen bugs gevonden</div>'; return; }
-  list.innerHTML = bugs.slice(0, 8).map(b => {
-    const isDone = b.status === 'Done' || b.status === 'Opgelost';
-    const isHigh = b.prio === 'High' || b.prio === 'Hoog' || b.prio === 'Highest';
-    const badgeClass = isDone ? 'badge-green' : isHigh ? 'badge-red' : 'badge-amber';
-    const badgeLabel = isDone ? 'Opgelost' : isHigh ? 'Hoog' : 'Open';
+  renderBugSection('bug-list-parro', parro);
+  renderBugSection('bug-list-schoolkassa', schoolkassa);
+}
+
+function renderBugSection(elId, list) {
+  const el = document.getElementById(elId);
+  if (!list.length) {
+    el.innerHTML = '<div class="empty-state" style="padding:8px 0 4px;">Geen bugs — klik op "+ Beheren" om toe te voegen</div>';
+    return;
+  }
+  el.innerHTML = list.map((b, i) => {
+    const isOpgelost = b.status === 'Opgelost';
+    const isHoog = b.prio === 'Hoog';
+    const badgeClass = isOpgelost ? 'badge-green' : isHoog ? 'badge-red' : 'badge-amber';
+    const jiraLink = b.jiraUrl ? `<a href="${b.jiraUrl}" target="_blank" style="font-size:11px;color:var(--blue);text-decoration:none;margin-left:4px;" title="Open in Jira">↗</a>` : '';
+    const zdLink = b.zendesk ? `<a href="${b.zendesk}" target="_blank" style="font-size:11px;color:var(--text3);text-decoration:none;" title="Open in Zendesk">ZD↗</a>` : '';
     return `<div class="bug-row">
-      <span class="bug-id">${b.id}</span>
+      <span class="bug-id">${b.id}${jiraLink}</span>
       <span class="bug-title">${b.title}</span>
       <div class="bug-right">
-        <span class="card-badge ${badgeClass}">${badgeLabel}</span>
+        ${zdLink}
+        <span class="card-badge ${badgeClass}" style="cursor:pointer;" onclick="toggleBugStatus(${bugs.indexOf(b)})" title="Klik om status te wijzigen">${b.status}</span>
       </div>
     </div>`;
   }).join('');
 }
 
-// ─── Bug submitten ───────────────────────────────────────
+function toggleBugStatus(i) {
+  const statuses = ['Open', 'In behandeling', 'Opgelost'];
+  const cur = statuses.indexOf(bugs[i].status);
+  bugs[i].status = statuses[(cur + 1) % statuses.length];
+  localStorage.setItem('ps_bugs', JSON.stringify(bugs));
+  renderBugList();
+}
+
+// ─── Bug beheer modal ────────────────────────────────────
+function openBugModal() {
+  renderBugEditList();
+  document.getElementById('bug-modal').classList.add('open');
+}
+
+function closeBugModal() {
+  document.getElementById('bug-modal').classList.remove('open');
+  renderBugList();
+}
+
+function renderBugEditList() {
+  const list = document.getElementById('bug-edit-list');
+  if (!bugs.length) { list.innerHTML = '<div class="empty-state">Nog geen bugs</div>'; return; }
+  list.innerHTML = bugs.map((b, i) => `
+    <div class="project-edit-row" style="flex-direction:column;align-items:flex-start;gap:8px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;width:100%;">
+        <span style="font-size:13px;font-weight:500;color:var(--text);">${b.id} — ${b.title}</span>
+        <button class="project-delete-btn" onclick="deleteBug(${i})">×</button>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;width:100%;">
+        <select class="form-select" style="font-size:11px;padding:4px 8px;height:28px;" onchange="updateBugField(${i},'status',this.value)">
+          ${['Open','In behandeling','Opgelost'].map(s => `<option value="${s}" ${b.status===s?'selected':''}>${s}</option>`).join('')}
+        </select>
+        <select class="form-select" style="font-size:11px;padding:4px 8px;height:28px;" onchange="updateBugField(${i},'prio',this.value)">
+          ${['Hoog','Normaal','Laag'].map(s => `<option value="${s}" ${b.prio===s?'selected':''}>${s}</option>`).join('')}
+        </select>
+        <select class="form-select" style="font-size:11px;padding:4px 8px;height:28px;" onchange="updateBugField(${i},'category',this.value)">
+          <option value="parro" ${b.category==='parro'?'selected':''}>Parro</option>
+          <option value="schoolkassa" ${b.category==='schoolkassa'?'selected':''}>Schoolkassa</option>
+        </select>
+      </div>
+      <input class="form-input" style="font-size:11px;padding:5px 10px;" placeholder="Jira URL (optioneel)" value="${b.jiraUrl||''}" oninput="updateBugField(${i},'jiraUrl',this.value)">
+    </div>`).join('');
+}
+
+function updateBugField(i, field, val) {
+  bugs[i][field] = val;
+  localStorage.setItem('ps_bugs', JSON.stringify(bugs));
+}
+
+function deleteBug(i) {
+  bugs.splice(i, 1);
+  localStorage.setItem('ps_bugs', JSON.stringify(bugs));
+  renderBugEditList();
+}
+
+function addBugToTracker() {
+  const id = document.getElementById('new-bug-id').value.trim();
+  const title = document.getElementById('new-bug-title').value.trim();
+  const cat = document.getElementById('new-bug-cat').value;
+  const prio = document.getElementById('new-bug-prio').value;
+  const jiraUrl = document.getElementById('new-bug-jira').value.trim();
+  if (!title) { notify('Vul een omschrijving in', 'error'); return; }
+  bugs.push({ id: id || '—', title, status: 'Open', prio, category: cat, jiraUrl, zendesk: '' });
+  localStorage.setItem('ps_bugs', JSON.stringify(bugs));
+  document.getElementById('new-bug-id').value = '';
+  document.getElementById('new-bug-title').value = '';
+  document.getElementById('new-bug-jira').value = '';
+  renderBugEditList();
+  notify('Bug toegevoegd aan tracker', 'success');
+}
+
+// ─── Bug submitten ────────────────────────────────────────
+function updateChannelLabel(project) {
+  const sel = document.getElementById('bug-channel');
+  if (project === 'PARRO') {
+    sel.innerHTML = '<option value="auto">→ #parro-bugs + #par-bugs</option>';
+  } else {
+    sel.innerHTML = '<option value="auto">→ #par-bugs</option>';
+  }
+}
+
 async function submitBug() {
   const title = document.getElementById('bug-title').value.trim();
   const desc = document.getElementById('bug-desc').value.trim();
@@ -953,69 +1020,44 @@ async function submitBug() {
   const btn = document.querySelector('.submit-btn');
   btn.disabled = true; btn.textContent = 'Bezig...';
 
-  let jiraId = 'LOCAL-' + Date.now().toString().slice(-4);
-  let jiraUrl = '';
+  const bugId = project + '-' + Date.now().toString().slice(-4);
+  const category = project === 'PARRO' ? 'parro' : 'schoolkassa';
 
-  // Jira ticket aanmaken
-  if (cfg.jiraDomain && cfg.jiraToken) {
-    try {
-      const auth = btoa(`${cfg.jiraEmail}:${cfg.jiraToken}`);
-      const descContent = [];
-      if (desc) descContent.push({ type: 'paragraph', content: [{ type: 'text', text: desc }] });
-      if (zendesk) descContent.push({ type: 'paragraph', content: [{ type: 'text', text: 'Zendesk: ' + zendesk }] });
-      const body = {
-        fields: {
-          project: { key: 'PS' },
-          summary: `[${project}] ${title}`,
-          description: { type: 'doc', version: 1, content: descContent.length ? descContent : [{ type: 'paragraph', content: [{ type: 'text', text: title }] }] },
-          issuetype: { name: 'Bug' },
-          priority: { name: prio },
-        }
-      };
-      const res = await fetch(`https://${cfg.jiraDomain}/rest/api/3/issue`, {
-        method: 'POST',
-        headers: { Authorization: `Basic ${auth}`, 'Content-Type': 'application/json', Accept: 'application/json' },
-        body: JSON.stringify(body),
-      });
-      if (res.ok) {
-        const data = await res.json();
-        jiraId = data.key;
-        jiraUrl = `https://${cfg.jiraDomain}/browse/${jiraId}`;
-        notify('Jira ticket aangemaakt: ' + jiraId, 'success');
-      }
-    } catch(e) { notify('Jira: ' + e.message, 'error'); }
-  }
-
-  // Slack bericht sturen — format zoals Rick het doet
+  // Slack bericht sturen
   if (cfg.slackToken) {
-    try {
-      const name = cfg.slackName || 'Rick de Jong';
-      let msg = `[${project}] ${title}`;
-      if (jiraUrl) msg += `\n${jiraUrl}`;
-      if (zendesk) msg += `\n${zendesk}`;
-      if (desc) msg += `\n_${desc}_`;
-      await fetch('https://slack.com/api/chat.postMessage', {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${cfg.slackToken}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ channel: '#' + channel, text: msg }),
-      });
-      notify('Bericht verstuurd naar #' + channel, 'success');
-    } catch(e) { notify('Slack: ' + e.message, 'error'); }
+    const channels = project === 'PARRO' ? ['parro-bugs', 'par-bugs'] : ['par-bugs'];
+    for (const ch of channels) {
+      try {
+        let msg = `[${project}] ${title}`;
+        if (zendesk) msg += `
+${zendesk}`;
+        if (desc) msg += `
+_${desc}_`;
+        const res = await fetch('https://slack.com/api/chat.postMessage', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${cfg.slackToken}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ channel: '#' + ch, text: msg }),
+        });
+        const data = await res.json();
+        if (data.ok) notify('Verstuurd naar #' + ch, 'success');
+        else notify('Slack #' + ch + ': ' + data.error, 'error');
+      } catch(e) { notify('Slack fout: ' + e.message, 'error'); }
+    }
+  } else {
+    notify('Geen Slack token — stel in via Instellingen', 'error');
   }
 
-  // Lokaal opslaan
-  const newBug = { id: jiraId, title: `[${project}] ${title}`, status: 'Open', prio, local: true };
-  bugs.unshift(newBug);
-  localStorage.setItem('ps_bugs', JSON.stringify(bugs.filter(b => b.local)));
+  // Lokaal opslaan in buglijst
+  bugs.unshift({ id: bugId, title: `[${project}] ${title}`, status: 'Open', prio, category, jiraUrl: '', zendesk });
+  localStorage.setItem('ps_bugs', JSON.stringify(bugs));
   renderBugList();
 
   document.getElementById('bug-title').value = '';
   document.getElementById('bug-desc').value = '';
   document.getElementById('bug-zendesk').value = '';
   btn.disabled = false; btn.textContent = 'Verstuur naar Slack + Jira →';
-
-  if (demoMode) notify('Demo: bug toegevoegd (geen echte API)', 'info');
 }
+
 
 // ─── Slack ───────────────────────────────────────────────
 function openSlack(channel) {
@@ -1159,6 +1201,43 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 });
 </script>
+
+
+<!-- Bug beheer modal -->
+<div class="modal-overlay" id="bug-modal">
+  <div class="modal">
+    <div class="modal-head">
+      <span class="modal-title">Bugs beheren</span>
+      <button class="modal-close" onclick="closeBugModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div id="bug-edit-list"></div>
+      <div class="add-project-form" style="margin-top:4px;">
+        <div style="font-size:12px;font-weight:500;color:var(--text2);margin-bottom:2px;">Bug toevoegen aan tracker</div>
+        <div class="bug-form-row">
+          <input class="form-input" id="new-bug-id" placeholder="Ticket ID (bijv. PRO-5070)">
+          <select class="form-select" id="new-bug-cat">
+            <option value="parro">Parro</option>
+            <option value="schoolkassa">Schoolkassa</option>
+          </select>
+        </div>
+        <input class="form-input" id="new-bug-title" placeholder="Omschrijving...">
+        <div class="bug-form-row">
+          <select class="form-select" id="new-bug-prio">
+            <option value="Hoog">Hoog</option>
+            <option value="Normaal" selected>Normaal</option>
+            <option value="Laag">Laag</option>
+          </select>
+          <input class="form-input" id="new-bug-jira" placeholder="Jira URL (optioneel)">
+        </div>
+        <button class="submit-btn" style="align-self:flex-start;" onclick="addBugToTracker()">+ Toevoegen aan tracker</button>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="topbar-btn" onclick="closeBugModal()">Sluiten</button>
+    </div>
+  </div>
+</div>
 
 <!-- Project beheer modal -->
 <div class="modal-overlay" id="project-modal">
