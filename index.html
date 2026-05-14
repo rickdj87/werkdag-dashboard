@@ -671,14 +671,17 @@ Antwoord altijd in het Nederlands. Wees direct en praktisch. Korte alinea's. Geb
 
 // ─── Setup ───────────────────────────────────────────────
 function saveAndStart() {
+  // Lege velden bewaren de bestaande opgeslagen waarde
+  const prev = cfg;
+  const val = id => document.getElementById(id).value.trim();
   cfg = {
-    msToken: document.getElementById('ms-token').value.trim(),
-    jiraDomain: document.getElementById('jira-domain').value.trim(),
-    jiraEmail: document.getElementById('jira-email').value.trim(),
-    jiraToken: document.getElementById('jira-token').value.trim(),
-    slackToken: document.getElementById('slack-token').value.trim(),
-    slackName: document.getElementById('slack-name').value.trim(),
-    claudeKey: document.getElementById('claude-token').value.trim(),
+    msToken:    val('ms-token')    || prev.msToken    || '',
+    jiraDomain: val('jira-domain') || prev.jiraDomain || '',
+    jiraEmail:  val('jira-email')  || prev.jiraEmail  || '',
+    jiraToken:  val('jira-token')  || prev.jiraToken  || '',
+    slackToken: val('slack-token') || prev.slackToken || '',
+    slackName:  val('slack-name')  || prev.slackName  || '',
+    claudeKey:  val('claude-token')|| prev.claudeKey  || '',
   };
   if (cfg.slackName) {
     const first = cfg.slackName.split(' ')[0];
@@ -698,6 +701,22 @@ function skipSetup() {
 }
 
 function showSetup() {
+  // Vul bestaande waarden voorin zodat je ze niet opnieuw hoeft in te typen
+  const fill = (id, val) => {
+    const el = document.getElementById(id);
+    if (el && val) el.placeholder = '(al ingesteld — laat leeg om te bewaren)';
+  };
+  fill('ms-token', cfg.msToken);
+  fill('jira-domain', cfg.jiraDomain);
+  fill('jira-email', cfg.jiraEmail);
+  fill('jira-token', cfg.jiraToken);
+  fill('slack-token', cfg.slackToken);
+  fill('slack-name', cfg.slackName);
+  fill('claude-token', cfg.claudeKey);
+  // Naam en domein wél voorinvullen want dat zijn geen geheimen
+  if (cfg.slackName) document.getElementById('slack-name').value = cfg.slackName;
+  if (cfg.jiraDomain) document.getElementById('jira-domain').value = cfg.jiraDomain;
+  if (cfg.jiraEmail) document.getElementById('jira-email').value = cfg.jiraEmail;
   document.getElementById('setup-screen').style.display = 'flex';
   document.getElementById('dashboard').classList.remove('visible');
 }
