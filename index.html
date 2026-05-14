@@ -151,6 +151,18 @@ body::before {
 
 /* Agenda */
 .agenda-list { display: flex; flex-direction: column; gap: 2px; }
+.week-list { display: flex; flex-direction: column; gap: 4px; margin-top: 4px; }
+.week-day { display: flex; gap: 10px; align-items: flex-start; padding: 7px 10px; border-radius: var(--r); transition: background 0.12s; }
+.week-day:hover { background: var(--bg3); }
+.week-day-name { font-size: 11px; font-weight: 500; color: var(--text3); min-width: 52px; padding-top: 2px; text-transform: uppercase; letter-spacing: 0.04em; }
+.week-day-name.today { color: var(--accent); }
+.week-events { flex: 1; display: flex; flex-direction: column; gap: 3px; }
+.week-event { font-size: 12px; color: var(--text2); display: flex; align-items: center; gap: 6px; }
+.week-event-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+.week-event-time { font-size: 11px; font-family: var(--font-mono); color: var(--text3); min-width: 42px; }
+.week-empty { font-size: 11px; color: var(--text3); font-style: italic; }
+.agenda-section-label { font-size: 10px; font-weight: 500; color: var(--text3); text-transform: uppercase; letter-spacing: 0.08em; padding: 10px 2px 4px; display: flex; align-items: center; gap: 6px; }
+.agenda-section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
 .agenda-item {
   display: flex; align-items: flex-start; gap: 12px; padding: 10px 12px;
   border-radius: var(--r); transition: background 0.12s; cursor: default;
@@ -474,6 +486,10 @@ input[type=range].pct-slider {
       <div class="agenda-list" id="agenda-list">
         <div class="loading-state"><div class="spin"></div>Ophalen...</div>
       </div>
+      <div class="agenda-section-label" style="margin-top:8px;">Rest van de week</div>
+      <div class="week-list" id="week-list">
+        <div class="loading-state"><div class="spin"></div>Ophalen...</div>
+      </div>
     </div>
 
     <div class="card" id="projects-card">
@@ -701,24 +717,51 @@ function refreshAll() {
 async function loadAgenda() {
   const list = document.getElementById('agenda-list');
   list.innerHTML = '<div class="loading-state"><div class="spin"></div>Ophalen...</div>';
+  document.getElementById('week-list').innerHTML = '<div class="loading-state"><div class="spin"></div>Ophalen...</div>';
 
-  if (demoMode || !cfg.msToken) { renderAgendaDemo(); return; }
+  if (demoMode || !cfg.msToken) { renderAgendaDemo(); renderWeekDemo(); return; }
 
   const now = new Date();
-  const start = new Date(now.setHours(0,0,0,0)).toISOString();
-  const end = new Date(now.setHours(23,59,59,999)).toISOString();
+  const todayStart = new Date(now); todayStart.setHours(0,0,0,0);
+  const todayEnd = new Date(now); todayEnd.setHours(23,59,59,999);
+
+  // Einde van de werkweek (vrijdag 23:59)
+  const weekEnd = new Date(now);
+  const dayOfWeek = now.getDay();
+  const daysUntilFriday = dayOfWeek <= 5 ? 5 - dayOfWeek : 6;
+  weekEnd.setDate(now.getDate() + daysUntilFriday);
+  weekEnd.setHours(23,59,59,999);
 
   try {
-    const res = await fetch(
-      `https://graph.microsoft.com/v1.0/me/calendarView?startDateTime=${start}&endDateTime=${end}&$orderby=start/dateTime&$top=20`,
+    // Vandaag ophalen
+    const res1 = await fetch(
+      `https://graph.microsoft.com/v1.0/me/calendarView?startDateTime=${todayStart.toISOString()}&endDateTime=${todayEnd.toISOString()}&$orderby=start/dateTime&$top=20`,
       { headers: { Authorization: `Bearer ${cfg.msToken}`, 'Content-Type': 'application/json' } }
     );
-    if (!res.ok) throw new Error('Graph API fout: ' + res.status);
-    const data = await res.json();
-    renderAgenda(data.value || []);
+    if (!res1.ok) throw new Error('Graph API fout: ' + res1.status);
+    const data1 = await res1.json();
+    renderAgenda(data1.value || []);
+
+    // Rest van de week ophalen (morgen t/m vrijdag)
+    const tomorrowStart = new Date(todayStart);
+    tomorrowStart.setDate(tomorrowStart.getDate() + 1);
+
+    if (tomorrowStart <= weekEnd) {
+      const res2 = await fetch(
+        `https://graph.microsoft.com/v1.0/me/calendarView?startDateTime=${tomorrowStart.toISOString()}&endDateTime=${weekEnd.toISOString()}&$orderby=start/dateTime&$top=50`,
+        { headers: { Authorization: `Bearer ${cfg.msToken}`, 'Content-Type': 'application/json' } }
+      );
+      if (res2.ok) {
+        const data2 = await res2.json();
+        renderWeek(data2.value || []);
+      }
+    } else {
+      document.getElementById('week-list').innerHTML = '<div class="empty-state">Einde van de werkweek bereikt</div>';
+    }
   } catch(e) {
     document.getElementById('agenda-cors-notice').style.display = 'flex';
     renderAgendaDemo();
+    renderWeekDemo();
   }
 }
 
@@ -754,6 +797,73 @@ function renderAgendaDemo() {
     { subject: 'Review: release 3.12', start:{dateTime:'2026-05-14T15:30:00'}, end:{dateTime:'2026-05-14T16:00:00'}, location:{displayName:'Teams'}, onlineMeeting:{joinUrl:'#'} },
   ];
   renderAgenda(demo);
+}
+
+function renderWeek(events) {
+  const weekList = document.getElementById('week-list');
+  const days = ['Zondag','Maandag','Dinsdag','Woensdag','Donderdag','Vrijdag'];
+  const daysFull = ['zo','ma','di','wo','do','vr'];
+  const now = new Date();
+
+  // Groepeer events per dag
+  const grouped = {};
+  events.forEach(e => {
+    const d = new Date(e.start?.dateTime || e.start?.date);
+    const key = d.toDateString();
+    if (!grouped[key]) grouped[key] = { date: d, events: [] };
+    grouped[key].events.push(e);
+  });
+
+  // Bouw dagen op van morgen t/m vrijdag
+  const rows = [];
+  for (let i = 1; i <= 5; i++) {
+    const d = new Date(now);
+    d.setDate(now.getDate() + i);
+    if (d.getDay() === 0 || d.getDay() === 6) continue; // skip weekend
+    if (d.getDay() < now.getDay() && i > 1) continue;
+    const key = d.toDateString();
+    const dayEvents = grouped[key]?.events || [];
+    const dayName = days[d.getDay()];
+    const dateStr = d.getDate() + ' ' + ['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'][d.getMonth()];
+    const colors = ['#6BA8FF','#C8F55A','#FFB84D','#FF6B6B','#5BDB8A','#C97FFF'];
+
+    const eventsHtml = dayEvents.length
+      ? dayEvents.slice(0, 4).map((e, i) => {
+          const st = new Date(e.start?.dateTime || e.start?.date);
+          const fmt = t => t.toLocaleTimeString('nl-NL', {hour:'2-digit',minute:'2-digit'});
+          return `<div class="week-event">
+            <div class="week-event-dot" style="background:${colors[i%colors.length]}"></div>
+            <span class="week-event-time">${fmt(st)}</span>
+            <span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px;">${e.subject || 'Afspraak'}</span>
+          </div>`;
+        }).join('') + (dayEvents.length > 4 ? `<div class="week-empty">+${dayEvents.length-4} meer</div>` : '')
+      : '<span class="week-empty">Geen afspraken</span>';
+
+    rows.push(`<div class="week-day">
+      <div class="week-day-name">${dayName}<br><span style="font-size:10px;font-weight:400;">${dateStr}</span></div>
+      <div class="week-events">${eventsHtml}</div>
+    </div>`);
+  }
+
+  weekList.innerHTML = rows.length ? rows.join('') : '<div class="empty-state">Geen afspraken deze week</div>';
+}
+
+function renderWeekDemo() {
+  const demoWeek = [
+    { subject: 'Sprint planning', start:{dateTime: getNextWeekday(1)+'T09:00:00'}, end:{dateTime: getNextWeekday(1)+'T10:00:00'} },
+    { subject: 'Klantgesprek Stad Rotterdam', start:{dateTime: getNextWeekday(1)+'T14:00:00'}, end:{dateTime: getNextWeekday(1)+'T15:00:00'} },
+    { subject: '1-op-1 met manager', start:{dateTime: getNextWeekday(2)+'T10:30:00'}, end:{dateTime: getNextWeekday(2)+'T11:00:00'} },
+    { subject: 'Demo Parro release', start:{dateTime: getNextWeekday(3)+'T13:00:00'}, end:{dateTime: getNextWeekday(3)+'T14:00:00'} },
+    { subject: 'Retrospective sprint 24', start:{dateTime: getNextWeekday(3)+'T15:00:00'}, end:{dateTime: getNextWeekday(3)+'T16:00:00'} },
+    { subject: 'Sprint review', start:{dateTime: getNextWeekday(4)+'T09:30:00'}, end:{dateTime: getNextWeekday(4)+'T10:30:00'} },
+  ];
+  renderWeek(demoWeek);
+}
+
+function getNextWeekday(offset) {
+  const d = new Date();
+  d.setDate(d.getDate() + offset);
+  return d.toISOString().split('T')[0];
 }
 
 // ─── Projecten (lokaal beheer + optioneel Jira) ─────────
