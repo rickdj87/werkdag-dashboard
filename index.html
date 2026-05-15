@@ -710,6 +710,17 @@ input[type=range].pct-slider {
 <script>
 // ─── State ───────────────────────────────────────────────
 let cfg = {};
+const PROXY_URL = 'https://werkdagdashboard.netlify.app/.netlify/functions/proxy';
+
+async function callProxy(service, payload) {
+  const res = await fetch(PROXY_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ service, payload }),
+  });
+  if (!res.ok) throw new Error('Proxy fout: ' + res.status);
+  return await res.json();
+}
 let todos = JSON.parse(localStorage.getItem('ps_todos') || '[]');
 let bugs = JSON.parse(localStorage.getItem('ps_bugs') || JSON.stringify([
   { id: 'PRO-001', title: 'Voortgangsbalk verkeerde weergave', status: 'Open', prio: 'Normaal', category: 'parro', jiraUrl: '', zendesk: '' },
@@ -841,12 +852,10 @@ async function loadAgenda() {
 
   try {
     // Vandaag ophalen
-    const res1 = await fetch(
-      `https://graph.microsoft.com/v1.0/me/calendarView?startDateTime=${todayStart.toISOString()}&endDateTime=${todayEnd.toISOString()}&$orderby=start/dateTime&$top=20`,
-      { headers: { Authorization: `Bearer ${cfg.msToken}`, 'Content-Type': 'application/json' } }
-    );
-    if (!res1.ok) throw new Error('Graph API fout: ' + res1.status);
-    const data1 = await res1.json();
+    const data1 = await callProxy('graph', {
+      token: cfg.msToken,
+      url: `https://graph.microsoft.com/v1.0/me/calendarView?startDateTime=${todayStart.toISOString()}&endDateTime=${todayEnd.toISOString()}&$orderby=start/dateTime&$top=20`
+    });
     renderAgenda(data1.value || []);
 
     // Rest van de week ophalen (morgen t/m vrijdag)
@@ -854,14 +863,11 @@ async function loadAgenda() {
     tomorrowStart.setDate(tomorrowStart.getDate() + 1);
 
     if (tomorrowStart <= weekEnd) {
-      const res2 = await fetch(
-        `https://graph.microsoft.com/v1.0/me/calendarView?startDateTime=${tomorrowStart.toISOString()}&endDateTime=${weekEnd.toISOString()}&$orderby=start/dateTime&$top=50`,
-        { headers: { Authorization: `Bearer ${cfg.msToken}`, 'Content-Type': 'application/json' } }
-      );
-      if (res2.ok) {
-        const data2 = await res2.json();
-        renderWeek(data2.value || []);
-      }
+      const data2 = await callProxy('graph', {
+        token: cfg.msToken,
+        url: `https://graph.microsoft.com/v1.0/me/calendarView?startDateTime=${tomorrowStart.toISOString()}&endDateTime=${weekEnd.toISOString()}&$orderby=start/dateTime&$top=50`
+      });
+      renderWeek(data2.value || []);
     } else {
       document.getElementById('week-list').innerHTML = '<div class="empty-state">Einde van de werkweek bereikt</div>';
     }
@@ -980,12 +986,12 @@ async function loadProjects() {
   // Jira ophalen als token beschikbaar en niet lokaal
   const auth = btoa(`${cfg.jiraEmail}:${cfg.jiraToken}`);
   try {
-    const res = await fetch(
-      `https://${cfg.jiraDomain}/rest/api/3/project/search?maxResults=10`,
-      { headers: { Authorization: `Basic ${auth}`, Accept: 'application/json' } }
-    );
-    if (!res.ok) throw new Error('Jira API fout');
-    const data = await res.json();
+    const data = await callProxy('jira', {
+      email: cfg.jiraEmail,
+      token: cfg.jiraToken,
+      url: `https://${cfg.jiraDomain}/rest/api/3/project/search?maxResults=10`,
+      method: 'GET'
+    });
     projects = (data.values || []).slice(0,8).map(p => ({
       id: p.id, name: p.name, pct: 0, status: 'Actief', deadline: '', color: '#C8F55A'
     }));
@@ -1250,14 +1256,13 @@ async function submitBug() {
 ${zendesk}`;
         if (desc) msg += `
 _${desc}_`;
-        const res = await fetch('https://slack.com/api/chat.postMessage', {
-          method: 'POST',
-          headers: { Authorization: `Bearer ${cfg.slackToken}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ channel: '#' + ch, text: msg }),
+        const data = await callProxy('slack', {
+          token: cfg.slackToken,
+          url: 'https://slack.com/api/chat.postMessage',
+          body: { channel: '#' + ch, text: msg }
         });
-        const data = await res.json();
         if (data.ok) notify('Verstuurd naar #' + ch, 'success');
-        else notify('Slack #' + ch + ': ' + data.error, 'error');
+        else notify('Slack #' + ch + ': ' + (data.error || 'onbekende fout'), 'error');
       } catch(e) { notify('Slack fout: ' + e.message, 'error'); }
     }
   } else {
@@ -1512,17 +1517,11 @@ async function sendChat() {
   }
 
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-api-key': cfg.claudeKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-ipc': 'true' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        system: SYSTEM_PROMPT,
-        messages: chatHistory,
-      }),
+    const data = await callProxy('claude', {
+      apiKey: cfg.claudeKey,
+      system: SYSTEM_PROMPT,
+      messages: chatHistory,
     });
-    const data = await res.json();
     const reply = data.content?.[0]?.text || 'Er ging iets mis.';
     typing.remove();
     addChatMsg('ai', reply);
