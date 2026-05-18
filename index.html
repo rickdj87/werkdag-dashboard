@@ -485,6 +485,11 @@ input[type=range].pct-slider {
   .topbar { flex-direction: column; align-items: flex-start; gap: 12px; }
 }
 </style>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Werkdag">
+  <meta name="theme-color" content="#0E0E0C">
+  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%230E0E0C' rx='20'/><text y='68' x='50' text-anchor='middle' font-size='60' fill='%23C8F55A'>W</text></svg>">
 </head>
 <body>
 
@@ -695,9 +700,12 @@ input[type=range].pct-slider {
 <div id="dashboard">
 <div class="app">
 
+  <div id="offline-banner" style="display:none;background:var(--amber-dim);border:1px solid rgba(255,184,77,0.3);border-radius:var(--r);padding:8px 14px;font-size:12px;color:var(--amber);margin-bottom:12px;">
+    ⚠ Geen internetverbinding — dashboard werkt met lokale data
+  </div>
   <div class="topbar">
     <div class="topbar-left">
-      <div class="topbar-title">Goedemorgen, <span id="greeting-name">Productspecialist</span></div>
+      <div class="topbar-title"><span id="greeting-text">Goedemorgen</span>, <span id="greeting-name">Productspecialist</span></div>
       <div class="topbar-date" id="topbar-date"></div>
     </div>
     <div class="topbar-right">
@@ -715,7 +723,7 @@ input[type=range].pct-slider {
         <span class="card-badge badge-blue" id="agenda-count">—</span>
       </div>
       <div class="divider"></div>
-      <div id="agenda-cors-notice" style="display:none;" class="cors-notice" style="margin-bottom:8px;">⚠ Agenda werkt pas na hosting op GitHub Pages. Zie instructies bij "Instellingen".</div>
+      <div id="agenda-cors-notice" style="display:none;" class="cors-notice" style="margin-bottom:8px;">⚠ Agenda ophalen mislukt. Controleer je Microsoft 365 token via Instellingen → stap 2. De token verloopt elk uur.</div>
       <div class="agenda-list" id="agenda-list">
         <div class="loading-state"><div class="spin"></div>Ophalen...</div>
       </div>
@@ -806,7 +814,12 @@ input[type=range].pct-slider {
       <div class="todo-list" id="todo-list"></div>
       <div class="todo-add">
         <input type="text" id="todo-input" placeholder="Nieuwe taak..." onkeydown="if(event.key==='Enter')addTodo()">
-        <button class="todo-add-btn" onclick="addTodo()">+ Voeg toe</button>
+        <select id="todo-prio-select" style="font-size:12px;padding:7px 8px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);color:var(--text2);font-family:var(--font-body);cursor:pointer;">
+          <option value="Vandaag">Vandaag</option>
+          <option value="Morgen">Morgen</option>
+          <option value="Geen datum">Geen datum</option>
+        </select>
+        <button class="todo-add-btn" onclick="addTodo()">+</button>
       </div>
     </div>
 
@@ -890,16 +903,23 @@ input[type=range].pct-slider {
 <script>
 // ─── State ───────────────────────────────────────────────
 let cfg = {};
-const PROXY_URL = 'https://werkdagdashboard.netlify.app/.netlify/functions/proxy';
+const PROXY_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+  ? 'http://localhost:8888/.netlify/functions/proxy'
+  : window.location.origin + '/.netlify/functions/proxy';
 
 async function callProxy(service, payload) {
-  const res = await fetch(PROXY_URL, {
+  const timeoutPromise = new Promise((_, reject) =>
+    setTimeout(() => reject(new Error('Verzoek duurde te lang (>10s)')), 10000)
+  );
+  const fetchPromise = fetch(PROXY_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ service, payload }),
+  }).then(res => {
+    if (!res.ok) throw new Error('Proxy fout: ' + res.status);
+    return res.json();
   });
-  if (!res.ok) throw new Error('Proxy fout: ' + res.status);
-  return await res.json();
+  return Promise.race([fetchPromise, timeoutPromise]);
 }
 let todos = JSON.parse(localStorage.getItem('ps_todos') || '[]');
 let bugs = JSON.parse(localStorage.getItem('ps_bugs') || JSON.stringify([
@@ -908,6 +928,7 @@ let bugs = JSON.parse(localStorage.getItem('ps_bugs') || JSON.stringify([
 ]));
 let projects = JSON.parse(localStorage.getItem('ps_projects') || '[]');
 let chatHistory = [];
+let hiddenProjects = JSON.parse(localStorage.getItem('ps_hidden_projects') || '[]');
 let demoMode = false;
 
 const SYSTEM_PROMPT = `Je bent een behulpzame AI-assistent voor een productspecialist bij ParnasSys, een Nederlands softwarebedrijf dat administratiesoftware maakt voor het primair onderwijs.
@@ -1073,8 +1094,9 @@ function saveAndStart() {
     claudeKey:  val('claude-token') || prev.claudeKey  || '',
   };
   if (cfg.slackName) {
-    const first = cfg.slackName.split(' ')[0];
-    document.getElementById('greeting-name').textContent = first;
+    const cleaned = cfg.slackName.replace(/[._]/g, ' ').trim();
+    const first = cleaned.split(' ')[0];
+    first && (document.getElementById('greeting-name').textContent = first.charAt(0).toUpperCase() + first.slice(1));
   }
   localStorage.setItem('ps_cfg', JSON.stringify(cfg));
   saveTheme();
@@ -1129,6 +1151,8 @@ function startDashboard() {
   renderTodos();
   initNotes();
   initChat();
+  startAutoRefresh();
+  initOfflineDetection();
 }
 
 function setDate() {
@@ -1136,11 +1160,35 @@ function setDate() {
   const days = ['Zondag','Maandag','Dinsdag','Woensdag','Donderdag','Vrijdag','Zaterdag'];
   const months = ['januari','februari','maart','april','mei','juni','juli','augustus','september','oktober','november','december'];
   document.getElementById('topbar-date').textContent = `${days[d.getDay()]} ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+  const hour = d.getHours();
+  const greeting = hour < 12 ? 'Goedemorgen' : hour < 17 ? 'Goedemiddag' : 'Goedenavond';
+  const el = document.getElementById('greeting-text');
+  if (el) el.textContent = greeting;
 }
 
 function refreshAll() {
   loadAgenda(); loadProjects(); loadBugs();
   notify('Dashboard vernieuwd', 'info');
+}
+
+function initOfflineDetection() {
+  const banner = document.getElementById('offline-banner');
+  if (!banner) return;
+  const update = () => { banner.style.display = navigator.onLine ? 'none' : 'block'; };
+  window.addEventListener('online', update);
+  window.addEventListener('offline', update);
+  update();
+}
+
+function startAutoRefresh() {
+  // Agenda elke 30 minuten automatisch vernieuwen
+  setInterval(() => {
+    loadAgenda();
+  }, 30 * 60 * 1000);
+  // Datum/begroeting elke minuut updaten
+  setInterval(() => {
+    setDate();
+  }, 60 * 1000);
 }
 
 // ─── Agenda (Microsoft Graph) ────────────────────────────
@@ -1184,6 +1232,7 @@ async function loadAgenda() {
       document.getElementById('week-list').innerHTML = '<div class="empty-state">Einde van de werkweek bereikt</div>';
     }
   } catch(e) {
+    console.error('[Agenda] Fout:', e.message);
     document.getElementById('agenda-cors-notice').style.display = 'flex';
     renderAgendaDemo();
     renderWeekDemo();
@@ -1198,7 +1247,7 @@ function renderAgenda(events) {
   list.innerHTML = events.map((e, i) => {
     const start = new Date(e.start?.dateTime || e.start?.date);
     const end = new Date(e.end?.dateTime || e.end?.date);
-    const fmt = t => t.toLocaleTimeString('nl-NL', {hour:'2-digit',minute:'2-digit'});
+    const fmt = t => t.toLocaleTimeString('nl-NL', {hour:'2-digit', minute:'2-digit', timeZone:'Europe/Amsterdam'});
     const color = colors[i % colors.length];
     const loc = e.location?.displayName || '';
     const teamsUrl = e.onlineMeeting?.joinUrl || '';
@@ -1255,7 +1304,7 @@ function renderWeek(events) {
     const eventsHtml = dayEvents.length
       ? dayEvents.slice(0, 4).map((e, i) => {
           const st = new Date(e.start?.dateTime || e.start?.date);
-          const fmt = t => t.toLocaleTimeString('nl-NL', {hour:'2-digit',minute:'2-digit'});
+          const fmt = t => t.toLocaleTimeString('nl-NL', {hour:'2-digit', minute:'2-digit', timeZone:'Europe/Amsterdam'});
           return `<div class="week-event">
             <div class="week-event-dot" style="background:${colors[i%colors.length]}"></div>
             <span class="week-event-time">${fmt(st)}</span>
@@ -1293,10 +1342,15 @@ function getNextWeekday(offset) {
 
 // ─── Projecten (lokaal beheer + optioneel Jira) ─────────
 async function loadProjects() {
-  if (projects.length) { renderProjects(); return; }
-  if (demoMode || !cfg.jiraDomain) { renderProjectsDemo(); return; }
-  // Jira ophalen als token beschikbaar en niet lokaal
-  const auth = btoa(`${cfg.jiraEmail}:${cfg.jiraToken}`);
+  // Altijd eerst lokale projecten tonen voor snelle weergave
+  if (projects.length) renderProjects();
+
+  // Als Jira token beschikbaar: haal live data op en merge met lokale voortgang
+  if (demoMode || !cfg.jiraDomain || !cfg.jiraToken) {
+    if (!projects.length) renderProjectsDemo();
+    return;
+  }
+
   try {
     const data = await callProxy('jira', {
       email: cfg.jiraEmail,
@@ -1304,26 +1358,41 @@ async function loadProjects() {
       url: `https://${cfg.jiraDomain}/rest/api/3/project/search?maxResults=10`,
       method: 'GET'
     });
-    projects = (data.values || []).slice(0,8).map(p => ({
-      id: p.id, name: p.name, pct: 0, status: 'Actief', deadline: '', color: '#C8F55A'
-    }));
+    if (!data.values) throw new Error('Geen Jira data');
+
+    // Merge: behoud lokale voortgang en status, update namen vanuit Jira
+    const jiraProjects = data.values.slice(0,8);
+    const colors = ['#C8F55A','#6BA8FF','#5BDB8A','#FFB84D','#FF6B6B','#C97FFF'];
+    projects = jiraProjects.map((p, i) => {
+      const existing = projects.find(lp => lp.id === p.id || lp.name === p.name);
+      return {
+        id: p.id,
+        name: p.name,
+        pct: existing?.pct || 0,
+        status: existing?.status || 'Actief',
+        deadline: existing?.deadline || '',
+        color: existing?.color || colors[i % colors.length],
+      };
+    });
     localStorage.setItem('ps_projects', JSON.stringify(projects));
     renderProjects();
   } catch(e) {
-    renderProjectsDemo();
+    console.error('[Jira projecten] Fout:', e.message);
+    if (!projects.length) renderProjectsDemo();
   }
 }
 
 function renderProjects() {
   const list = document.getElementById('project-list');
-  const active = projects.filter(p => p.status !== 'Afgerond');
+  const visible = projects.filter(p => !hiddenProjects.includes(p.id || p.name));
+  const active = visible.filter(p => p.status !== 'Afgerond');
   document.getElementById('projects-count').textContent = active.length + ' actief';
-  if (!projects.length) {
-    list.innerHTML = '<div class="empty-state">Klik op "+ Beheren" om projecten toe te voegen</div>';
+  if (!visible.length) {
+    list.innerHTML = '<div class="empty-state">Geen zichtbare projecten — klik op "+ Beheren" om projecten in te schakelen</div>';
     return;
   }
   const colors = ['#C8F55A','#6BA8FF','#5BDB8A','#FFB84D','#FF6B6B','#C97FFF'];
-  list.innerHTML = projects.map((p, i) => {
+  list.innerHTML = visible.map((p, i) => {
     const color = p.color || colors[i % colors.length];
     const statusMap = {
       'Actief': 'badge-accent', 'In review': 'badge-amber',
@@ -1375,10 +1444,18 @@ function renderProjectEditList() {
   const colors = ['#C8F55A','#6BA8FF','#5BDB8A','#FFB84D','#FF6B6B','#C97FFF'];
   list.innerHTML = projects.map((p, i) => {
     const color = p.color || colors[i % colors.length];
-    return `<div class="project-edit-row">
+    const key = p.id || p.name;
+    const isHidden = hiddenProjects.includes(key);
+    return `<div class="project-edit-row" style="${isHidden ? 'opacity:0.45;' : ''}">
       <div class="project-edit-info">
-        <div class="project-edit-name">${p.name}</div>
-        <div class="project-edit-controls">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+          <div class="project-edit-name" style="${isHidden ? 'text-decoration:line-through;' : ''}">${p.name}</div>
+          <button onclick="toggleProjectVisibility('${key}')"
+            style="font-size:10px;padding:2px 8px;border-radius:10px;border:1px solid var(--border2);background:${isHidden ? 'var(--bg3)' : 'var(--accent-dim)'};color:${isHidden ? 'var(--text3)' : 'var(--accent)'};cursor:pointer;font-family:var(--font-body);">
+            ${isHidden ? 'Verborgen' : 'Zichtbaar'}
+          </button>
+        </div>
+        <div class="project-edit-controls" style="${isHidden ? 'pointer-events:none;' : ''}">
           <input type="range" class="pct-slider" min="0" max="100" value="${p.pct}" step="5"
             oninput="updateProjectPct(${i}, this.value); this.nextElementSibling.textContent=this.value+'%'">
           <span class="pct-label" style="color:${color}">${p.pct}%</span>
@@ -1392,6 +1469,17 @@ function renderProjectEditList() {
       <button class="project-delete-btn" onclick="deleteProject(${i})" title="Verwijderen">×</button>
     </div>`;
   }).join('');
+}
+
+function toggleProjectVisibility(key) {
+  const idx = hiddenProjects.indexOf(key);
+  if (idx === -1) {
+    hiddenProjects.push(key);
+  } else {
+    hiddenProjects.splice(idx, 1);
+  }
+  localStorage.setItem('ps_hidden_projects', JSON.stringify(hiddenProjects));
+  renderProjectEditList();
 }
 
 function updateProjectPct(i, val) {
@@ -1408,6 +1496,18 @@ function updateProjectStatus(i, val) {
 function deleteProject(i) {
   projects.splice(i, 1);
   localStorage.setItem('ps_projects', JSON.stringify(projects));
+  renderProjectEditList();
+}
+
+function showAllProjects() {
+  hiddenProjects = [];
+  localStorage.setItem('ps_hidden_projects', JSON.stringify(hiddenProjects));
+  renderProjectEditList();
+}
+
+function hideAllProjects() {
+  hiddenProjects = projects.map(p => p.id || p.name);
+  localStorage.setItem('ps_hidden_projects', JSON.stringify(hiddenProjects));
   renderProjectEditList();
 }
 
@@ -1555,7 +1655,9 @@ async function submitBug() {
   const btn = document.querySelector('.submit-btn');
   btn.disabled = true; btn.textContent = 'Bezig...';
 
-  const bugId = project + '-' + Date.now().toString().slice(-4);
+  const now = new Date();
+  const datePart = now.getFullYear().toString().slice(-2) + String(now.getMonth()+1).padStart(2,'0') + String(now.getDate()).padStart(2,'0');
+  const bugId = project + '-' + datePart + '-' + Math.floor(Math.random()*100).toString().padStart(2,'0');
   const category = project === 'PARRO' ? 'parro' : 'schoolkassa';
 
   // Slack bericht sturen
@@ -1665,7 +1767,18 @@ function notesKey(date) {
 }
 
 function initNotes() {
+  cleanOldNotes();
   loadNotesForDate(notesDate);
+}
+
+function cleanOldNotes() {
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - 30);
+  const keys = Object.keys(localStorage).filter(k => k.startsWith('ps_notes_'));
+  keys.forEach(key => {
+    const dateStr = key.replace('ps_notes_', '');
+    if (new Date(dateStr) < cutoff) localStorage.removeItem(key);
+  });
 }
 
 function loadNotesForDate(date) {
@@ -1763,9 +1876,11 @@ function toggleTodo(i) {
 
 function addTodo() {
   const input = document.getElementById('todo-input');
+  const prioEl = document.getElementById('todo-prio-select');
   const text = input.value.trim();
   if (!text) return;
-  todos.push({ text, done: false, priority: 'Vandaag' });
+  const priority = prioEl ? prioEl.value : 'Vandaag';
+  todos.push({ text, done: false, priority });
   localStorage.setItem('ps_todos', JSON.stringify(todos));
   input.value = '';
   renderTodos();
@@ -1773,7 +1888,10 @@ function addTodo() {
 
 // ─── Claude chat ─────────────────────────────────────────
 function initChat() {
-  addChatMsg('ai', 'Hoi! Ik ben je ParnasSys assistent. Ik ken jouw werkcontext en help je met vragen over bugs, projecten, klantgesprekken en sprintprocessen. Waar kan ik je mee helpen?');
+  const win = document.getElementById('chat-window');
+  if (win && win.children.length === 0) {
+    addChatMsg('ai', 'Hoi! Ik ben je ParnasSys assistent. Ik ken jouw werkcontext en help je met vragen over bugs, projecten, klantgesprekken en sprintprocessen. Waar kan ik je mee helpen?');
+  }
 }
 
 function addChatMsg(role, text) {
@@ -1838,7 +1956,9 @@ async function sendChat() {
     typing.remove();
     addChatMsg('ai', reply);
     chatHistory.push({ role: 'assistant', content: reply });
+    if (chatHistory.length > 20) chatHistory = chatHistory.slice(-20);
   } catch(e) {
+    console.error('[Claude] Fout:', e.message);
     typing.remove();
     addChatMsg('ai', 'Verbindingsfout: ' + e.message);
   }
@@ -1916,7 +2036,14 @@ window.addEventListener('DOMContentLoaded', () => {
     </div>
     <div class="modal-body">
       <div class="cors-notice">
-        ⚠ Live Jira-koppeling werkt pas na hosting op GitHub Pages. Hieronder kun je projecten handmatig beheren — deze worden lokaal opgeslagen.
+        ⚠ Projecten worden lokaal opgeslagen in je browser. Koppeling met Jira werkt via de proxy — voeg je Jira token toe via Instellingen.
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+        <span style="font-size:12px;color:var(--text2);">Klik op "Zichtbaar/Verborgen" om projecten te filteren</span>
+        <div style="display:flex;gap:6px;">
+          <button onclick="showAllProjects()" style="font-size:11px;padding:3px 10px;border-radius:var(--r);border:1px solid var(--border2);background:var(--bg3);color:var(--text2);cursor:pointer;font-family:var(--font-body);">Alles tonen</button>
+          <button onclick="hideAllProjects()" style="font-size:11px;padding:3px 10px;border-radius:var(--r);border:1px solid var(--border2);background:var(--bg3);color:var(--text2);cursor:pointer;font-family:var(--font-body);">Alles verbergen</button>
+        </div>
       </div>
       <div id="project-edit-list"></div>
       <div class="add-project-form">
