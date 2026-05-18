@@ -1784,10 +1784,12 @@ function renderSlackChannels() {
 }
 
 function openSlackChannel(channelId) {
-  window.location.href = `slack://channel?id=${channelId}`;
+  // Probeer eerst de Slack app te openen via deep link
+  window.location.href = `slack://channel?id=${channelId}&team=T02K9FWQ4`;
+  // Als de app niet opent, open dan de browser versie na 1 seconde
   setTimeout(() => {
-    window.open(`https://app.slack.com/client/${channelId}`, '_blank');
-  }, 500);
+    window.open(`https://app.slack.com/client/T02K9FWQ4/${channelId}`, '_blank');
+  }, 1000);
 }
 
 // ─── Dagelijkse notities ────────────────────────────────
