@@ -720,7 +720,10 @@ input[type=range].pct-slider {
     <div class="card" id="agenda-card">
       <div class="card-head">
         <span class="card-title"><span class="card-title-dot" style="background:var(--blue)"></span>Agenda vandaag</span>
-        <span class="card-badge badge-blue" id="agenda-count">—</span>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <span class="card-badge badge-blue" id="agenda-count">—</span>
+          <button class="topbar-btn" id="token-refresh-btn" style="padding:4px 10px;font-size:11px;" onclick="showTokenRefresh()">🔑 Token vernieuwen</button>
+        </div>
       </div>
       <div class="divider"></div>
       <div id="agenda-cors-notice" style="display:none;" class="cors-notice" style="margin-bottom:8px;">⚠ Agenda ophalen mislukt. Controleer je Microsoft 365 token via Instellingen → stap 2. De token verloopt elk uur.</div>
@@ -1191,6 +1194,30 @@ function startAutoRefresh() {
   }, 60 * 1000);
 }
 
+// ─── Token vernieuw modal ────────────────────────────────
+function showTokenRefresh() {
+  document.getElementById('token-input').value = '';
+  document.getElementById('token-modal').classList.add('open');
+}
+
+function closeTokenModal() {
+  document.getElementById('token-modal').classList.remove('open');
+}
+
+function saveNewToken() {
+  const token = document.getElementById('token-input').value.trim();
+  if (!token || !token.startsWith('eyJ')) {
+    notify('Plak een geldig token (begint met eyJ...)', 'error');
+    return;
+  }
+  // Token opslaan in cfg
+  cfg.msToken = token;
+  localStorage.setItem('ps_cfg', JSON.stringify(cfg));
+  closeTokenModal();
+  notify('Token opgeslagen — agenda wordt geladen...', 'success');
+  loadAgenda();
+}
+
 // ─── Agenda (Microsoft Graph) ────────────────────────────
 async function loadAgenda() {
   const list = document.getElementById('agenda-list');
@@ -1233,8 +1260,14 @@ async function loadAgenda() {
     }
   } catch(e) {
     console.error('[Agenda] Fout:', e.message);
-    document.getElementById('agenda-cors-notice').style.display = 'flex';
-    renderAgendaDemo();
+    // Toon token verlopen melding met directe actieknop
+    const list = document.getElementById('agenda-list');
+    list.innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;gap:10px;padding:20px 0;">
+      <div style="font-size:13px;color:var(--text2);text-align:center;">Agenda token verlopen of niet ingesteld</div>
+      <button onclick="showTokenRefresh()" style="font-size:12px;padding:8px 18px;background:var(--accent);color:var(--accent-text);border:none;border-radius:var(--r);cursor:pointer;font-weight:500;font-family:var(--font-body);">
+        🔑 Token vernieuwen — 30 seconden
+      </button>
+    </div>`;
     renderWeekDemo();
   }
 }
@@ -1990,6 +2023,46 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 
+
+<!-- Token vernieuw modal -->
+<div class="modal-overlay" id="token-modal">
+  <div class="modal" style="max-width:480px;">
+    <div class="modal-head">
+      <span class="modal-title">🔑 Agenda token vernieuwen</span>
+      <button class="modal-close" onclick="closeTokenModal()">×</button>
+    </div>
+    <div class="modal-body" style="gap:16px;">
+      <div style="background:var(--blue-dim);border:1px solid rgba(107,168,255,0.2);border-radius:var(--r);padding:12px 14px;font-size:13px;color:var(--blue);line-height:1.6;">
+        De agenda token verloopt elk uur. Dit duurt 30 seconden.
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:24px;height:24px;border-radius:50%;background:var(--accent);color:var(--accent-text);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;flex-shrink:0;">1</div>
+          <div style="font-size:13px;color:var(--text);">Open Graph Explorer en log in</div>
+          <a href="https://developer.microsoft.com/en-us/graph/graph-explorer" target="_blank"
+            style="margin-left:auto;font-size:12px;padding:5px 12px;background:var(--accent);color:var(--accent-text);border-radius:var(--r);text-decoration:none;font-weight:500;white-space:nowrap;flex-shrink:0;">
+            Openen →
+          </a>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:24px;height:24px;border-radius:50%;background:var(--bg3);color:var(--text2);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;flex-shrink:0;">2</div>
+          <div style="font-size:13px;color:var(--text);">Klik op je avatar rechtsboven → <strong>"Access token"</strong> → kopieer</div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:10px;">
+          <div style="width:24px;height:24px;border-radius:50%;background:var(--bg3);color:var(--text2);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;flex-shrink:0;margin-top:2px;">3</div>
+          <div style="flex:1;">
+            <div style="font-size:13px;color:var(--text);margin-bottom:6px;">Plak de token hier:</div>
+            <textarea id="token-input" style="width:100%;height:80px;resize:none;font-size:11px;font-family:var(--font-mono);background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);color:var(--text);padding:8px 10px;outline:none;line-height:1.5;" placeholder="eyJ0eXAiOiJKV1Q..."></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="topbar-btn" onclick="closeTokenModal()">Annuleren</button>
+      <button class="wizard-next" style="flex:0;padding:10px 20px;" onclick="saveNewToken()">Opslaan & agenda laden</button>
+    </div>
+  </div>
+</div>
 
 <!-- Bug beheer modal -->
 <div class="modal-overlay" id="bug-modal">
