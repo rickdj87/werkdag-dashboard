@@ -1748,9 +1748,52 @@ let slackLastMsg = {};
 
 async function loadSlack() {
   renderSlackChannels();
-  document.getElementById('slack-status').textContent = 'Klikbaar';
-  document.getElementById('slack-status').className = 'card-badge badge-green';
-  document.getElementById('slack-refresh-time').textContent = 'Opent in Slack app';
+  document.getElementById('slack-status').textContent = 'Laden...';
+  await pollSlackUnread();
+  setInterval(pollSlackUnread, 60000);
+}
+
+async function pollSlackUnread() {
+  try {
+    // Haal alle kanalen op via proxy
+    const allChannels = [
+      ...SLACK_CHANNELS.prominent.map(c => c.id),
+      ...SLACK_CHANNELS.normal.map(c => c.id)
+    ];
+
+    // Per kanaal conversations.info ophalen via proxy
+    const results = await Promise.allSettled(
+      allChannels.map(id => callProxy('slack', {
+        url: `https://slack.com/api/conversations.info?channel=${id}&include_num_members=false`,
+        body: null,
+        method: 'GET'
+      }))
+    );
+
+    results.forEach((result, i) => {
+      const id = allChannels[i];
+      if (result.status === 'fulfilled' && result.value?.channel) {
+        const ch = result.value.channel;
+        slackUnread[id] = ch.unread_count || 0;
+        if (ch.latest?.text) {
+          slackLastMsg[id] = ch.latest.text
+            .replace(/<[^>]+>/g, '') // strip Slack markup
+            .slice(0, 45);
+        }
+      }
+    });
+
+    renderSlackChannels();
+    const now = new Date();
+    document.getElementById('slack-refresh-time').textContent =
+      now.toLocaleTimeString('nl-NL', {hour:'2-digit', minute:'2-digit'});
+    document.getElementById('slack-status').textContent = 'Verbonden';
+    document.getElementById('slack-status').className = 'card-badge badge-green';
+  } catch(e) {
+    console.error('[Slack] Fout:', e.message);
+    document.getElementById('slack-status').textContent = 'Fout';
+    document.getElementById('slack-status').className = 'card-badge badge-red';
+  }
 }
 
 function renderSlackChannels() {
@@ -1758,27 +1801,31 @@ function renderSlackChannels() {
   const normalEl = document.getElementById('slack-normal');
 
   prominentEl.innerHTML = SLACK_CHANNELS.prominent.map(ch => {
+    const unread = slackUnread[ch.id] || 0;
     const urgentClass = ch.urgent ? ' urgent' : '';
-    const dotColor = ch.urgent ? 'var(--red)' : 'var(--green)';
+    const dotColor = ch.urgent ? 'var(--red)' : unread > 0 ? 'var(--amber)' : 'var(--green)';
+    const preview = slackLastMsg[ch.id] || 'Klik om te openen in Slack';
     return `<a class="slack-card prominent${urgentClass}" href="#" onclick="openSlackChannel('${ch.id}');return false;">
       <div class="slack-card-left">
         <div class="slack-card-dot" style="background:${dotColor}"></div>
         <div class="slack-card-info">
           <div class="slack-card-name">${ch.name}</div>
-          <div class="slack-card-preview">Klik om te openen in Slack</div>
+          <div class="slack-card-preview">${preview}</div>
         </div>
       </div>
-      <span style="font-size:13px;color:var(--text3);">↗</span>
+      <span class="slack-unread ${unread > 0 ? 'has' : 'none'}">${unread > 0 ? unread : '—'}</span>
     </a>`;
   }).join('');
 
   normalEl.innerHTML = SLACK_CHANNELS.normal.map(ch => {
+    const unread = slackUnread[ch.id] || 0;
+    const dotColor = unread > 0 ? 'var(--amber)' : 'var(--green)';
     return `<a class="slack-card" href="#" onclick="openSlackChannel('${ch.id}');return false;">
       <div class="slack-card-left">
-        <div class="slack-card-dot" style="background:var(--green)"></div>
+        <div class="slack-card-dot" style="background:${dotColor}"></div>
         <div class="slack-card-name">${ch.name}</div>
       </div>
-      <span style="font-size:13px;color:var(--text3);">↗</span>
+      <span class="slack-unread ${unread > 0 ? 'has' : 'none'}">${unread > 0 ? unread : '—'}</span>
     </a>`;
   }).join('');
 }
@@ -1999,6 +2046,33 @@ async function sendChat() {
   }
   btn.disabled = false;
 }
+
+// ─── GitHub auto-update ──────────────────────────────────
+async function pushToGitHub(newContent, filePath = 'index.html') {
+  try {
+    notify('Bezig met uploaden naar GitHub...', 'info');
+    const data = await callProxy('github', {
+      owner: 'rickdj87',
+      repo: 'werkdag-dashboard',
+      path: filePath,
+      content: newContent,
+      message: `Update ${filePath} via dashboard ${new Date().toLocaleDateString('nl-NL')}`,
+    });
+    if (data.success) {
+      notify(`✅ Gepusht naar GitHub (${data.commit}) — Netlify deployt automatisch`, 'success');
+    } else {
+      notify('GitHub push mislukt: ' + (data.error || 'onbekend'), 'error');
+    }
+  } catch(e) {
+    notify('GitHub push fout: ' + e.message, 'error');
+  }
+}
+
+// Globale update functie — aanroepen vanuit console met nieuwe bestandsinhoud
+window.deployUpdate = async function(htmlContent, proxyContent) {
+  if (htmlContent) await pushToGitHub(htmlContent, 'index.html');
+  if (proxyContent) await pushToGitHub(proxyContent, 'netlify/functions/proxy.js');
+};
 
 // ─── Notificaties ────────────────────────────────────────
 function notify(msg, type = 'info') {
