@@ -40,9 +40,13 @@ exports.handler = async function(event) {
     // ─── Microsoft Graph ─────────────────────────────────
     if (service === 'graph') {
       const token = process.env.MS_TOKEN || payload?.token || '';
-      if (!token) return { statusCode: 400, headers, body: JSON.stringify({ error: 'Geen Microsoft token. Voeg MS_TOKEN toe in Netlify environment variables.' }) };
+      if (!token) return { statusCode: 400, headers, body: JSON.stringify({ error: 'Geen Microsoft token. Gebruik de Token vernieuwen knop in het dashboard.' }) };
       const res = await fetch(payload.url, {
-        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json', 'Prefer': 'outlook.timezone="Europe/Amsterdam"' },
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          'Prefer': 'outlook.timezone="Europe/Amsterdam"'
+        },
       });
       const data = await res.json();
       return { statusCode: 200, headers, body: JSON.stringify(data) };
@@ -67,13 +71,69 @@ exports.handler = async function(event) {
     if (service === 'slack') {
       const token = process.env.SLACK_TOKEN || payload?.token || '';
       if (!token) return { statusCode: 400, headers, body: JSON.stringify({ error: 'Geen Slack token. Voeg SLACK_TOKEN toe in Netlify environment variables.' }) };
-      const res = await fetch(payload.url || 'https://slack.com/api/chat.postMessage', {
-        method: 'POST',
+      const method = payload.method || 'POST';
+      const url = payload.url || 'https://slack.com/api/chat.postMessage';
+      const fetchOptions = {
+        method,
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload.body),
-      });
+      };
+      if (method === 'POST' && payload.body) {
+        fetchOptions.body = JSON.stringify(payload.body);
+      }
+      const res = await fetch(url, fetchOptions);
       const data = await res.json();
       return { statusCode: 200, headers, body: JSON.stringify(data) };
+    }
+
+    // ─── GitHub push ──────────────────────────────────────
+    if (service === 'github') {
+      const token = process.env.GITHUB_TOKEN || '';
+      if (!token) return { statusCode: 400, headers, body: JSON.stringify({ error: 'Geen GitHub token. Voeg GITHUB_TOKEN toe in Netlify environment variables.' }) };
+
+      const { owner, repo, path, content, message } = payload;
+      if (!owner || !repo || !path || !content) {
+        return { statusCode: 400, headers, body: JSON.stringify({ error: 'Ontbrekende velden: owner, repo, path, content zijn verplicht.' }) };
+      }
+
+      // Haal huidige SHA op (nodig voor update)
+      const shaRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`, {
+        headers: {
+          Authorization: `token ${token}`,
+          Accept: 'application/vnd.github.v3+json',
+          'User-Agent': 'Werkdag-Dashboard',
+        },
+      });
+
+      let sha = null;
+      if (shaRes.ok) {
+        const shaData = await shaRes.json();
+        sha = shaData.sha;
+      }
+
+      // Push bestand
+      const pushBody = {
+        message: message || `Update ${path} via dashboard`,
+        content: Buffer.from(content).toString('base64'),
+      };
+      if (sha) pushBody.sha = sha;
+
+      const pushRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`, {
+        method: 'PUT',
+        headers: {
+          Authorization: `token ${token}`,
+          Accept: 'application/vnd.github.v3+json',
+          'Content-Type': 'application/json',
+          'User-Agent': 'Werkdag-Dashboard',
+        },
+        body: JSON.stringify(pushBody),
+      });
+
+      const pushData = await pushRes.json();
+      if (!pushRes.ok) {
+        return { statusCode: pushRes.status, headers, body: JSON.stringify({ error: pushData.message || 'GitHub push mislukt' }) };
+      }
+
+      return { statusCode: 200, headers, body: JSON.stringify({ success: true, commit: pushData.commit?.sha?.slice(0,8) }) };
     }
 
     return { statusCode: 400, headers, body: JSON.stringify({ error: 'Onbekende service: ' + service }) };
