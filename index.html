@@ -485,7 +485,7 @@ input[type=range].pct-slider {
   .topbar { flex-direction: column; align-items: flex-start; gap: 12px; }
 }
 </style>
-  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Werkdag">
   <meta name="theme-color" content="#0E0E0C">
@@ -1103,6 +1103,7 @@ function saveAndStart() {
   }
   localStorage.setItem('ps_cfg', JSON.stringify(cfg));
   saveTheme();
+  saveUserSettings();
   startDashboard();
 }
 
@@ -1156,6 +1157,7 @@ function startDashboard() {
   initChat();
   startAutoRefresh();
   initOfflineDetection();
+  loadCloudData();
 }
 
 function setDate() {
@@ -1511,36 +1513,36 @@ function toggleProjectVisibility(key) {
   } else {
     hiddenProjects.splice(idx, 1);
   }
-  localStorage.setItem('ps_hidden_projects', JSON.stringify(hiddenProjects));
+  saveHiddenProjects();
   renderProjectEditList();
 }
 
 function updateProjectPct(i, val) {
   projects[i].pct = parseInt(val);
-  localStorage.setItem('ps_projects', JSON.stringify(projects));
+  saveProjectsCloud();
 }
 
 function updateProjectStatus(i, val) {
   projects[i].status = val;
-  localStorage.setItem('ps_projects', JSON.stringify(projects));
+  saveProjectsCloud();
   renderProjectEditList();
 }
 
 function deleteProject(i) {
   projects.splice(i, 1);
-  localStorage.setItem('ps_projects', JSON.stringify(projects));
+  saveProjectsCloud();
   renderProjectEditList();
 }
 
 function showAllProjects() {
   hiddenProjects = [];
-  localStorage.setItem('ps_hidden_projects', JSON.stringify(hiddenProjects));
+  saveHiddenProjects();
   renderProjectEditList();
 }
 
 function hideAllProjects() {
   hiddenProjects = projects.map(p => p.id || p.name);
-  localStorage.setItem('ps_hidden_projects', JSON.stringify(hiddenProjects));
+  saveHiddenProjects();
   renderProjectEditList();
 }
 
@@ -1551,7 +1553,7 @@ function addProject() {
   if (!name) { notify('Vul een projectnaam in', 'error'); return; }
   const colors = ['#C8F55A','#6BA8FF','#5BDB8A','#FFB84D','#FF6B6B','#C97FFF'];
   projects.push({ name, pct: 0, status, deadline, color: colors[projects.length % colors.length] });
-  localStorage.setItem('ps_projects', JSON.stringify(projects));
+  saveProjectsCloud();
   document.getElementById('new-project-name').value = '';
   document.getElementById('new-project-deadline').value = '';
   renderProjectEditList();
@@ -1952,7 +1954,7 @@ function renderTodos() {
 
 function toggleTodo(i) {
   todos[i].done = !todos[i].done;
-  localStorage.setItem('ps_todos', JSON.stringify(todos));
+  saveTodos();
   renderTodos();
 }
 
@@ -1963,7 +1965,7 @@ function addTodo() {
   if (!text) return;
   const priority = prioEl ? prioEl.value : 'Vandaag';
   todos.push({ text, done: false, priority });
-  localStorage.setItem('ps_todos', JSON.stringify(todos));
+  saveTodos();
   input.value = '';
   renderTodos();
 }
@@ -2045,6 +2047,135 @@ async function sendChat() {
     addChatMsg('ai', 'Verbindingsfout: ' + e.message);
   }
   btn.disabled = false;
+}
+
+// ─── Online opslag (Netlify Blobs) ───────────────────────
+const STORAGE_URL = window.location.origin + '/.netlify/functions/storage';
+let syncTimer = null;
+
+async function cloudGet(key) {
+  try {
+    const res = await fetch(STORAGE_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'get', key }),
+    });
+    const data = await res.json();
+    return data.value;
+  } catch(e) {
+    console.error('[Storage] get fout:', e.message);
+    return null;
+  }
+}
+
+async function cloudSet(key, value) {
+  try {
+    await fetch(STORAGE_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'set', key, value }),
+    });
+  } catch(e) {
+    console.error('[Storage] set fout:', e.message);
+  }
+}
+
+async function cloudGetAll() {
+  try {
+    const res = await fetch(STORAGE_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'getAll' }),
+    });
+    return await res.json();
+  } catch(e) {
+    console.error('[Storage] getAll fout:', e.message);
+    return null;
+  }
+}
+
+async function cloudSetAll(data) {
+  try {
+    await fetch(STORAGE_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'setAll', data }),
+    });
+  } catch(e) {
+    console.error('[Storage] setAll fout:', e.message);
+  }
+}
+
+// Laad alle online data bij opstarten
+async function loadCloudData() {
+  const cloudData = await cloudGetAll();
+  if (!cloudData) return; // Offline of fout — gebruik localStorage
+
+  // To-do's
+  if (cloudData.todos && cloudData.todos.length > 0) {
+    todos = cloudData.todos;
+    localStorage.setItem('ps_todos', JSON.stringify(todos));
+  }
+
+  // Projecten
+  if (cloudData.projects && cloudData.projects.length > 0) {
+    projects = cloudData.projects;
+    localStorage.setItem('ps_projects', JSON.stringify(projects));
+  }
+
+  // Verborgen projecten
+  if (cloudData.hidden_projects) {
+    hiddenProjects = cloudData.hidden_projects;
+    localStorage.setItem('ps_hidden_projects', JSON.stringify(hiddenProjects));
+  }
+
+  // Gebruikersinstellingen (naam, thema)
+  if (cloudData.user_settings) {
+    const s = cloudData.user_settings;
+    if (s.slackName && cfg) {
+      cfg.slackName = s.slackName;
+      const first = s.slackName.replace(/[._]/g, ' ').trim().split(' ')[0];
+      const el = document.getElementById('greeting-name');
+      if (el && first) el.textContent = first.charAt(0).toUpperCase() + first.slice(1);
+    }
+    if (s.theme) { selectedTheme = s.theme; applyTheme(s.theme); }
+    if (s.accent) { selectColor(s.colorName || 'lime', s.accent, s.accentText || '#0E0E0C'); }
+  }
+
+  // Herrender alles
+  renderTodos();
+  renderProjects();
+}
+
+// Sla to-do's op — lokaal + online
+function saveTodos() {
+  localStorage.setItem('ps_todos', JSON.stringify(todos));
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(() => cloudSet('todos', todos), 1000);
+}
+
+// Sla projecten op — lokaal + online
+function saveProjectsCloud() {
+  localStorage.setItem('ps_projects', JSON.stringify(projects));
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(() => cloudSet('projects', projects), 1000);
+}
+
+// Sla verborgen projecten op — lokaal + online
+function saveHiddenProjects() {
+  localStorage.setItem('ps_hidden_projects', JSON.stringify(hiddenProjects));
+  cloudSet('hidden_projects', hiddenProjects);
+}
+
+// Sla gebruikersinstellingen op — online
+function saveUserSettings() {
+  cloudSet('user_settings', {
+    slackName: cfg?.slackName || '',
+    theme: selectedTheme,
+    accent: selectedAccent,
+    accentText: selectedAccentText,
+    colorName: selectedColor,
+  });
 }
 
 // ─── GitHub auto-update ──────────────────────────────────
