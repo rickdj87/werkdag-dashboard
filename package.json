@@ -1,0 +1,8 @@
+{
+  "name": "werkdag-dashboard",
+  "version": "1.0.0",
+  "description": "ParnasSys werkdag dashboard",
+  "dependencies": {
+    "@netlify/blobs": "^8.1.0"
+  }
+}
