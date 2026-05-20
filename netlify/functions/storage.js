@@ -1,4 +1,13 @@
-const { getStore } = require('@netlify/blobs');
+// Netlify Blobs storage function
+// Vereist: @netlify/blobs package
+
+let getStore;
+try {
+  ({ getStore } = require('@netlify/blobs'));
+} catch(e) {
+  // Package niet beschikbaar
+  getStore = null;
+}
 
 exports.handler = async function(event) {
   const headers = {
@@ -16,6 +25,13 @@ exports.handler = async function(event) {
     return { statusCode: 405, headers, body: JSON.stringify({ error: 'Method not allowed' }) };
   }
 
+  // Check of Netlify Blobs beschikbaar is
+  if (!getStore) {
+    return { statusCode: 500, headers, body: JSON.stringify({ 
+      error: '@netlify/blobs niet beschikbaar. Voeg toe aan package.json.' 
+    })};
+  }
+
   let body;
   try {
     body = JSON.parse(event.body);
@@ -26,35 +42,27 @@ exports.handler = async function(event) {
   const { action, key, value } = body;
 
   try {
-    const store = getStore({
-      name: 'werkdag-dashboard',
-      siteID: process.env.NETLIFY_SITE_ID,
-      token: process.env.NETLIFY_ACCESS_TOKEN || process.env.TOKEN,
-    });
+    const store = getStore('werkdag-dashboard');
 
     if (action === 'get') {
-      if (!key) return { statusCode: 400, headers, body: JSON.stringify({ error: 'Key verplicht' }) };
-      const data = await store.get(key, { type: 'json' });
+      const data = await store.get(key, { type: 'json' }).catch(() => null);
       return { statusCode: 200, headers, body: JSON.stringify({ value: data }) };
     }
 
     if (action === 'set') {
-      if (!key) return { statusCode: 400, headers, body: JSON.stringify({ error: 'Key verplicht' }) };
       await store.setJSON(key, value);
       return { statusCode: 200, headers, body: JSON.stringify({ success: true }) };
     }
 
     if (action === 'delete') {
-      if (!key) return { statusCode: 400, headers, body: JSON.stringify({ error: 'Key verplicht' }) };
       await store.delete(key);
       return { statusCode: 200, headers, body: JSON.stringify({ success: true }) };
     }
 
     if (action === 'getAll') {
-      // Haal alle werkdag data op in één keer
       const keys = ['todos', 'projects', 'hidden_projects', 'user_settings'];
       const results = await Promise.allSettled(
-        keys.map(k => store.get(k, { type: 'json' }))
+        keys.map(k => store.get(k, { type: 'json' }).catch(() => null))
       );
       const data = {};
       keys.forEach((k, i) => {
@@ -66,10 +74,8 @@ exports.handler = async function(event) {
     }
 
     if (action === 'setAll') {
-      // Sla meerdere keys op in één keer
       const { data } = body;
-      if (!data) return { statusCode: 400, headers, body: JSON.stringify({ error: 'Data verplicht' }) };
-      await Promise.all(
+      await Promise.allSettled(
         Object.entries(data).map(([k, v]) => store.setJSON(k, v))
       );
       return { statusCode: 200, headers, body: JSON.stringify({ success: true }) };
