@@ -27,11 +27,24 @@ exports.handler = async function(event) {
     })};
   }
 
+  // Robuuste JSON parsing — accepteert zowel string als object
   let body;
   try {
-    body = JSON.parse(event.body);
+    const raw = event.body;
+    if (typeof raw === 'string') {
+      // Probeer direct te parsen
+      try {
+        body = JSON.parse(raw);
+      } catch(e1) {
+        // Power Automate stuurt soms dubbel ge-escaped JSON
+        body = JSON.parse(JSON.parse(raw));
+      }
+    } else {
+      body = raw;
+    }
   } catch(e) {
-    return { statusCode: 400, headers, body: JSON.stringify({ error: 'Invalid JSON' }) };
+    console.error('[Storage] JSON parse fout:', e.message, '| Raw:', event.body?.slice(0, 200));
+    return { statusCode: 400, headers, body: JSON.stringify({ error: 'Invalid JSON', raw: event.body?.slice(0, 100) }) };
   }
 
   const { action, key, value } = body;
@@ -39,30 +52,36 @@ exports.handler = async function(event) {
   try {
     const store = getStore('werkdag-dashboard');
 
-    // ─── Power Automate endpoint ──────────────────────────
-    // Power Automate stuurt agenda data via action: 'set_agenda'
+    // ─── Power Automate agenda endpoint ──────────────────
     if (action === 'set_agenda') {
-      const { events } = body;
-      if (!events) return { statusCode: 400, headers, body: JSON.stringify({ error: 'events verplicht' }) };
+      let events = body.events;
 
-      // Sla agenda op met timestamp
+      // Events kan een string zijn als Power Automate concat gebruikt
+      if (typeof events === 'string') {
+        try { events = JSON.parse(events); } catch(e) {}
+      }
+
+      if (!events) {
+        return { statusCode: 400, headers, body: JSON.stringify({ error: 'events verplicht' }) };
+      }
+
       await store.setJSON('agenda', {
         events,
         updatedAt: new Date().toISOString(),
         date: new Date().toLocaleDateString('nl-NL'),
       });
 
-      console.log(`[Storage] Agenda bijgewerkt: ${events.length} afspraken`);
-      return { statusCode: 200, headers, body: JSON.stringify({ success: true, count: events.length }) };
+      console.log(`[Storage] Agenda bijgewerkt: ${Array.isArray(events) ? events.length : '?'} afspraken`);
+      return { statusCode: 200, headers, body: JSON.stringify({ success: true, count: Array.isArray(events) ? events.length : 0 }) };
     }
 
-    // ─── Get agenda (door dashboard) ─────────────────────
+    // ─── Get agenda ───────────────────────────────────────
     if (action === 'get_agenda') {
       const data = await store.get('agenda', { type: 'json' }).catch(() => null);
       return { statusCode: 200, headers, body: JSON.stringify({ value: data }) };
     }
 
-    // ─── Standaard get/set/getAll ─────────────────────────
+    // ─── Standaard CRUD ───────────────────────────────────
     if (action === 'get') {
       const data = await store.get(key, { type: 'json' }).catch(() => null);
       return { statusCode: 200, headers, body: JSON.stringify({ value: data }) };
