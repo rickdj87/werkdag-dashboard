@@ -1226,6 +1226,30 @@ async function loadAgenda() {
   list.innerHTML = '<div class="loading-state"><div class="spin"></div>Ophalen...</div>';
   document.getElementById('week-list').innerHTML = '<div class="loading-state"><div class="spin"></div>Ophalen...</div>';
 
+  // Probeer eerst agenda uit Netlify Blobs (gevuld door Power Automate)
+  const cloudAgenda = await cloudGet('agenda');
+  if (cloudAgenda && cloudAgenda.events && cloudAgenda.events.length >= 0) {
+    const today = new Date().toLocaleDateString('nl-NL');
+    if (cloudAgenda.date === today) {
+      // Agenda is van vandaag — gebruik cloud data
+      const todayEvents = cloudAgenda.events.filter(e => {
+        const start = new Date(e.start?.dateTime || e.start?.date);
+        const now = new Date();
+        return start.toDateString() === now.toDateString();
+      });
+      const weekEvents = cloudAgenda.events.filter(e => {
+        const start = new Date(e.start?.dateTime || e.start?.date);
+        const now = new Date();
+        return start > now && start.toDateString() !== now.toDateString();
+      });
+      renderAgenda(todayEvents);
+      renderWeek(weekEvents);
+      document.getElementById('agenda-count').textContent = todayEvents.length + ' afspraken';
+      return;
+    }
+  }
+
+  // Geen cloud data — gebruik Graph API als token beschikbaar
   if (demoMode || !cfg.msToken) { renderAgendaDemo(); renderWeekDemo(); return; }
 
   const now = new Date();
