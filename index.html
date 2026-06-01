@@ -2056,29 +2056,34 @@ async function loadAgenda() {
 
   // Probeer eerst agenda uit GitHub (gevuld door Power Automate)
   const cloudAgenda = await cloudGet('agenda');
-  if (cloudAgenda && cloudAgenda.events) {
-    // Controleer of data niet ouder is dan 24 uur
-    const updatedAt = cloudAgenda.updatedAt ? new Date(cloudAgenda.updatedAt) : null;
-    const isRecent = updatedAt && (new Date() - updatedAt) < 24 * 60 * 60 * 1000;
+  if (cloudAgenda && cloudAgenda.events && cloudAgenda.events.length > 0) {
+    const now = new Date();
 
-    if (isRecent || cloudAgenda.events.length > 0) {
-      const now = new Date();
-      const todayEvents = cloudAgenda.events.filter(e => {
-        const start = new Date(e.start?.dateTime || e.start?.date);
-        return start.toDateString() === now.toDateString();
-      });
-      const weekEvents = cloudAgenda.events.filter(e => {
-        const start = new Date(e.start?.dateTime || e.start?.date);
-        return start > now && start.toDateString() !== now.toDateString();
-      });
-      renderAgenda(todayEvents);
-      renderWeek(weekEvents);
-      document.getElementById('agenda-count').textContent = todayEvents.length + ' afspraken';
-      // Verberg token vernieuw knop als Power Automate werkt
-      const tokenBtn = document.getElementById('token-refresh-btn');
-      if (tokenBtn && isRecent) tokenBtn.style.display = 'none';
-      return;
-    }
+    // Power Automate geeft soms datums zonder Z (UTC marker) — voeg toe indien nodig
+    const parseDate = s => {
+      if (!s) return null;
+      const str = String(s);
+      return new Date(str.match(/[Z+]/) ? str : str + 'Z');
+    };
+
+    const todayEvents = cloudAgenda.events.filter(e => {
+      const start = parseDate(e.start?.dateTime || e.start?.date || e.start);
+      return start && start.toDateString() === now.toDateString();
+    });
+
+    const weekEvents = cloudAgenda.events.filter(e => {
+      const start = parseDate(e.start?.dateTime || e.start?.date || e.start);
+      return start && start > now && start.toDateString() !== now.toDateString();
+    });
+
+    renderAgenda(todayEvents);
+    renderWeek(weekEvents);
+    document.getElementById('agenda-count').textContent = todayEvents.length + ' afspraken';
+
+    // Verberg token vernieuw knop als Power Automate data beschikbaar is
+    const tokenBtn = document.getElementById('token-refresh-btn');
+    if (tokenBtn) tokenBtn.style.display = 'none';
+    return;
   }
 
   // Geen cloud data — gebruik Graph API als token beschikbaar
