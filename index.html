@@ -475,6 +475,497 @@ input[type=range].pct-slider {
 .color-option:hover { transform: scale(1.1); }
 .color-option.selected { border-color: white; transform: scale(1.1); }
 
+/* Spotify muziekspeler */
+.spotify-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--r-lg); overflow: hidden; }
+.spotify-head { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; border-bottom: 1px solid var(--border); }
+.spotify-head-left { display: flex; align-items: center; gap: 10px; }
+.spotify-icon { width: 28px; height: 28px; border-radius: 7px; background: #1DB954; display: flex; align-items: center; justify-content: center; }
+.spotify-title { font-size: 13px; font-weight: 500; color: var(--text); }
+.spotify-sub { font-size: 11px; color: var(--text3); }
+.spotify-body { padding: 16px 20px; }
+.spotify-player { display: flex; align-items: center; gap: 14px; }
+.spotify-art { width: 52px; height: 52px; border-radius: var(--r); flex-shrink: 0; object-fit: cover; }
+.spotify-art-placeholder { width: 52px; height: 52px; border-radius: var(--r); flex-shrink: 0; background: var(--bg3); display: flex; align-items: center; justify-content: center; color: var(--text3); font-size: 20px; }
+.spotify-info { flex: 1; min-width: 0; }
+.spotify-track { font-size: 13px; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.spotify-artist { font-size: 12px; color: var(--text2); margin-top: 2px; }
+.spotify-progress-wrap { margin-top: 8px; display: flex; align-items: center; gap: 8px; }
+.spotify-time { font-size: 10px; font-family: var(--font-mono); color: var(--text3); min-width: 30px; }
+.spotify-progress { flex: 1; height: 3px; background: var(--bg4); border-radius: 2px; overflow: hidden; }
+.spotify-progress-fill { height: 100%; background: #1DB954; border-radius: 2px; transition: width 1s linear; }
+.spotify-controls { display: flex; align-items: center; gap: 14px; justify-content: center; margin-top: 14px; }
+.sp-btn { width: 32px; height: 32px; border-radius: 50%; background: transparent; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text2); transition: all 0.15s; }
+.sp-btn:hover { color: var(--text); transform: scale(1.1); }
+.sp-btn.play { width: 40px; height: 40px; background: #1DB954; color: white; }
+.sp-btn.play:hover { background: #1ed760; }
+.sp-btn svg { width: 16px; height: 16px; fill: currentColor; }
+.sp-btn.play svg { width: 18px; height: 18px; }
+.spotify-login { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 20px; }
+.spotify-login-btn { display: flex; align-items: center; gap: 8px; padding: 10px 22px; background: #1DB954; color: white; border: none; border-radius: 20px; font-size: 13px; font-weight: 500; cursor: pointer; font-family: var(--font-body); transition: background 0.15s; }
+.spotify-login-btn:hover { background: #1ed760; }
+.spotify-nothing { font-size: 12px; color: var(--text3); text-align: center; padding: 8px 0; font-style: italic; }
+
+/* ═══ THEMA SYSTEEM ═══════════════════════════════════ */
+
+/* Thema: Donker (standaard) */
+/* Thema: Notion */
+[data-theme="notion"] {
+  --bg: #FFFFFF;
+  --bg2: #F7F6F3;
+  --bg3: #EFEEEB;
+  --bg4: #E8E7E3;
+  --border: rgba(55,53,47,0.09);
+  --border2: rgba(55,53,47,0.16);
+  --border3: rgba(55,53,47,0.24);
+  --text: #37352F;
+  --text2: #6B6B6B;
+  --text3: #9B9A97;
+  --send-bg: #37352F;
+  --send-icon: #FFFFFF;
+  --user-bg: #37352F;
+  --user-text: #FFFFFF;
+  --accent: #2F80ED;
+  --accent-dim: rgba(47,128,237,0.12);
+  --accent-text: #FFFFFF;
+  --r: 4px;
+  --r-lg: 6px;
+  --font-body: 'Georgia', 'Times New Roman', serif;
+  --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 0 0 1px rgba(55,53,47,0.08);
+}
+
+[data-theme="notion"] .card {
+  box-shadow: var(--shadow);
+  border: none;
+}
+
+[data-theme="notion"] .card-title {
+  font-family: 'Georgia', serif;
+  font-size: 14px;
+  letter-spacing: -0.01em;
+}
+
+[data-theme="notion"] .topbar-title {
+  font-family: 'Georgia', serif;
+  font-size: 22px;
+}
+
+[data-theme="notion"] .topbar {
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+}
+
+[data-theme="notion"] .card-title-dot {
+  display: none;
+}
+
+[data-theme="notion"] .setup-input,
+[data-theme="notion"] .form-input {
+  border-radius: 4px;
+  font-family: inherit;
+}
+
+[data-theme="notion"] .card-badge {
+  border-radius: 4px;
+  font-size: 11px;
+  font-family: inherit;
+}
+
+[data-theme="notion"] .topbar-btn {
+  border-radius: 4px;
+  font-family: inherit;
+}
+
+[data-theme="notion"] .todo-item {
+  border-bottom: 1px solid var(--border);
+  border-radius: 0;
+  padding: 6px 0;
+  background: transparent;
+}
+
+[data-theme="notion"] .agenda-item {
+  border-left: 3px solid var(--accent);
+  border-radius: 0 4px 4px 0;
+  background: var(--bg2);
+}
+
+/* Thema: ParnasSys */
+[data-theme="parnassys"] {
+  --bg: #FDF5F6;
+  --bg2: #FFFFFF;
+  --bg3: #FAE8ED;
+  --bg4: #F5D5DE;
+  --border: rgba(200,57,107,0.1);
+  --border2: rgba(200,57,107,0.18);
+  --border3: rgba(200,57,107,0.28);
+  --text: #2C1A20;
+  --text2: #7A4A58;
+  --text3: #B08A96;
+  --send-bg: #C8396B;
+  --send-icon: #FFFFFF;
+  --user-bg: #C8396B;
+  --user-text: #FFFFFF;
+  --accent: #C8396B;
+  --accent-dim: rgba(200,57,107,0.12);
+  --accent-text: #FFFFFF;
+  --r: 8px;
+  --r-lg: 12px;
+}
+
+[data-theme="parnassys"] .card {
+  box-shadow: 0 2px 8px rgba(200,57,107,0.06), 0 0 0 1px rgba(200,57,107,0.08);
+  border: 1px solid var(--border);
+}
+
+[data-theme="parnassys"] .card-title {
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+[data-theme="parnassys"] .topbar {
+  background: linear-gradient(135deg, #C8396B 0%, #E05A8A 100%);
+  border-bottom: none;
+}
+
+[data-theme="parnassys"] .topbar-title {
+  color: #FFFFFF;
+  font-weight: 700;
+  font-size: 18px;
+  letter-spacing: -0.02em;
+}
+
+[data-theme="parnassys"] .topbar-date {
+  color: rgba(255,255,255,0.75);
+}
+
+[data-theme="parnassys"] #greeting-text { color: #FFFFFF; }
+[data-theme="parnassys"] #greeting-name { color: #FFD0E0; }
+
+[data-theme="parnassys"] .topbar-btn {
+  background: rgba(255,255,255,0.2);
+  color: #FFFFFF;
+  border-color: rgba(255,255,255,0.3);
+}
+
+[data-theme="parnassys"] .topbar-btn:hover {
+  background: rgba(255,255,255,0.3);
+}
+
+[data-theme="parnassys"] .card-badge {
+  font-weight: 600;
+  border-radius: 20px;
+}
+
+[data-theme="parnassys"] .card-title-dot {
+  background: #C8396B !important;
+}
+
+[data-theme="parnassys"] .agenda-item {
+  border-left: 3px solid #C8396B;
+  background: #FAE8ED;
+  border-radius: 0 8px 8px 0;
+}
+
+[data-theme="parnassys"] .agenda-time {
+  color: #C8396B;
+  font-weight: 600;
+}
+
+[data-theme="parnassys"] .badge-green {
+  background: rgba(200,57,107,0.1);
+  color: #C8396B;
+}
+
+[data-theme="parnassys"] .badge-blue {
+  background: rgba(200,57,107,0.08);
+  color: #C8396B;
+}
+
+[data-theme="parnassys"] .badge-amber {
+  background: rgba(200,57,107,0.08);
+  color: #C8396B;
+}
+
+[data-theme="parnassys"] .focus-ring-fill {
+  stroke: #C8396B;
+}
+
+[data-theme="parnassys"] .wizard-next,
+[data-theme="parnassys"] .submit-btn,
+[data-theme="parnassys"] .todo-add-btn {
+  background: #C8396B;
+}
+
+[data-theme="parnassys"] .spotify-btn.play {
+  background: #C8396B;
+}
+
+/* Thema: ParnasSys Dark */
+[data-theme="parnassys-dark"] {
+  --bg: #1A0D11;
+  --bg2: #2A1520;
+  --bg3: #3A1D2C;
+  --bg4: #4A2538;
+  --border: rgba(232,90,138,0.12);
+  --border2: rgba(232,90,138,0.2);
+  --border3: rgba(232,90,138,0.3);
+  --text: #F5E8ED;
+  --text2: #C08A9A;
+  --text3: #7A4A5A;
+  --send-bg: #E85A8A;
+  --send-icon: #1A0D11;
+  --user-bg: #3A1D2C;
+  --user-text: #F5E8ED;
+  --accent: #E85A8A;
+  --accent-dim: rgba(232,90,138,0.15);
+  --accent-text: #1A0D11;
+  --r: 8px;
+  --r-lg: 12px;
+}
+
+[data-theme="parnassys-dark"] .topbar {
+  background: linear-gradient(135deg, #2A1520 0%, #3A1D2C 100%);
+  border-bottom: 1px solid rgba(232,90,138,0.2);
+}
+
+[data-theme="parnassys-dark"] .topbar-title {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+[data-theme="parnassys-dark"] #greeting-name { color: #E85A8A; }
+
+[data-theme="parnassys-dark"] .card-title-dot {
+  background: #E85A8A !important;
+}
+
+[data-theme="parnassys-dark"] .agenda-item {
+  border-left: 3px solid #E85A8A;
+  background: #3A1D2C;
+  border-radius: 0 8px 8px 0;
+}
+
+[data-theme="parnassys-dark"] .agenda-time {
+  color: #E85A8A;
+  font-weight: 600;
+}
+
+[data-theme="parnassys-dark"] .focus-ring-fill {
+  stroke: #E85A8A;
+}
+
+/* Thema: Notion Dark */
+[data-theme="notion-dark"] {
+  --bg: #191919;
+  --bg2: #2F2F2F;
+  --bg3: #373737;
+  --bg4: #404040;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.13);
+  --border3: rgba(255,255,255,0.2);
+  --text: #E8E8E6;
+  --text2: #9B9A97;
+  --text3: #6B6B6B;
+  --send-bg: #E8E8E6;
+  --send-icon: #191919;
+  --user-bg: #373737;
+  --user-text: #E8E8E6;
+  --accent: #529CCA;
+  --accent-dim: rgba(82,156,202,0.15);
+  --accent-text: #FFFFFF;
+  --r: 4px;
+  --r-lg: 6px;
+  --font-body: 'Georgia', 'Times New Roman', serif;
+  --shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+
+[data-theme="notion-dark"] .card {
+  box-shadow: var(--shadow);
+  border: none;
+}
+
+[data-theme="notion-dark"] .card-title {
+  font-family: 'Georgia', serif;
+  font-size: 14px;
+}
+
+[data-theme="notion-dark"] .topbar-title {
+  font-family: 'Georgia', serif;
+  font-size: 22px;
+}
+
+[data-theme="notion-dark"] .card-title-dot {
+  display: none;
+}
+
+[data-theme="notion-dark"] .todo-item {
+  border-bottom: 1px solid var(--border);
+  border-radius: 0;
+  padding: 6px 0;
+  background: transparent;
+}
+
+[data-theme="notion-dark"] .agenda-item {
+  border-left: 3px solid var(--accent);
+  border-radius: 0 4px 4px 0;
+  background: var(--bg2);
+}
+
+/* Thema: Donker (standaard) */
+[data-theme="dark"] {
+  --bg: #0E0E0C; --bg2: #141412; --bg3: #1C1C19; --bg4: #242420;
+  --border: rgba(255,255,255,0.07); --border2: rgba(255,255,255,0.12); --border3: rgba(255,255,255,0.18);
+  --text: #F0EDE6; --text2: #9A9890; --text3: #5A5955;
+  --send-bg: #F0EDE6; --send-icon: #1A1916;
+  --user-bg: #1A1916; --user-text: #F0EDE6;
+}
+
+/* Thema: Licht */
+[data-theme="light"] {
+  --bg: #F5F4F0; --bg2: #FFFFFF; --bg3: #EEECE8; --bg4: #E4E2DE;
+  --border: rgba(0,0,0,0.08); --border2: rgba(0,0,0,0.14); --border3: rgba(0,0,0,0.22);
+  --text: #1A1916; --text2: #5A5955; --text3: #9A9890;
+  --send-bg: #1A1916; --send-icon: #F0EDE6;
+  --user-bg: #1A1916; --user-text: #F0EDE6;
+}
+
+/* Thema: Ocean */
+[data-theme="ocean"] {
+  --bg: #0A1628; --bg2: #0F2040; --bg3: #153055; --bg4: #1A3D6B;
+  --border: rgba(100,180,255,0.12); --border2: rgba(100,180,255,0.2); --border3: rgba(100,180,255,0.3);
+  --text: #E8F4FF; --text2: #8BB8D8; --text3: #4A7A9B;
+  --send-bg: #64B4FF; --send-icon: #0A1628;
+  --user-bg: #1A3D6B; --user-text: #E8F4FF;
+  --accent: #64B4FF; --accent-dim: rgba(100,180,255,0.15); --accent-text: #0A1628;
+}
+
+/* Thema: Forest */
+[data-theme="forest"] {
+  --bg: #0D1F0D; --bg2: #142414; --bg3: #1A2E1A; --bg4: #213821;
+  --border: rgba(100,200,100,0.12); --border2: rgba(100,200,100,0.2); --border3: rgba(100,200,100,0.3);
+  --text: #E8F5E8; --text2: #8BC48B; --text3: #4A7A4A;
+  --send-bg: #64C864; --send-icon: #0D1F0D;
+  --user-bg: #213821; --user-text: #E8F5E8;
+  --accent: #64C864; --accent-dim: rgba(100,200,100,0.15); --accent-text: #0D1F0D;
+}
+
+/* Thema: Sunset */
+[data-theme="sunset"] {
+  --bg: #1A0A0A; --bg2: #2A1010; --bg3: #3A1818; --bg4: #4A2020;
+  --border: rgba(255,140,80,0.12); --border2: rgba(255,140,80,0.2); --border3: rgba(255,140,80,0.3);
+  --text: #FFF0E8; --text2: #D4886A; --text3: #8A4A3A;
+  --send-bg: #FF8C50; --send-icon: #1A0A0A;
+  --user-bg: #4A2020; --user-text: #FFF0E8;
+  --accent: #FF8C50; --accent-dim: rgba(255,140,80,0.15); --accent-text: #1A0A0A;
+}
+
+/* Thema: Nord */
+[data-theme="nord"] {
+  --bg: #2E3440; --bg2: #3B4252; --bg3: #434C5E; --bg4: #4C566A;
+  --border: rgba(216,222,233,0.1); --border2: rgba(216,222,233,0.18); --border3: rgba(216,222,233,0.28);
+  --text: #ECEFF4; --text2: #D8DEE9; --text3: #8B9AB2;
+  --send-bg: #88C0D0; --send-icon: #2E3440;
+  --user-bg: #4C566A; --user-text: #ECEFF4;
+  --accent: #88C0D0; --accent-dim: rgba(136,192,208,0.15); --accent-text: #2E3440;
+}
+
+/* Thema: Rose */
+[data-theme="rose"] {
+  --bg: #1A0F14; --bg2: #2A1820; --bg3: #3A2030; --bg4: #4A2840;
+  --border: rgba(255,150,180,0.12); --border2: rgba(255,150,180,0.2); --border3: rgba(255,150,180,0.3);
+  --text: #FFF0F5; --text2: #D48898; --text3: #8A4858;
+  --send-bg: #FF96B4; --send-icon: #1A0F14;
+  --user-bg: #4A2840; --user-text: #FFF0F5;
+  --accent: #FF96B4; --accent-dim: rgba(255,150,180,0.15); --accent-text: #1A0F14;
+}
+
+/* Thema modal */
+.theme-modal-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; }
+.theme-swatch { border-radius: var(--r-lg); overflow: hidden; cursor: pointer; border: 2px solid transparent; transition: all 0.15s; }
+.theme-swatch:hover { transform: translateY(-2px); }
+.theme-swatch.active { border-color: var(--accent); }
+.theme-swatch-preview { height: 64px; display: flex; gap: 4px; padding: 8px; }
+.theme-swatch-bar { width: 10px; border-radius: 3px; }
+.theme-swatch-content { flex: 1; display: flex; flex-direction: column; gap: 4px; justify-content: center; }
+.theme-swatch-line { height: 4px; border-radius: 2px; }
+.theme-swatch-name { padding: 6px 8px; font-size: 11px; font-weight: 500; text-align: center; }
+.accent-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+.accent-dot { width: 28px; height: 28px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: all 0.15s; }
+.accent-dot:hover { transform: scale(1.15); }
+.accent-dot.active { border-color: white; box-shadow: 0 0 0 2px rgba(0,0,0,0.3); transform: scale(1.1); }
+
+/* Beheer modals algemeen */
+.manage-section { display: flex; flex-direction: column; gap: 6px; }
+.manage-item { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: var(--bg3); border-radius: var(--r); border: 1px solid var(--border); }
+.manage-item-name { flex: 1; font-size: 13px; color: var(--text); }
+.manage-item-sub { font-size: 11px; color: var(--text3); }
+.manage-drag { color: var(--text3); cursor: grab; font-size: 16px; }
+.manage-section-title { font-size: 11px; font-weight: 500; color: var(--text3); text-transform: uppercase; letter-spacing: 0.06em; margin: 8px 0 4px; }
+
+/* Project subtaken */
+.subtask-list { display: flex; flex-direction: column; gap: 4px; margin-top: 8px; }
+.subtask-item { display: flex; align-items: center; gap: 8px; padding: 4px 0; }
+.subtask-check { width: 15px; height: 15px; border-radius: 3px; border: 1.5px solid var(--border2); flex-shrink: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+.subtask-check.done { background: var(--accent); border-color: var(--accent); }
+.subtask-check.done::after { content: ''; display: block; width: 7px; height: 5px; border-left: 1.5px solid var(--accent-text); border-bottom: 1.5px solid var(--accent-text); transform: rotate(-45deg) translateY(-1px); }
+.subtask-text { font-size: 12px; color: var(--text); flex: 1; }
+.subtask-text.done { color: var(--text3); text-decoration: line-through; }
+.subtask-del { width: 16px; height: 16px; border-radius: 50%; background: transparent; border: none; color: var(--text3); cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; transition: color 0.15s; flex-shrink: 0; opacity: 0; }
+.subtask-item:hover .subtask-del { opacity: 1; }
+.subtask-del:hover { color: var(--red); }
+.subtask-add { display: flex; gap: 6px; margin-top: 6px; }
+.subtask-add input { flex: 1; font-size: 12px; padding: 5px 8px; background: var(--bg3); border: 1px solid var(--border2); border-radius: var(--r); color: var(--text); outline: none; font-family: var(--font-body); }
+.subtask-add input:focus { border-color: var(--border3); }
+.subtask-add button { font-size: 11px; padding: 5px 10px; background: var(--bg3); border: 1px solid var(--border2); border-radius: var(--r); color: var(--text2); cursor: pointer; white-space: nowrap; font-family: var(--font-body); }
+.subtask-add button:hover { border-color: var(--border3); color: var(--text); }
+.subtask-progress { height: 3px; background: var(--bg4); border-radius: 2px; margin-top: 6px; overflow: hidden; }
+.subtask-progress-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width 0.3s ease; }
+
+/* Focustimer */
+.focus-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 20px; display: flex; flex-direction: column; align-items: center; gap: 14px; }
+.focus-ring { position: relative; width: 120px; height: 120px; }
+.focus-ring svg { transform: rotate(-90deg); }
+.focus-ring-bg { fill: none; stroke: var(--bg3); stroke-width: 8; }
+.focus-ring-fill { fill: none; stroke: var(--accent); stroke-width: 8; stroke-linecap: round; transition: stroke-dashoffset 1s linear; }
+.focus-time { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 26px; font-weight: 500; font-family: var(--font-mono); color: var(--text); }
+.focus-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.08em; }
+.focus-phase { font-size: 12px; font-weight: 500; padding: 3px 10px; border-radius: 20px; }
+.focus-phase.work { background: var(--accent-dim); color: var(--accent); }
+.focus-phase.break { background: var(--green-dim); color: var(--green); }
+.focus-btns { display: flex; gap: 8px; }
+.focus-btn { padding: 8px 16px; font-size: 12px; font-weight: 500; font-family: var(--font-body); border-radius: var(--r); border: 1px solid var(--border2); background: var(--bg3); color: var(--text2); cursor: pointer; transition: all 0.15s; }
+.focus-btn:hover { border-color: var(--border3); color: var(--text); }
+.focus-btn.primary { background: var(--accent); color: var(--accent-text); border-color: var(--accent); }
+.focus-btn.primary:hover { opacity: 0.9; }
+.focus-sessions { font-size: 11px; color: var(--text3); }
+
+/* Snelle notities */
+.sticky-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; }
+.sticky-note { border-radius: var(--r); padding: 10px 12px; min-height: 90px; display: flex; flex-direction: column; gap: 6px; position: relative; cursor: pointer; transition: transform 0.15s; }
+.sticky-note:hover { transform: translateY(-2px); }
+.sticky-note textarea { background: transparent; border: none; outline: none; font-size: 12px; font-family: var(--font-body); color: rgba(0,0,0,0.75); resize: none; flex: 1; line-height: 1.5; }
+.sticky-note-del { position: absolute; top: 6px; right: 8px; width: 18px; height: 18px; border-radius: 50%; background: rgba(0,0,0,0.15); border: none; cursor: pointer; font-size: 12px; color: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; line-height: 1; }
+.sticky-note:hover .sticky-note-del { display: flex; }
+.sticky-add-btn { border: 1.5px dashed var(--border2); border-radius: var(--r); padding: 10px; min-height: 90px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text3); font-size: 24px; transition: all 0.15s; background: transparent; }
+.sticky-add-btn:hover { border-color: var(--border3); color: var(--text2); }
+
+/* Weer widget */
+.weather-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 20px; display: flex; flex-direction: column; gap: 12px; }
+.weather-main { display: flex; align-items: center; gap: 16px; }
+.weather-icon { font-size: 48px; line-height: 1; }
+.weather-temp { font-size: 36px; font-weight: 300; color: var(--text); font-family: var(--font-mono); }
+.weather-info { flex: 1; }
+.weather-desc { font-size: 14px; color: var(--text); font-weight: 500; text-transform: capitalize; }
+.weather-loc { font-size: 12px; color: var(--text3); margin-top: 2px; }
+.weather-details { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.weather-detail { background: var(--bg3); border-radius: var(--r); padding: 8px 10px; text-align: center; }
+.weather-detail-val { font-size: 13px; font-weight: 500; color: var(--text); }
+.weather-detail-label { font-size: 10px; color: var(--text3); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.04em; }
+.weather-forecast { display: flex; gap: 6px; overflow-x: auto; }
+.weather-day { background: var(--bg3); border-radius: var(--r); padding: 8px 10px; text-align: center; flex-shrink: 0; min-width: 52px; }
+.weather-day-name { font-size: 10px; color: var(--text3); text-transform: uppercase; }
+.weather-day-icon { font-size: 18px; margin: 4px 0; }
+.weather-day-temp { font-size: 12px; font-weight: 500; color: var(--text); }
+
 /* Scrollbar global */
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
@@ -710,6 +1201,7 @@ input[type=range].pct-slider {
     </div>
     <div class="topbar-right">
       <button class="topbar-btn" onclick="refreshAll()">↻ Vernieuwen</button>
+      <button class="topbar-btn" onclick="openThemeModal()">🎨 Thema</button>
       <button class="topbar-btn" onclick="showSetup()">Instellingen</button>
     </div>
   </div>
@@ -758,6 +1250,7 @@ input[type=range].pct-slider {
     <div class="card">
       <div class="card-head">
         <span class="card-title"><span class="card-title-dot" style="background:var(--red)"></span>Bug melden</span>
+        <button class="topbar-btn" style="padding:4px 10px;font-size:11px;" onclick="openBugSettings()">⚙ Tags</button>
       </div>
       <div class="divider"></div>
       <div class="bug-form">
@@ -828,6 +1321,59 @@ input[type=range].pct-slider {
 
   </div>
 
+  <!-- Rij 3: Focustimer + Snelle notities + Weer -->
+  <div class="grid-bottom">
+
+    <!-- Focustimer -->
+    <div class="card focus-card">
+      <div class="card-head" style="width:100%;">
+        <span class="card-title"><span class="card-title-dot" style="background:var(--accent)"></span>Focustimer</span>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <span class="card-badge badge-muted" id="focus-sessions-badge">0 sessies</span>
+          <button class="topbar-btn" style="padding:4px 10px;font-size:11px;" onclick="openFocusSettings()">⚙</button>
+        </div>
+      </div>
+      <div class="focus-ring">
+        <svg width="120" height="120" viewBox="0 0 120 120">
+          <circle class="focus-ring-bg" cx="60" cy="60" r="52"/>
+          <circle class="focus-ring-fill" id="focus-ring-fill" cx="60" cy="60" r="52"
+            stroke-dasharray="326.7" stroke-dashoffset="0"/>
+        </svg>
+        <div class="focus-time" id="focus-time">25:00</div>
+      </div>
+      <span class="focus-phase work" id="focus-phase">Werken</span>
+      <div class="focus-btns">
+        <button class="focus-btn" onclick="focusReset()">↺</button>
+        <button class="focus-btn primary" id="focus-start-btn" onclick="focusToggle()">Start</button>
+        <button class="focus-btn" onclick="focusSkip()">⏭</button>
+      </div>
+      <div class="focus-sessions" id="focus-sessions-label">Pomodoro · 25 min werk · 5 min pauze</div>
+    </div>
+
+    <!-- Snelle notities -->
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title"><span class="card-title-dot" style="background:var(--amber)"></span>Snelle notities</span>
+        <span class="card-badge badge-amber" id="sticky-count">0</span>
+      </div>
+      <div class="divider"></div>
+      <div class="sticky-grid" id="sticky-grid"></div>
+    </div>
+
+    <!-- Weer -->
+    <div class="card weather-card" id="weather-card">
+      <div class="card-head">
+        <span class="card-title"><span class="card-title-dot" style="background:var(--blue)"></span>Weer — Deventer</span>
+        <span class="card-badge badge-blue" id="weather-badge">Laden...</span>
+      </div>
+      <div class="divider"></div>
+      <div id="weather-body">
+        <div class="loading-state"><div class="spin"></div>Ophalen...</div>
+      </div>
+    </div>
+
+  </div>
+
   <!-- Rij 3: Notities -->
   <div class="grid-full">
     <div class="card">
@@ -853,9 +1399,10 @@ input[type=range].pct-slider {
     <div class="card">
       <div class="card-head">
         <span class="card-title"><span class="card-title-dot" style="background:var(--green)"></span>Slack kanalen</span>
-        <div style="display:flex;gap:8px;align-items:center;">
+        <div style="display:flex;gap:6px;align-items:center;">
           <span class="slack-refresh" id="slack-refresh-time">Laden...</span>
           <span class="card-badge badge-green" id="slack-status">Verbinden...</span>
+          <button class="topbar-btn" style="padding:4px 10px;font-size:11px;" onclick="openSlackManageModal()">+ Beheren</button>
         </div>
       </div>
       <div class="divider"></div>
@@ -867,6 +1414,33 @@ input[type=range].pct-slider {
         <div>
           <div class="slack-group-label">Overige kanalen</div>
           <div class="slack-normal" id="slack-normal"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Rij 4: Spotify -->
+  <div class="grid-full">
+    <div class="spotify-card">
+      <div class="spotify-head">
+        <div class="spotify-head-left">
+          <div class="spotify-icon">
+            <svg viewBox="0 0 24 24"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
+          </div>
+          <div>
+            <div class="spotify-title">Spotify</div>
+            <div class="spotify-sub" id="spotify-sub">Verbinden...</div>
+          </div>
+        </div>
+        <span class="card-badge" id="spotify-badge">—</span>
+      </div>
+      <div class="spotify-body" id="spotify-body">
+        <div class="spotify-login">
+          <div class="spotify-nothing">Log in om je muziek te zien en bedienen</div>
+          <button class="spotify-login-btn" onclick="spotifyLogin()">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="white"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
+            Inloggen met Spotify
+          </button>
         </div>
       </div>
     </div>
@@ -942,6 +1516,249 @@ Help met: user stories, acceptatiecriteria, sprintreviews, backlog refinement, b
 Antwoord altijd in het Nederlands. Wees direct en praktisch. Korte alinea's. Gebruik **vetgedrukte tekst** voor termen.`;
 
 // ─── Setup ───────────────────────────────────────────────
+// ═══ THEMA SYSTEEM ═══════════════════════════════════════
+const THEMES = [
+  { id: 'dark', name: 'Donker', bg: '#0E0E0C', bg2: '#1C1C19', accent: '#C8F55A', text: '#F0EDE6' },
+  { id: 'light', name: 'Licht', bg: '#F5F4F0', bg2: '#FFFFFF', accent: '#1A6B3C', text: '#1A1916' },
+  { id: 'notion', name: 'Notion', bg: '#FFFFFF', bg2: '#F7F6F3', accent: '#2F80ED', text: '#37352F' },
+  { id: 'notion-dark', name: 'Notion Dark', bg: '#191919', bg2: '#2F2F2F', accent: '#529CCA', text: '#E8E8E6' },
+  { id: 'ocean', name: 'Ocean', bg: '#0A1628', bg2: '#153055', accent: '#64B4FF', text: '#E8F4FF' },
+  { id: 'forest', name: 'Forest', bg: '#0D1F0D', bg2: '#1A2E1A', accent: '#64C864', text: '#E8F5E8' },
+  { id: 'sunset', name: 'Sunset', bg: '#1A0A0A', bg2: '#3A1818', accent: '#FF8C50', text: '#FFF0E8' },
+  { id: 'nord', name: 'Nord', bg: '#2E3440', bg2: '#434C5E', accent: '#88C0D0', text: '#ECEFF4' },
+  { id: 'rose', name: 'Rose', bg: '#1A0F14', bg2: '#3A2030', accent: '#FF96B4', text: '#FFF0F5' },
+  { id: 'parnassys', name: 'ParnasSys', bg: '#FDF5F6', bg2: '#FFFFFF', accent: '#C8396B', text: '#2C1A20' },
+  { id: 'parnassys-dark', name: 'ParnasSys Dark', bg: '#1A0D11', bg2: '#2A1520', accent: '#E85A8A', text: '#F5E8ED' },
+];
+
+const ACCENTS = [
+  { name: 'Lime', color: '#C8F55A', text: '#0E0E0C' },
+  { name: 'Blauw', color: '#6BA8FF', text: '#0E0E0C' },
+  { name: 'Groen', color: '#5BDB8A', text: '#0E0E0C' },
+  { name: 'Oranje', color: '#FFB84D', text: '#0E0E0C' },
+  { name: 'Paars', color: '#C97FFF', text: '#0E0E0C' },
+  { name: 'Rood', color: '#FF6B6B', text: '#0E0E0C' },
+  { name: 'Roze', color: '#FF96B4', text: '#0E0E0C' },
+  { name: 'Cyaan', color: '#64B4FF', text: '#0E0E0C' },
+  { name: 'Mint', color: '#64C864', text: '#0E0E0C' },
+  { name: 'Goud', color: '#FFD700', text: '#0E0E0C' },
+];
+
+function openThemeModal() {
+  renderThemeSwatches();
+  renderAccentDots();
+  document.getElementById('theme-modal').classList.add('open');
+}
+
+function closeThemeModal() {
+  document.getElementById('theme-modal').classList.remove('open');
+}
+
+function renderThemeSwatches() {
+  const grid = document.getElementById('theme-swatches');
+  if (!grid) return;
+  grid.innerHTML = THEMES.map(t => `
+    <div class="theme-swatch ${selectedTheme === t.id ? 'active' : ''}" onclick="applyFullTheme('${t.id}')" title="${t.name}">
+      <div class="theme-swatch-preview" style="background:${t.bg};">
+        <div class="theme-swatch-bar" style="background:${t.bg2};"></div>
+        <div class="theme-swatch-content">
+          <div class="theme-swatch-line" style="background:${t.accent};width:70%;"></div>
+          <div class="theme-swatch-line" style="background:${t.text}30;width:90%;"></div>
+          <div class="theme-swatch-line" style="background:${t.text}20;width:60%;"></div>
+        </div>
+      </div>
+      <div class="theme-swatch-name" style="background:${t.bg2};color:${t.text};">${t.name}</div>
+    </div>`).join('');
+}
+
+function renderAccentDots() {
+  const grid = document.getElementById('accent-dots');
+  if (!grid) return;
+  grid.innerHTML = ACCENTS.map(a => `
+    <div class="accent-dot ${selectedAccent === a.color ? 'active' : ''}"
+      style="background:${a.color};"
+      onclick="applyAccent('${a.color}','${a.text}','${a.name.toLowerCase()}')"
+      title="${a.name}">
+    </div>`).join('');
+}
+
+function applyFullTheme(themeId) {
+  selectedTheme = themeId;
+  document.documentElement.setAttribute('data-theme', themeId);
+  // Verwijder inline stijlen zodat CSS data-theme variabelen werken
+  const vars = ['--bg','--bg2','--bg3','--bg4','--border','--border2','--border3','--text','--text2','--text3','--send-bg','--send-icon','--user-bg','--user-text'];
+  vars.forEach(v => document.documentElement.style.removeProperty(v));
+  // Pas accent aan als het thema een eigen accent heeft
+  const theme = THEMES.find(t => t.id === themeId);
+  if (theme && themeId !== 'dark' && themeId !== 'light') {
+    selectedAccent = theme.accent;
+    selectedAccentText = theme.text === '#1A1916' ? '#F0EDE6' : '#0E0E0C';
+    document.documentElement.style.setProperty('--accent', theme.accent);
+    document.documentElement.style.setProperty('--accent-dim', theme.accent + '25');
+    document.documentElement.style.setProperty('--accent-text', selectedAccentText);
+  }
+  localStorage.setItem('ps_theme', themeId);
+  renderThemeSwatches();
+  renderAccentDots();
+}
+
+function applyAccent(color, textColor, name) {
+  selectedAccent = color;
+  selectedAccentText = textColor;
+  selectedColor = name;
+  document.documentElement.style.setProperty('--accent', color);
+  document.documentElement.style.setProperty('--accent-dim', color + '25');
+  document.documentElement.style.setProperty('--accent-text', textColor);
+  localStorage.setItem('ps_accent', color);
+  localStorage.setItem('ps_accent_text', textColor);
+  localStorage.setItem('ps_color', name);
+  renderAccentDots();
+}
+
+// ═══ SLACK KANALEN BEHEER ═══════════════════════════════
+function openSlackManageModal() {
+  renderSlackManageLists();
+  document.getElementById('slack-manage-modal').classList.add('open');
+}
+
+function closeSlackManageModal() {
+  document.getElementById('slack-manage-modal').classList.remove('open');
+  loadSlack();
+}
+
+function renderSlackManageLists() {
+  const pEl = document.getElementById('slack-prominent-list');
+  const nEl = document.getElementById('slack-normal-list');
+  if (!pEl || !nEl) return;
+
+  pEl.innerHTML = SLACK_CHANNELS.prominent.map((ch, i) => `
+    <div class="manage-item">
+      <span class="manage-drag">⠿</span>
+      <div style="flex:1;">
+        <div class="manage-item-name">${ch.name}</div>
+        <div class="manage-item-sub">${ch.id}${ch.urgent ? ' · Urgent' : ''}</div>
+      </div>
+      <button class="project-delete-btn" onclick="removeSlackChannel('prominent',${i})">×</button>
+    </div>`).join('') || '<div class="empty-state">Geen prioriteit kanalen</div>';
+
+  nEl.innerHTML = SLACK_CHANNELS.normal.map((ch, i) => `
+    <div class="manage-item">
+      <span class="manage-drag">⠿</span>
+      <div style="flex:1;">
+        <div class="manage-item-name">${ch.name}</div>
+        <div class="manage-item-sub">${ch.id}</div>
+      </div>
+      <button class="project-delete-btn" onclick="removeSlackChannel('normal',${i})">×</button>
+    </div>`).join('') || '<div class="empty-state">Geen overige kanalen</div>';
+}
+
+function removeSlackChannel(type, idx) {
+  SLACK_CHANNELS[type].splice(idx, 1);
+  saveSlackChannels();
+  renderSlackManageLists();
+}
+
+function addSlackChannel() {
+  const name = document.getElementById('new-slack-name').value.trim();
+  const id = document.getElementById('new-slack-id').value.trim();
+  const type = document.getElementById('new-slack-type').value;
+  const urgent = document.getElementById('new-slack-urgent').checked;
+  if (!name || !id) { notify('Vul naam en kanaal ID in', 'error'); return; }
+  const ch = { id, name: name.startsWith('#') ? name : '#' + name };
+  if (type === 'prominent') ch.urgent = urgent;
+  SLACK_CHANNELS[type].push(ch);
+  saveSlackChannels();
+  document.getElementById('new-slack-name').value = '';
+  document.getElementById('new-slack-id').value = '';
+  renderSlackManageLists();
+  notify('Kanaal toegevoegd: ' + ch.name, 'success');
+}
+
+function saveSlackChannels() {
+  localStorage.setItem('ps_slack_channels', JSON.stringify(SLACK_CHANNELS));
+}
+
+function loadSlackChannels() {
+  const saved = localStorage.getItem('ps_slack_channels');
+  if (saved) {
+    const parsed = JSON.parse(saved);
+    SLACK_CHANNELS.prominent = parsed.prominent || SLACK_CHANNELS.prominent;
+    SLACK_CHANNELS.normal = parsed.normal || SLACK_CHANNELS.normal;
+  }
+}
+
+// ═══ BUG TAGS BEHEER ════════════════════════════════════
+let bugTags = JSON.parse(localStorage.getItem('ps_bug_tags') || '["PARRO","SCHOOLKASSA","OVERIG"]');
+
+function openBugSettings() {
+  renderBugTagsList();
+  document.getElementById('bug-settings-modal').classList.add('open');
+}
+
+function renderBugTagsList() {
+  const list = document.getElementById('bug-project-tags-list');
+  if (!list) return;
+  list.innerHTML = bugTags.map((tag, i) => `
+    <div class="manage-item">
+      <div class="manage-item-name">${tag}</div>
+      <button class="project-delete-btn" onclick="removeBugTag(${i})">×</button>
+    </div>`).join('');
+  updateBugTagsDropdown();
+}
+
+function addBugTag() {
+  const input = document.getElementById('new-bug-tag');
+  const val = input.value.trim().toUpperCase();
+  if (!val) return;
+  if (bugTags.includes(val)) { notify('Tag bestaat al', 'error'); return; }
+  bugTags.push(val);
+  localStorage.setItem('ps_bug_tags', JSON.stringify(bugTags));
+  input.value = '';
+  renderBugTagsList();
+  notify('Tag toegevoegd: ' + val, 'success');
+}
+
+function removeBugTag(i) {
+  bugTags.splice(i, 1);
+  localStorage.setItem('ps_bug_tags', JSON.stringify(bugTags));
+  renderBugTagsList();
+}
+
+function updateBugTagsDropdown() {
+  const sel = document.getElementById('bug-project');
+  if (!sel) return;
+  const current = sel.value;
+  sel.innerHTML = bugTags.map(tag => {
+    const channels = tag === 'PARRO' ? '→ #parro-bugs + #par-bugs' : '→ #par-bugs';
+    return `<option value="${tag}" ${current === tag ? 'selected' : ''}>${tag} ${channels}</option>`;
+  }).join('');
+}
+
+// ═══ FOCUSTIMER INSTELLINGEN ════════════════════════════
+let focusWorkMinutes = parseInt(localStorage.getItem('ps_focus_work') || '25');
+let focusBreakMinutes = parseInt(localStorage.getItem('ps_focus_break') || '5');
+
+function openFocusSettings() {
+  document.getElementById('focus-work-input').value = focusWorkMinutes;
+  document.getElementById('focus-break-input').value = focusBreakMinutes;
+  document.getElementById('focus-settings-modal').classList.add('open');
+}
+
+function saveFocusSettings() {
+  const work = parseInt(document.getElementById('focus-work-input').value) || 25;
+  const brk = parseInt(document.getElementById('focus-break-input').value) || 5;
+  focusWorkMinutes = Math.min(Math.max(work, 1), 90);
+  focusBreakMinutes = Math.min(Math.max(brk, 1), 30);
+  localStorage.setItem('ps_focus_work', focusWorkMinutes);
+  localStorage.setItem('ps_focus_break', focusBreakMinutes);
+  // Reset timer met nieuwe tijden
+  focusReset();
+  document.getElementById('focus-sessions-label').textContent =
+    `Pomodoro · ${focusWorkMinutes} min werk · ${focusBreakMinutes} min pauze`;
+  document.getElementById('focus-settings-modal').classList.remove('open');
+  notify('Focustimer bijgewerkt', 'success');
+}
+
 // ─── Thema ────────────────────────────────────────────────
 let selectedTheme = localStorage.getItem('ps_theme') || 'dark';
 let selectedColor = localStorage.getItem('ps_color') || 'lime';
@@ -968,6 +1785,8 @@ function selectColor(name, accent, accentText) {
 }
 
 function applyTheme(theme) {
+  // Gebruik applyFullTheme als het een known theme is
+  if (THEMES.find(t => t.id === theme)) { applyFullTheme(theme); return; }
   const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
   const useDark = theme === 'dark' || (theme === 'system' && prefersDark);
   if (useDark) {
@@ -1012,13 +1831,18 @@ function saveTheme() {
 
 function loadTheme() {
   const t = localStorage.getItem('ps_theme') || 'dark';
-  const c = localStorage.getItem('ps_color') || 'lime';
   const a = localStorage.getItem('ps_accent') || '#C8F55A';
   const at = localStorage.getItem('ps_accent_text') || '#0E0E0C';
-  applyTheme(t);
-  document.documentElement.style.setProperty('--accent', a);
-  document.documentElement.style.setProperty('--accent-text', at);
-  document.documentElement.style.setProperty('--accent-dim', a + '20');
+  applyFullTheme(t);
+  if (a) {
+    document.documentElement.style.setProperty('--accent', a);
+    document.documentElement.style.setProperty('--accent-dim', a + '25');
+    document.documentElement.style.setProperty('--accent-text', at);
+  }
+  loadSlackChannels();
+  updateBugTagsDropdown();
+  // Focustimer tijden laden
+  focusSeconds = focusWorkMinutes * 60;
 }
 
 // ─── Wizard navigatie ────────────────────────────────────
@@ -1157,6 +1981,10 @@ function startDashboard() {
   initChat();
   startAutoRefresh();
   initOfflineDetection();
+  initSpotify();
+  focusUpdateDisplay();
+  renderStickyNotes();
+  loadWeather();
   loadCloudData();
 }
 
@@ -1505,27 +2333,45 @@ function renderProjectEditList() {
     const color = p.color || colors[i % colors.length];
     const key = p.id || p.name;
     const isHidden = hiddenProjects.includes(key);
-    return `<div class="project-edit-row" style="${isHidden ? 'opacity:0.45;' : ''}">
-      <div class="project-edit-info">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+    const subtasks = p.subtasks || [];
+    const doneSubs = subtasks.filter(s => s.done).length;
+    const pct = subtasks.length > 0 ? Math.round((doneSubs / subtasks.length) * 100) : p.pct;
+
+    const subtasksHtml = subtasks.map((s, si) => `
+      <div class="subtask-item">
+        <div class="subtask-check ${s.done ? 'done' : ''}" onclick="toggleSubtask(${i}, ${si})"></div>
+        <span class="subtask-text ${s.done ? 'done' : ''}">${s.text}</span>
+        <button class="subtask-del" onclick="deleteSubtask(${i}, ${si})">×</button>
+      </div>`).join('');
+
+    return `<div class="project-edit-row" style="flex-direction:column;align-items:flex-start;gap:8px;${isHidden ? 'opacity:0.45;' : ''}">
+      <div style="display:flex;align-items:center;justify-content:space-between;width:100%;gap:8px;">
+        <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0;">
           <div class="project-edit-name" style="${isHidden ? 'text-decoration:line-through;' : ''}">${p.name}</div>
           <button onclick="toggleProjectVisibility('${key}')"
-            style="font-size:10px;padding:2px 8px;border-radius:10px;border:1px solid var(--border2);background:${isHidden ? 'var(--bg3)' : 'var(--accent-dim)'};color:${isHidden ? 'var(--text3)' : 'var(--accent)'};cursor:pointer;font-family:var(--font-body);">
+            style="font-size:10px;padding:2px 8px;border-radius:10px;border:1px solid var(--border2);background:${isHidden ? 'var(--bg3)' : 'var(--accent-dim)'};color:${isHidden ? 'var(--text3)' : 'var(--accent)'};cursor:pointer;font-family:var(--font-body);flex-shrink:0;">
             ${isHidden ? 'Verborgen' : 'Zichtbaar'}
           </button>
         </div>
-        <div class="project-edit-controls" style="${isHidden ? 'pointer-events:none;' : ''}">
-          <input type="range" class="pct-slider" min="0" max="100" value="${p.pct}" step="5"
-            oninput="updateProjectPct(${i}, this.value); this.nextElementSibling.textContent=this.value+'%'">
-          <span class="pct-label" style="color:${color}">${p.pct}%</span>
+        <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+          <span style="font-size:11px;font-family:var(--font-mono);color:${color};">${pct}%</span>
           <select class="form-select" style="font-size:11px;padding:4px 8px;height:28px;" onchange="updateProjectStatus(${i}, this.value)">
             ${['Actief','In review','Bijna klaar','In uitvoering','Afgerond'].map(s =>
               `<option value="${s}" ${p.status===s?'selected':''}>${s}</option>`
             ).join('')}
           </select>
+          <button class="project-delete-btn" onclick="deleteProject(${i})" title="Verwijderen">×</button>
         </div>
       </div>
-      <button class="project-delete-btn" onclick="deleteProject(${i})" title="Verwijderen">×</button>
+      <div style="width:100%;">
+        <div class="subtask-progress"><div class="subtask-progress-fill" style="width:${pct}%;background:${color};"></div></div>
+        <div class="subtask-list">${subtasksHtml}</div>
+        <div class="subtask-add">
+          <input type="text" id="subtask-input-${i}" placeholder="Onderdeel toevoegen..."
+            onkeydown="if(event.key==='Enter')addSubtask(${i})">
+          <button onclick="addSubtask(${i})">+ Voeg toe</button>
+        </div>
+      </div>
     </div>`;
   }).join('');
 }
@@ -1556,6 +2402,43 @@ function deleteProject(i) {
   projects.splice(i, 1);
   saveProjectsCloud();
   renderProjectEditList();
+}
+
+function addSubtask(projectIdx) {
+  const input = document.getElementById(`subtask-input-${projectIdx}`);
+  if (!input) return;
+  const text = input.value.trim();
+  if (!text) return;
+  if (!projects[projectIdx].subtasks) projects[projectIdx].subtasks = [];
+  projects[projectIdx].subtasks.push({ text, done: false });
+  updateProjectPctFromSubtasks(projectIdx);
+  saveProjectsCloud();
+  renderProjectEditList();
+}
+
+function toggleSubtask(projectIdx, subtaskIdx) {
+  if (!projects[projectIdx].subtasks) return;
+  projects[projectIdx].subtasks[subtaskIdx].done = !projects[projectIdx].subtasks[subtaskIdx].done;
+  updateProjectPctFromSubtasks(projectIdx);
+  saveProjectsCloud();
+  renderProjectEditList();
+  renderProjects();
+}
+
+function deleteSubtask(projectIdx, subtaskIdx) {
+  if (!projects[projectIdx].subtasks) return;
+  projects[projectIdx].subtasks.splice(subtaskIdx, 1);
+  updateProjectPctFromSubtasks(projectIdx);
+  saveProjectsCloud();
+  renderProjectEditList();
+  renderProjects();
+}
+
+function updateProjectPctFromSubtasks(projectIdx) {
+  const subtasks = projects[projectIdx].subtasks || [];
+  if (subtasks.length === 0) return;
+  const done = subtasks.filter(s => s.done).length;
+  projects[projectIdx].pct = Math.round((done / subtasks.length) * 100);
 }
 
 function showAllProjects() {
@@ -1863,6 +2746,395 @@ function openSlackChannel(channelId) {
   setTimeout(() => {
     window.open(`https://app.slack.com/client/T02K9FWQ4/${channelId}`, '_blank');
   }, 1000);
+}
+
+// ─── Focustimer ──────────────────────────────────────────
+let focusIsRunning = false;
+let focusIsBreak = false;
+let focusSeconds = 25 * 60;
+let focusSessions = 0;
+let focusInterval = null;
+let FOCUS_WORK = focusWorkMinutes * 60;
+let FOCUS_BREAK = focusBreakMinutes * 60;
+const FOCUS_CIRCUMFERENCE = 2 * Math.PI * 52;
+
+function focusToggle() {
+  if (focusIsRunning) {
+    clearInterval(focusInterval);
+    focusIsRunning = false;
+    document.getElementById('focus-start-btn').textContent = 'Hervat';
+  } else {
+    focusIsRunning = true;
+    document.getElementById('focus-start-btn').textContent = 'Pauze';
+    focusInterval = setInterval(() => {
+      focusSeconds--;
+      focusUpdateDisplay();
+      if (focusSeconds <= 0) {
+        clearInterval(focusInterval);
+        focusIsRunning = false;
+        if (!focusIsBreak) {
+          focusSessions++;
+          notify('🍅 Focussessie klaar! Neem een pauze.', 'success');
+          try { new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAA').play(); } catch(e) {}
+        } else {
+          notify('⏰ Pauze voorbij! Tijd om te werken.', 'info');
+        }
+        focusIsBreak = !focusIsBreak;
+        focusSeconds = focusIsBreak ? FOCUS_BREAK : FOCUS_WORK;
+        focusUpdateDisplay();
+        document.getElementById('focus-start-btn').textContent = 'Start';
+      }
+    }, 1000);
+  }
+}
+
+function focusReset() {
+  clearInterval(focusInterval);
+  focusIsRunning = false;
+  focusIsBreak = false;
+  FOCUS_WORK = focusWorkMinutes * 60;
+  FOCUS_BREAK = focusBreakMinutes * 60;
+  focusSeconds = FOCUS_WORK;
+  focusUpdateDisplay();
+  document.getElementById('focus-start-btn').textContent = 'Start';
+}
+
+function focusSkip() {
+  clearInterval(focusInterval);
+  focusIsRunning = false;
+  if (!focusIsBreak) { focusSessions++; }
+  focusIsBreak = !focusIsBreak;
+  focusSeconds = focusIsBreak ? FOCUS_BREAK : FOCUS_WORK;
+  focusUpdateDisplay();
+  document.getElementById('focus-start-btn').textContent = 'Start';
+}
+
+function focusUpdateDisplay() {
+  const mins = Math.floor(focusSeconds / 60);
+  const secs = focusSeconds % 60;
+  document.getElementById('focus-time').textContent =
+    String(mins).padStart(2,'0') + ':' + String(secs).padStart(2,'0');
+
+  const total = focusIsBreak ? FOCUS_BREAK : FOCUS_WORK;
+  const pct = focusSeconds / total;
+  const offset = FOCUS_CIRCUMFERENCE * (1 - pct);
+  const ring = document.getElementById('focus-ring-fill');
+  if (ring) {
+    ring.style.strokeDashoffset = offset;
+    ring.style.stroke = focusIsBreak ? 'var(--green)' : 'var(--accent)';
+  }
+
+  const phase = document.getElementById('focus-phase');
+  if (phase) {
+    phase.textContent = focusIsBreak ? 'Pauze' : 'Werken';
+    phase.className = 'focus-phase ' + (focusIsBreak ? 'break' : 'work');
+  }
+
+  const badge = document.getElementById('focus-sessions-badge');
+  if (badge) badge.textContent = focusSessions + ' sessies';
+}
+
+// ─── Snelle notities ─────────────────────────────────────
+const STICKY_COLORS = ['#FFF176','#A5D6A7','#90CAF9','#FFCC80','#F48FB1','#CE93D8'];
+let stickyNotes = JSON.parse(localStorage.getItem('ps_sticky') || '[]');
+
+function renderStickyNotes() {
+  const grid = document.getElementById('sticky-grid');
+  if (!grid) return;
+  document.getElementById('sticky-count').textContent = stickyNotes.length;
+  grid.innerHTML = stickyNotes.map((note, i) => `
+    <div class="sticky-note" style="background:${note.color};">
+      <textarea rows="4" oninput="updateSticky(${i}, this.value)"
+        style="color:rgba(0,0,0,0.75);">${note.text}</textarea>
+      <button class="sticky-note-del" onclick="deleteSticky(${i})">×</button>
+    </div>`).join('') +
+    `<button class="sticky-add-btn" onclick="addSticky()" title="Notitie toevoegen">+</button>`;
+}
+
+function addSticky() {
+  const color = STICKY_COLORS[stickyNotes.length % STICKY_COLORS.length];
+  stickyNotes.push({ text: '', color });
+  localStorage.setItem('ps_sticky', JSON.stringify(stickyNotes));
+  renderStickyNotes();
+  // Focus op de nieuwe notitie
+  setTimeout(() => {
+    const textareas = document.querySelectorAll('.sticky-note textarea');
+    if (textareas.length) textareas[textareas.length - 1].focus();
+  }, 50);
+}
+
+function updateSticky(i, text) {
+  stickyNotes[i].text = text;
+  clearTimeout(window._stickyTimer);
+  window._stickyTimer = setTimeout(() => {
+    localStorage.setItem('ps_sticky', JSON.stringify(stickyNotes));
+  }, 500);
+}
+
+function deleteSticky(i) {
+  stickyNotes.splice(i, 1);
+  localStorage.setItem('ps_sticky', JSON.stringify(stickyNotes));
+  renderStickyNotes();
+}
+
+// ─── Weer ─────────────────────────────────────────────────
+const WEATHER_ICONS = {
+  0: '☀️', 1: '🌤️', 2: '⛅', 3: '☁️',
+  45: '🌫️', 48: '🌫️',
+  51: '🌦️', 53: '🌦️', 55: '🌧️',
+  61: '🌧️', 63: '🌧️', 65: '🌧️',
+  71: '🌨️', 73: '🌨️', 75: '❄️',
+  80: '🌦️', 81: '🌧️', 82: '⛈️',
+  95: '⛈️', 96: '⛈️', 99: '⛈️',
+};
+const WEATHER_DESC = {
+  0:'Helder',1:'Overwegend helder',2:'Gedeeltelijk bewolkt',3:'Bewolkt',
+  45:'Mist',48:'Bevriezende mist',51:'Lichte motregen',53:'Matige motregen',55:'Zware motregen',
+  61:'Lichte regen',63:'Matige regen',65:'Zware regen',
+  71:'Lichte sneeuw',73:'Matige sneeuw',75:'Zware sneeuw',
+  80:'Lichte buien',81:'Matige buien',82:'Zware buien',
+  95:'Onweer',96:'Onweer met hagel',99:'Zwaar onweer',
+};
+const DAYS = ['zo','ma','di','wo','do','vr','za'];
+
+async function loadWeather() {
+  try {
+    // Open-Meteo API — gratis, geen token nodig, Enschede coördinaten
+    const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=52.255&longitude=6.158&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=Europe%2FAmsterdam&forecast_days=5');
+    if (!res.ok) throw new Error('Weer API fout');
+    const data = await res.json();
+    renderWeather(data);
+    document.getElementById('weather-badge').textContent = 'Live';
+    document.getElementById('weather-badge').className = 'card-badge badge-green';
+  } catch(e) {
+    console.error('[Weer] Fout:', e.message);
+    document.getElementById('weather-body').innerHTML = '<div class="empty-state">Kon weer niet ophalen</div>';
+    document.getElementById('weather-badge').textContent = 'Fout';
+    document.getElementById('weather-badge').className = 'card-badge badge-red';
+  }
+}
+
+function renderWeather(data) {
+  const c = data.current;
+  const d = data.daily;
+  const code = c.weather_code;
+  const temp = Math.round(c.temperature_2m);
+  const humidity = c.relative_humidity_2m;
+  const wind = Math.round(c.wind_speed_10m);
+  const icon = WEATHER_ICONS[code] || '🌡️';
+  const desc = WEATHER_DESC[code] || 'Onbekend';
+
+  const forecastHtml = d.time.slice(1, 5).map((date, i) => {
+    const day = new Date(date);
+    const dayName = DAYS[day.getDay()];
+    const dayIcon = WEATHER_ICONS[d.weather_code[i+1]] || '🌡️';
+    const maxT = Math.round(d.temperature_2m_max[i+1]);
+    const minT = Math.round(d.temperature_2m_min[i+1]);
+    return `<div class="weather-day">
+      <div class="weather-day-name">${dayName}</div>
+      <div class="weather-day-icon">${dayIcon}</div>
+      <div class="weather-day-temp">${maxT}°</div>
+      <div class="weather-day-temp" style="color:var(--text3);font-size:11px;">${minT}°</div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('weather-body').innerHTML = `
+    <div class="weather-main">
+      <div class="weather-icon">${icon}</div>
+      <div>
+        <div class="weather-temp">${temp}°C</div>
+        <div class="weather-desc">${desc}</div>
+        <div class="weather-loc">Deventer</div>
+      </div>
+    </div>
+    <div class="weather-details">
+      <div class="weather-detail">
+        <div class="weather-detail-val">${humidity}%</div>
+        <div class="weather-detail-label">Vochtig</div>
+      </div>
+      <div class="weather-detail">
+        <div class="weather-detail-val">${wind} km/h</div>
+        <div class="weather-detail-label">Wind</div>
+      </div>
+      <div class="weather-detail">
+        <div class="weather-detail-val">${Math.round(d.temperature_2m_max[0])}°/${Math.round(d.temperature_2m_min[0])}°</div>
+        <div class="weather-detail-label">Max/Min</div>
+      </div>
+    </div>
+    <div class="weather-forecast">${forecastHtml}</div>`;
+}
+
+// ─── Spotify ────────────────────────────────────────────
+const SPOTIFY_CLIENT_ID = '60f186f4c6f24e9f9857148027c1e377';
+const SPOTIFY_REDIRECT = window.location.origin;
+const SPOTIFY_SCOPES = 'user-read-playback-state user-modify-playback-state user-read-currently-playing';
+
+let spotifyToken = localStorage.getItem('spotify_token') || null;
+let spotifyRefreshTimer = null;
+let spotifyPollTimer = null;
+let spotifyCurrentTrack = null;
+
+function spotifyLogin() {
+  const state = Math.random().toString(36).slice(2);
+  localStorage.setItem('spotify_state', state);
+  const params = new URLSearchParams({
+    client_id: SPOTIFY_CLIENT_ID,
+    response_type: 'token',
+    redirect_uri: SPOTIFY_REDIRECT,
+    scope: SPOTIFY_SCOPES,
+    state,
+  });
+  window.location.href = 'https://accounts.spotify.com/authorize?' + params.toString();
+}
+
+function spotifyHandleCallback() {
+  const hash = window.location.hash.substring(1);
+  if (!hash) return;
+  const params = new URLSearchParams(hash);
+  const token = params.get('access_token');
+  const expiresIn = params.get('expires_in');
+  if (token) {
+    spotifyToken = token;
+    localStorage.setItem('spotify_token', token);
+    // Verwijder hash uit URL
+    history.replaceState(null, null, window.location.pathname);
+    initSpotify();
+  }
+}
+
+function initSpotify() {
+  if (!spotifyToken) {
+    spotifyHandleCallback();
+    return;
+  }
+  spotifyFetchNowPlaying();
+  clearInterval(spotifyPollTimer);
+  spotifyPollTimer = setInterval(spotifyFetchNowPlaying, 5000);
+}
+
+async function spotifyFetchNowPlaying() {
+  if (!spotifyToken) return;
+  try {
+    const res = await fetch('https://api.spotify.com/v1/me/player/currently-playing', {
+      headers: { Authorization: `Bearer ${spotifyToken}` }
+    });
+
+    if (res.status === 401) {
+      // Token verlopen
+      spotifyToken = null;
+      localStorage.removeItem('spotify_token');
+      renderSpotifyLogin();
+      return;
+    }
+
+    if (res.status === 204 || !res.ok) {
+      renderSpotifyNothing();
+      return;
+    }
+
+    const data = await res.json();
+    if (!data || !data.item) { renderSpotifyNothing(); return; }
+    spotifyCurrentTrack = data;
+    renderSpotifyPlayer(data);
+  } catch(e) {
+    console.error('[Spotify] Fout:', e.message);
+  }
+}
+
+function renderSpotifyLogin() {
+  document.getElementById('spotify-badge').textContent = 'Inloggen';
+  document.getElementById('spotify-badge').className = 'card-badge badge-amber';
+  document.getElementById('spotify-sub').textContent = 'Niet verbonden';
+  document.getElementById('spotify-body').innerHTML = `
+    <div class="spotify-login">
+      <div class="spotify-nothing">Log in om je muziek te zien en bedienen</div>
+      <button class="spotify-login-btn" onclick="spotifyLogin()">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="white"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
+        Inloggen met Spotify
+      </button>
+    </div>`;
+}
+
+function renderSpotifyNothing() {
+  document.getElementById('spotify-badge').textContent = 'Actief';
+  document.getElementById('spotify-badge').className = 'card-badge badge-green';
+  document.getElementById('spotify-sub').textContent = 'Verbonden';
+  document.getElementById('spotify-body').innerHTML = `<div class="spotify-nothing">Niets aan het afspelen</div>`;
+}
+
+function renderSpotifyPlayer(data) {
+  const track = data.item;
+  const isPlaying = data.is_playing;
+  const progress = data.progress_ms;
+  const duration = track.duration_ms;
+  const pct = Math.round((progress / duration) * 100);
+  const artUrl = track.album?.images?.[0]?.url || '';
+  const trackName = track.name || 'Onbekend';
+  const artistName = track.artists?.map(a => a.name).join(', ') || '';
+  const fmt = ms => `${Math.floor(ms/60000)}:${String(Math.floor((ms%60000)/1000)).padStart(2,'0')}`;
+
+  document.getElementById('spotify-badge').textContent = isPlaying ? '▶ Speelt' : '⏸ Gepauzeerd';
+  document.getElementById('spotify-badge').className = isPlaying ? 'card-badge badge-green' : 'card-badge badge-muted';
+  document.getElementById('spotify-sub').textContent = 'Verbonden';
+
+  document.getElementById('spotify-body').innerHTML = `
+    <div class="spotify-player">
+      ${artUrl
+        ? `<img class="spotify-art" src="${artUrl}" alt="Album art">`
+        : `<div class="spotify-art-placeholder">♪</div>`
+      }
+      <div class="spotify-info">
+        <div class="spotify-track" title="${trackName}">${trackName}</div>
+        <div class="spotify-artist">${artistName}</div>
+        <div class="spotify-progress-wrap">
+          <span class="spotify-time">${fmt(progress)}</span>
+          <div class="spotify-progress"><div class="spotify-progress-fill" style="width:${pct}%"></div></div>
+          <span class="spotify-time" style="text-align:right">${fmt(duration)}</span>
+        </div>
+      </div>
+    </div>
+    <div class="spotify-controls">
+      <button class="sp-btn" onclick="spotifyPrev()" title="Vorige">
+        <svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg>
+      </button>
+      <button class="sp-btn play" onclick="spotifyTogglePlay()" title="${isPlaying ? 'Pauzeren' : 'Afspelen'}">
+        ${isPlaying
+          ? `<svg viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>`
+          : `<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>`
+        }
+      </button>
+      <button class="sp-btn" onclick="spotifyNext()" title="Volgende">
+        <svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zm2-8.14L11.03 12 8 14.14V9.86zM16 6h2v12h-2z"/></svg>
+      </button>
+    </div>`;
+}
+
+async function spotifyTogglePlay() {
+  if (!spotifyToken || !spotifyCurrentTrack) return;
+  const isPlaying = spotifyCurrentTrack.is_playing;
+  await fetch(`https://api.spotify.com/v1/me/player/${isPlaying ? 'pause' : 'play'}`, {
+    method: 'PUT',
+    headers: { Authorization: `Bearer ${spotifyToken}` }
+  });
+  setTimeout(spotifyFetchNowPlaying, 300);
+}
+
+async function spotifyNext() {
+  if (!spotifyToken) return;
+  await fetch('https://api.spotify.com/v1/me/player/next', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${spotifyToken}` }
+  });
+  setTimeout(spotifyFetchNowPlaying, 500);
+}
+
+async function spotifyPrev() {
+  if (!spotifyToken) return;
+  await fetch('https://api.spotify.com/v1/me/player/previous', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${spotifyToken}` }
+  });
+  setTimeout(spotifyFetchNowPlaying, 500);
 }
 
 // ─── Dagelijkse notities ────────────────────────────────
@@ -2254,6 +3526,111 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 
+
+<!-- Thema modal -->
+<div class="modal-overlay" id="theme-modal">
+  <div class="modal" style="max-width:580px;">
+    <div class="modal-head">
+      <span class="modal-title">🎨 Thema aanpassen</span>
+      <button class="modal-close" onclick="closeThemeModal()">×</button>
+    </div>
+    <div class="modal-body" style="gap:20px;">
+      <div>
+        <div class="manage-section-title">Weergave</div>
+        <div class="theme-modal-grid" id="theme-swatches"></div>
+      </div>
+      <div>
+        <div class="manage-section-title">Accentkleur</div>
+        <div class="accent-grid" id="accent-dots"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="topbar-btn" onclick="closeThemeModal()">Sluiten</button>
+    </div>
+  </div>
+</div>
+
+<!-- Slack beheer modal -->
+<div class="modal-overlay" id="slack-manage-modal">
+  <div class="modal" style="max-width:500px;">
+    <div class="modal-head">
+      <span class="modal-title">💬 Slack kanalen beheren</span>
+      <button class="modal-close" onclick="closeSlackManageModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="manage-section-title">Prioriteit kanalen</div>
+      <div class="manage-section" id="slack-prominent-list"></div>
+      <div class="manage-section-title" style="margin-top:12px;">Overige kanalen</div>
+      <div class="manage-section" id="slack-normal-list"></div>
+      <div class="add-project-form" style="margin-top:12px;">
+        <div class="manage-section-title">Kanaal toevoegen</div>
+        <div class="bug-form-row">
+          <input class="form-input" id="new-slack-name" placeholder="Kanaalnaam (bijv. #algemeen)">
+          <input class="form-input" id="new-slack-id" placeholder="Kanaal ID (C...)">
+        </div>
+        <div class="bug-form-row">
+          <select class="form-select" id="new-slack-type">
+            <option value="normal">Overig kanaal</option>
+            <option value="prominent">Prioriteit kanaal</option>
+          </select>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <input type="checkbox" id="new-slack-urgent" style="width:16px;height:16px;">
+            <label style="font-size:12px;color:var(--text2);">Markeer als urgent</label>
+          </div>
+        </div>
+        <button class="submit-btn" style="align-self:flex-start;" onclick="addSlackChannel()">+ Toevoegen</button>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="topbar-btn" onclick="closeSlackManageModal()">Sluiten</button>
+    </div>
+  </div>
+</div>
+
+<!-- Bugformulier instellingen modal -->
+<div class="modal-overlay" id="bug-settings-modal">
+  <div class="modal" style="max-width:480px;">
+    <div class="modal-head">
+      <span class="modal-title">🐛 Bug formulier aanpassen</span>
+      <button class="modal-close" onclick="document.getElementById('bug-settings-modal').classList.remove('open')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="manage-section-title">Projecttags</div>
+      <div class="manage-section" id="bug-project-tags-list"></div>
+      <div class="add-project-form" style="margin-top:8px;">
+        <input class="form-input" id="new-bug-tag" placeholder="Nieuwe tag (bijv. RAPPORTMODULE)">
+        <button class="submit-btn" style="align-self:flex-start;" onclick="addBugTag()">+ Toevoegen</button>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="topbar-btn" onclick="document.getElementById('bug-settings-modal').classList.remove('open')">Sluiten</button>
+    </div>
+  </div>
+</div>
+
+<!-- Focustimer instellingen -->
+<div class="modal-overlay" id="focus-settings-modal">
+  <div class="modal" style="max-width:400px;">
+    <div class="modal-head">
+      <span class="modal-title">⏱ Focustimer instellingen</span>
+      <button class="modal-close" onclick="document.getElementById('focus-settings-modal').classList.remove('open')">×</button>
+    </div>
+    <div class="modal-body" style="gap:14px;">
+      <div class="setup-field-group">
+        <div class="setup-field-label">Werktijd (minuten)</div>
+        <input class="setup-input" id="focus-work-input" type="number" min="1" max="90" value="25">
+      </div>
+      <div class="setup-field-group">
+        <div class="setup-field-label">Pauzetijd (minuten)</div>
+        <input class="setup-input" id="focus-break-input" type="number" min="1" max="30" value="5">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="topbar-btn" onclick="document.getElementById('focus-settings-modal').classList.remove('open')">Annuleren</button>
+      <button class="wizard-next" style="flex:0;padding:10px 20px;" onclick="saveFocusSettings()">Opslaan</button>
+    </div>
+  </div>
+</div>
 
 <!-- Token vernieuw modal -->
 <div class="modal-overlay" id="token-modal">
