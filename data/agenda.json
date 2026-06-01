@@ -5,86 +5,86 @@
       "start": "2026-05-26T11:30:00.0000000",
       "end": "2026-05-26T12:00:00.0000000",
       "location": "VK LB 2.4 Speelhoek (8)",
-      "joinUrl": "item()?['onlineMeeting']?['joinUrl']\n"
+      "joinUrl": null
     },
     {
       "subject": "Kennissessie speciaal onderwijs",
       "start": "2026-05-26T14:00:00.0000000",
       "end": "2026-05-26T15:00:00.0000000",
       "location": "VK LB 2.6 Schoolplein (10)",
-      "joinUrl": "item()?['onlineMeeting']?['joinUrl']\n"
+      "joinUrl": null
     },
     {
       "subject": "AI toepassingen voor SD ParnasSys",
       "start": "2026-05-26T15:00:00.0000000",
       "end": "2026-05-26T16:00:00.0000000",
       "location": "Microsoft Teams-vergadering",
-      "joinUrl": "item()?['onlineMeeting']?['joinUrl']\n"
+      "joinUrl": null
     },
     {
       "subject": "Gespreksondersteuning P.O.C",
       "start": "2026-05-28T09:00:00.0000000",
       "end": "2026-05-28T10:00:00.0000000",
       "location": "VK LB 1.7 Topi Conf (12)",
-      "joinUrl": "item()?['onlineMeeting']?['joinUrl']\n"
+      "joinUrl": null
     },
     {
       "subject": "GTM Parro Portaal",
       "start": "2026-05-28T10:30:00.0000000",
       "end": "2026-05-28T11:15:00.0000000",
       "location": "Microsoft Teams-vergadering; VK LB 2.5 Lerarenkamer (12)",
-      "joinUrl": "item()?['onlineMeeting']?['joinUrl']\n"
+      "joinUrl": null
     },
     {
       "subject": "Onder de motorkap van AI (1/1)",
       "start": "2026-05-28T13:00:00.0000000",
       "end": "2026-05-28T17:00:00.0000000",
       "location": "VK S25 1 - Ada Lovelace",
-      "joinUrl": "item()?['onlineMeeting']?['joinUrl']\n"
+      "joinUrl": null
     },
     {
       "subject": "Stand up",
       "start": "2026-05-25T12:35:00.0000000",
       "end": "2026-05-25T13:00:00.0000000",
       "location": "online of in de 1e lijns ruimte",
-      "joinUrl": "item()?['onlineMeeting']?['joinUrl']\n"
+      "joinUrl": null
     },
     {
       "subject": "Stand up",
       "start": "2026-05-28T12:35:00.0000000",
       "end": "2026-05-28T13:00:00.0000000",
       "location": "online of in de 1e lijns ruimte",
-      "joinUrl": "item()?['onlineMeeting']?['joinUrl']\n"
+      "joinUrl": null
     },
     {
       "subject": "Tickets evalueren",
       "start": "2026-05-26T16:00:00.0000000",
       "end": "2026-05-26T16:30:00.0000000",
       "location": "Microsoft Teams-vergadering",
-      "joinUrl": "item()?['onlineMeeting']?['joinUrl']\n"
+      "joinUrl": null
     },
     {
       "subject": "Tickets evalueren",
       "start": "2026-05-28T16:00:00.0000000",
       "end": "2026-05-28T16:30:00.0000000",
       "location": "Microsoft Teams-vergadering",
-      "joinUrl": "item()?['onlineMeeting']?['joinUrl']\n"
+      "joinUrl": null
     },
     {
       "subject": "Schoolkassa Review",
       "start": "2026-05-26T09:30:00.0000000",
       "end": "2026-05-26T10:15:00.0000000",
       "location": "VK LB 1.12 Topi Impact (9) (Deventer)",
-      "joinUrl": "item()?['onlineMeeting']?['joinUrl']\n"
+      "joinUrl": null
     },
     {
       "subject": "AI inloopspreekuur",
       "start": "2026-05-28T11:00:00.0000000",
       "end": "2026-05-28T12:00:00.0000000",
       "location": "club topicana",
-      "joinUrl": "item()?['onlineMeeting']?['joinUrl']\n"
+      "joinUrl": null
     }
   ],
-  "updatedAt": "2026-06-01T22:17:00.784Z",
+  "updatedAt": "2026-06-01T22:18:52.301Z",
   "date": "1-6-2026"
 }
