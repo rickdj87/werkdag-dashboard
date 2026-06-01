@@ -2987,7 +2987,7 @@ function renderWeather(data) {
 // ─── Spotify ────────────────────────────────────────────
 const SPOTIFY_CLIENT_ID = '60f186f4c6f24e9f9857148027c1e377';
 const SPOTIFY_REDIRECT = window.location.origin;
-const SPOTIFY_SCOPES = 'user-read-playback-state user-modify-playback-state user-read-currently-playing';
+const SPOTIFY_SCOPES = 'user-read-playback-state user-modify-playback-state user-read-currently-playing streaming app-remote-control';
 
 let spotifyToken = localStorage.getItem('spotify_token') || null;
 let spotifyPlayer = null;
@@ -3146,8 +3146,8 @@ function initSpotifyPlayer() {
     spotifyPlayer.connect();
   };
 
-  // Als SDK al geladen is
-  if (window.Spotify) {
+  // Als SDK al geladen is, direct aanroepen
+  if (window.Spotify && window.Spotify.Player) {
     window.onSpotifyWebPlaybackSDKReady();
   }
 }
