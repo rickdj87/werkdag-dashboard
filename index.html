@@ -2066,9 +2066,9 @@ async function loadAgenda() {
       const raw = e.start?.dateTime || e.start?.date || e.start || '';
       const str = String(raw).trim();
       if (!str) return null;
-      // Voeg Z toe als er geen tijdzone aanduiding is
-      const normalized = str.match(/[Z+\-]\d{2}:\d{2}$|Z$/) ? str : str + 'Z';
-      return new Date(normalized);
+      // Power Automate lokale NL tijd — geen Z toevoegen
+      if (str.match(/[Z+][0-9]/)) return new Date(str);
+      return new Date(str.replace('T', ' '));
     };
 
     const todayStr = now.toDateString();
@@ -2149,8 +2149,13 @@ function renderAgenda(events) {
   list.innerHTML = events.map((e, i) => {
     const parseEvtDate = v => {
       const raw = (typeof v === 'object' ? (v?.dateTime || v?.date) : v) || '';
-      const s = String(raw).trim();
-      return new Date(s.match(/[Z+][0-9]/) || s.endsWith('Z') ? s : s + 'Z');
+      const s = String(raw).trim().replace(/\.0+$/, '');
+      // Power Automate geeft lokale NL tijd zonder tijdzone aanduiding
+      // Voeg GEEN Z toe — interpreteer als lokale tijd
+      if (!s) return new Date(NaN);
+      if (s.match(/[Z+\-]\d{2}:\d{2}$|Z$/)) return new Date(s); // heeft al tijdzone
+      // Lokale tijd van Power Automate — converteer expliciet naar NL tijdzone
+      return new Date(s.replace('T', ' '));
     };
     const start = parseEvtDate(e.start);
     const end = parseEvtDate(e.end);
@@ -2189,7 +2194,7 @@ function renderWeek(events) {
   // Groepeer events per dag
   const grouped = {};
   events.forEach(e => {
-    const d = (() => { const raw = (typeof e.start === 'object' ? (e.start?.dateTime || e.start?.date) : e.start) || ''; const s = String(raw).trim(); return new Date(s.match(/[Z+][0-9]/) || s.endsWith('Z') ? s : s + 'Z'); })();
+    const d = (() => { const raw = (typeof e.start === 'object' ? (e.start?.dateTime || e.start?.date) : e.start) || ''; const s = String(raw).trim().replace(/\.0+$/, ''); if (!s) return new Date(NaN); if (s.match(/[Z+\-]\d{2}:\d{2}$|Z$/)) return new Date(s); return new Date(s.replace('T', ' ')); })();
     const key = d.toDateString();
     if (!grouped[key]) grouped[key] = { date: d, events: [] };
     grouped[key].events.push(e);
@@ -2210,7 +2215,7 @@ function renderWeek(events) {
 
     const eventsHtml = dayEvents.length
       ? dayEvents.slice(0, 4).map((e, i) => {
-          const st = (() => { const raw = (typeof e.start === 'object' ? (e.start?.dateTime || e.start?.date) : e.start) || ''; const s = String(raw).trim(); return new Date(s.match(/[Z+][0-9]/) || s.endsWith('Z') ? s : s + 'Z'); })();
+          const st = (() => { const raw = (typeof e.start === 'object' ? (e.start?.dateTime || e.start?.date) : e.start) || ''; const s = String(raw).trim().replace(/\.0+$/, ''); if (!s) return new Date(NaN); if (s.match(/[Z+\-]\d{2}:\d{2}$|Z$/)) return new Date(s); return new Date(s.replace('T', ' ')); })();
           const fmt = t => t.toLocaleTimeString('nl-NL', {hour:'2-digit', minute:'2-digit', timeZone:'Europe/Amsterdam'});
           return `<div class="week-event">
             <div class="week-event-dot" style="background:${colors[i%colors.length]}"></div>
