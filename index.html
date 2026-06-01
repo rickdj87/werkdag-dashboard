@@ -981,6 +981,7 @@ input[type=range].pct-slider {
   <meta name="apple-mobile-web-app-title" content="Werkdag">
   <meta name="theme-color" content="#0E0E0C">
   <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%230E0E0C' rx='20'/><text y='68' x='50' text-anchor='middle' font-size='60' fill='%23C8F55A'>W</text></svg>">
+  <script src="https://sdk.scdn.co/spotify-player.js"></script>
 </head>
 <body>
 
@@ -2989,6 +2990,9 @@ const SPOTIFY_REDIRECT = window.location.origin;
 const SPOTIFY_SCOPES = 'user-read-playback-state user-modify-playback-state user-read-currently-playing';
 
 let spotifyToken = localStorage.getItem('spotify_token') || null;
+let spotifyPlayer = null;
+let spotifyDeviceId = null;
+let spotifyPlayerReady = false;
 let spotifyRefreshTimer = null;
 let spotifyPollTimer = null;
 let spotifyCurrentTrack = null;
@@ -3097,9 +3101,152 @@ function initSpotify() {
     spotifyHandleCallback();
     return;
   }
+  initSpotifyPlayer();
   spotifyFetchNowPlaying();
   clearInterval(spotifyPollTimer);
   spotifyPollTimer = setInterval(spotifyFetchNowPlaying, 5000);
+}
+
+function initSpotifyPlayer() {
+  if (spotifyPlayer || !spotifyToken) return;
+
+  // Wacht tot SDK geladen is
+  window.onSpotifyWebPlaybackSDKReady = () => {
+    spotifyPlayer = new Spotify.Player({
+      name: 'Werkdag Dashboard',
+      getOAuthToken: cb => cb(spotifyToken),
+      volume: 0.7,
+    });
+
+    spotifyPlayer.addListener('ready', ({ device_id }) => {
+      spotifyDeviceId = device_id;
+      spotifyPlayerReady = true;
+      console.log('[Spotify] Player klaar, device ID:', device_id);
+      updateSpotifyPlayerUI();
+    });
+
+    spotifyPlayer.addListener('not_ready', ({ device_id }) => {
+      spotifyPlayerReady = false;
+      console.log('[Spotify] Player niet beschikbaar');
+    });
+
+    spotifyPlayer.addListener('player_state_changed', state => {
+      if (!state) return;
+      // Update UI direct zonder polling
+      renderSpotifyFromState(state);
+    });
+
+    spotifyPlayer.addListener('authentication_error', ({ message }) => {
+      console.error('[Spotify] Auth fout:', message);
+      spotifyToken = null;
+      localStorage.removeItem('spotify_token');
+      renderSpotifyLogin();
+    });
+
+    spotifyPlayer.connect();
+  };
+
+  // Als SDK al geladen is
+  if (window.Spotify) {
+    window.onSpotifyWebPlaybackSDKReady();
+  }
+}
+
+function updateSpotifyPlayerUI() {
+  // Voeg "Speel hier af" knop toe als player klaar is
+  const badge = document.getElementById('spotify-badge');
+  if (badge && spotifyPlayerReady) {
+    badge.textContent = '▶ Klaar';
+    badge.className = 'card-badge badge-green';
+  }
+}
+
+function renderSpotifyFromState(state) {
+  if (!state) return;
+  const track = state.track_window?.current_track;
+  if (!track) return;
+
+  const isPlaying = !state.paused;
+  const progress = state.position;
+  const duration = track.duration_ms;
+  const pct = Math.round((progress / duration) * 100);
+  const artUrl = track.album?.images?.[0]?.url || '';
+  const trackName = track.name || 'Onbekend';
+  const artistName = track.artists?.map(a => a.name).join(', ') || '';
+  const fmt = ms => `${Math.floor(ms/60000)}:${String(Math.floor((ms%60000)/1000)).padStart(2,'0')}`;
+
+  document.getElementById('spotify-badge').textContent = isPlaying ? '▶ Speelt' : '⏸ Gepauzeerd';
+  document.getElementById('spotify-badge').className = isPlaying ? 'card-badge badge-green' : 'card-badge badge-muted';
+  document.getElementById('spotify-sub').textContent = 'Verbonden';
+
+  // Update bestaande UI of render nieuw
+  const existingTrack = document.querySelector('.spotify-track');
+  if (existingTrack) {
+    existingTrack.textContent = trackName;
+    const artist = document.querySelector('.spotify-artist');
+    if (artist) artist.textContent = artistName;
+    const fill = document.querySelector('.spotify-progress-fill');
+    if (fill) fill.style.width = pct + '%';
+    const times = document.querySelectorAll('.spotify-time');
+    if (times[0]) times[0].textContent = fmt(progress);
+    const playBtn = document.querySelector('.sp-btn.play svg');
+    if (playBtn) playBtn.parentElement.innerHTML = isPlaying
+      ? '<svg viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>'
+      : '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>';
+  } else {
+    renderSpotifyPlayerFull(track, isPlaying, progress, duration, artUrl);
+  }
+}
+
+async function playOnDashboard() {
+  if (!spotifyToken || !spotifyDeviceId) return;
+  // Zet playback over naar dashboard device
+  await fetch('https://api.spotify.com/v1/me/player', {
+    method: 'PUT',
+    headers: { Authorization: `Bearer ${spotifyToken}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ device_ids: [spotifyDeviceId], play: true }),
+  });
+  setTimeout(spotifyFetchNowPlaying, 500);
+}
+
+function renderSpotifyPlayerFull(track, isPlaying, progress, duration, artUrl) {
+  const trackName = track.name || 'Onbekend';
+  const artistName = track.artists?.map(a => a.name).join(', ') || '';
+  const pct = Math.round((progress / duration) * 100);
+  const fmt = ms => `${Math.floor(ms/60000)}:${String(Math.floor((ms%60000)/1000)).padStart(2,'0')}`;
+
+  document.getElementById('spotify-body').innerHTML = `
+    <div class="spotify-player">
+      ${artUrl
+        ? `<img class="spotify-art" src="${artUrl}" alt="Album art">`
+        : `<div class="spotify-art-placeholder">♪</div>`}
+      <div class="spotify-info">
+        <div class="spotify-track">${trackName}</div>
+        <div class="spotify-artist">${artistName}</div>
+        <div class="spotify-progress-wrap">
+          <span class="spotify-time">${fmt(progress)}</span>
+          <div class="spotify-progress"><div class="spotify-progress-fill" style="width:${pct}%"></div></div>
+          <span class="spotify-time" style="text-align:right">${fmt(duration)}</span>
+        </div>
+      </div>
+    </div>
+    <div class="spotify-controls">
+      <button class="sp-btn" onclick="spotifyPrev()" title="Vorige">
+        <svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg>
+      </button>
+      <button class="sp-btn play" onclick="spotifyTogglePlay()" title="${isPlaying ? 'Pauzeren' : 'Afspelen'}">
+        ${isPlaying
+          ? `<svg viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>`
+          : `<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>`}
+      </button>
+      <button class="sp-btn" onclick="spotifyNext()" title="Volgende">
+        <svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zm2-8.14L11.03 12 8 14.14V9.86zM16 6h2v12h-2z"/></svg>
+      </button>
+    </div>
+    ${spotifyPlayerReady ? `
+    <button onclick="playOnDashboard()" style="margin-top:8px;width:100%;padding:7px;font-size:12px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);color:var(--text2);cursor:pointer;font-family:var(--font-body);">
+      ▶ Afspelen via dashboard
+    </button>` : ''}`;
 }
 
 async function spotifyFetchNowPlaying() {
@@ -3200,7 +3347,14 @@ function renderSpotifyPlayer(data) {
 }
 
 async function spotifyTogglePlay() {
-  if (!spotifyToken || !spotifyCurrentTrack) return;
+  if (!spotifyToken) return;
+  // Gebruik Web Playback SDK als beschikbaar
+  if (spotifyPlayer && spotifyPlayerReady) {
+    spotifyPlayer.togglePlay();
+    return;
+  }
+  // Fallback naar API
+  if (!spotifyCurrentTrack) return;
   const isPlaying = spotifyCurrentTrack.is_playing;
   await fetch(`https://api.spotify.com/v1/me/player/${isPlaying ? 'pause' : 'play'}`, {
     method: 'PUT',
@@ -3211,6 +3365,7 @@ async function spotifyTogglePlay() {
 
 async function spotifyNext() {
   if (!spotifyToken) return;
+  if (spotifyPlayer && spotifyPlayerReady) { spotifyPlayer.nextTrack(); return; }
   await fetch('https://api.spotify.com/v1/me/player/next', {
     method: 'POST',
     headers: { Authorization: `Bearer ${spotifyToken}` }
@@ -3220,6 +3375,7 @@ async function spotifyNext() {
 
 async function spotifyPrev() {
   if (!spotifyToken) return;
+  if (spotifyPlayer && spotifyPlayerReady) { spotifyPlayer.previousTrack(); return; }
   await fetch('https://api.spotify.com/v1/me/player/previous', {
     method: 'POST',
     headers: { Authorization: `Bearer ${spotifyToken}` }
