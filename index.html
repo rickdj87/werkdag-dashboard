@@ -2059,21 +2059,26 @@ async function loadAgenda() {
   if (cloudAgenda && cloudAgenda.events && cloudAgenda.events.length > 0) {
     const now = new Date();
 
-    // Power Automate geeft soms datums zonder Z (UTC marker) — voeg toe indien nodig
-    const parseDate = s => {
-      if (!s) return null;
-      const str = String(s);
-      return new Date(str.match(/[Z+]/) ? str : str + 'Z');
+    // Robuuste datum parsing — Power Automate geeft strings zonder Z
+    // en start kan een string zijn of {dateTime: "..."} object
+    const parseDate = e => {
+      const raw = e.start?.dateTime || e.start?.date || e.start || '';
+      const str = String(raw).trim();
+      if (!str) return null;
+      // Voeg Z toe als er geen tijdzone aanduiding is
+      const normalized = str.match(/[Z+\-]\d{2}:\d{2}$|Z$/) ? str : str + 'Z';
+      return new Date(normalized);
     };
 
+    const todayStr = now.toDateString();
     const todayEvents = cloudAgenda.events.filter(e => {
-      const start = parseDate(e.start?.dateTime || e.start?.date || e.start);
-      return start && start.toDateString() === now.toDateString();
+      const d = parseDate(e);
+      return d && !isNaN(d) && d.toDateString() === todayStr;
     });
 
     const weekEvents = cloudAgenda.events.filter(e => {
-      const start = parseDate(e.start?.dateTime || e.start?.date || e.start);
-      return start && start > now && start.toDateString() !== now.toDateString();
+      const d = parseDate(e);
+      return d && !isNaN(d) && d > now && d.toDateString() !== todayStr;
     });
 
     renderAgenda(todayEvents);
@@ -2141,12 +2146,17 @@ function renderAgenda(events) {
   if (!events.length) { list.innerHTML = '<div class="empty-state">Geen afspraken vandaag</div>'; return; }
   const colors = ['#6BA8FF','#C8F55A','#FFB84D','#FF6B6B','#5BDB8A','#C97FFF'];
   list.innerHTML = events.map((e, i) => {
-    const start = new Date(e.start?.dateTime || e.start?.date);
-    const end = new Date(e.end?.dateTime || e.end?.date);
-    const fmt = t => t.toLocaleTimeString('nl-NL', {hour:'2-digit', minute:'2-digit', timeZone:'Europe/Amsterdam'});
+    const parseEvtDate = v => {
+      const raw = (typeof v === 'object' ? (v?.dateTime || v?.date) : v) || '';
+      const s = String(raw).trim();
+      return new Date(s.match(/[Z+][0-9]/) || s.endsWith('Z') ? s : s + 'Z');
+    };
+    const start = parseEvtDate(e.start);
+    const end = parseEvtDate(e.end);
+    const fmt = t => isNaN(t) ? '--:--' : t.toLocaleTimeString('nl-NL', {hour:'2-digit', minute:'2-digit', timeZone:'Europe/Amsterdam'});
     const color = colors[i % colors.length];
-    const loc = e.location?.displayName || '';
-    const teamsUrl = e.onlineMeeting?.joinUrl || '';
+    const loc = e.location?.displayName || e.location || '';
+    const teamsUrl = e.onlineMeeting?.joinUrl || e.joinUrl || '';
     return `<div class="agenda-item">
       <span class="agenda-time">${fmt(start)}<br>${fmt(end)}</span>
       <div class="agenda-bar" style="background:${color}"></div>
@@ -2178,7 +2188,7 @@ function renderWeek(events) {
   // Groepeer events per dag
   const grouped = {};
   events.forEach(e => {
-    const d = new Date(e.start?.dateTime || e.start?.date);
+    const d = (() => { const raw = (typeof e.start === 'object' ? (e.start?.dateTime || e.start?.date) : e.start) || ''; const s = String(raw).trim(); return new Date(s.match(/[Z+][0-9]/) || s.endsWith('Z') ? s : s + 'Z'); })();
     const key = d.toDateString();
     if (!grouped[key]) grouped[key] = { date: d, events: [] };
     grouped[key].events.push(e);
@@ -2199,7 +2209,7 @@ function renderWeek(events) {
 
     const eventsHtml = dayEvents.length
       ? dayEvents.slice(0, 4).map((e, i) => {
-          const st = new Date(e.start?.dateTime || e.start?.date);
+          const st = (() => { const raw = (typeof e.start === 'object' ? (e.start?.dateTime || e.start?.date) : e.start) || ''; const s = String(raw).trim(); return new Date(s.match(/[Z+][0-9]/) || s.endsWith('Z') ? s : s + 'Z'); })();
           const fmt = t => t.toLocaleTimeString('nl-NL', {hour:'2-digit', minute:'2-digit', timeZone:'Europe/Amsterdam'});
           return `<div class="week-event">
             <div class="week-event-dot" style="background:${colors[i%colors.length]}"></div>
