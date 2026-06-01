@@ -3115,11 +3115,14 @@ function initSpotify() {
 function initSpotifyPlayer() {
   if (spotifyPlayer || !spotifyToken) return;
 
-  // Wacht tot SDK geladen is
-  window.onSpotifyWebPlaybackSDKReady = () => {
-    spotifyPlayer = new Spotify.Player({
+  const createPlayer = () => {
+    if (spotifyPlayer) return;
+    spotifyPlayer = new window.Spotify.Player({
       name: 'Werkdag Dashboard',
-      getOAuthToken: cb => cb(spotifyToken),
+      getOAuthToken: cb => {
+        const t = localStorage.getItem('spotify_token') || spotifyToken;
+        cb(t);
+      },
       volume: 0.7,
     });
 
@@ -3130,30 +3133,36 @@ function initSpotifyPlayer() {
       updateSpotifyPlayerUI();
     });
 
-    spotifyPlayer.addListener('not_ready', ({ device_id }) => {
+    spotifyPlayer.addListener('not_ready', () => {
       spotifyPlayerReady = false;
-      console.log('[Spotify] Player niet beschikbaar');
     });
 
     spotifyPlayer.addListener('player_state_changed', state => {
       if (!state) return;
-      // Update UI direct zonder polling
       renderSpotifyFromState(state);
     });
 
     spotifyPlayer.addListener('authentication_error', ({ message }) => {
       console.error('[Spotify] Auth fout:', message);
-      spotifyToken = null;
-      localStorage.removeItem('spotify_token');
-      renderSpotifyLogin();
+      spotifyRefreshToken();
     });
 
-    spotifyPlayer.connect();
+    spotifyPlayer.addListener('account_error', ({ message }) => {
+      console.error('[Spotify] Account fout:', message);
+      notify('Spotify Premium vereist voor afspelen via dashboard', 'error');
+    });
+
+    spotifyPlayer.connect().then(success => {
+      console.log('[Spotify] Connect:', success ? 'gelukt' : 'mislukt');
+    });
   };
 
-  // Als SDK al geladen is, direct aanroepen
+  // SDK al geladen? Direct aanmaken
   if (window.Spotify && window.Spotify.Player) {
-    window.onSpotifyWebPlaybackSDKReady();
+    createPlayer();
+  } else {
+    // Wacht op SDK callback
+    window.onSpotifyWebPlaybackSDKReady = createPlayer;
   }
 }
 
