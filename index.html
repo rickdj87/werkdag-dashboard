@@ -2992,7 +2992,7 @@ function renderWeather(data) {
 // ─── Spotify ────────────────────────────────────────────
 const SPOTIFY_CLIENT_ID = '60f186f4c6f24e9f9857148027c1e377';
 const SPOTIFY_REDIRECT = window.location.origin;
-const SPOTIFY_SCOPES = 'user-read-playback-state user-modify-playback-state user-read-currently-playing streaming app-remote-control';
+const SPOTIFY_SCOPES = 'user-read-playback-state user-modify-playback-state user-read-currently-playing streaming app-remote-control user-read-private user-read-email';
 
 let spotifyToken = localStorage.getItem('spotify_token') || null;
 let spotifyPlayer = null;
