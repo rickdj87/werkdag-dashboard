@@ -1,90 +1,97 @@
 {
   "events": [
     {
-      "subject": "Bijpraten inwerken",
-      "start": "2026-05-26T11:30:00.0000000",
-      "end": "2026-05-26T12:00:00.0000000",
-      "location": "VK LB 2.4 Speelhoek (8)",
+      "subject": "Bigroom: Kick-off",
+      "start": "2026-06-02T09:00:00.0000000",
+      "end": "2026-06-02T10:15:00.0000000",
+      "location": "VK LB 0.2 Topi Share (28)",
       "joinUrl": null
     },
     {
-      "subject": "Kennissessie speciaal onderwijs",
-      "start": "2026-05-26T14:00:00.0000000",
-      "end": "2026-05-26T15:00:00.0000000",
-      "location": "VK LB 2.6 Schoolplein (10)",
+      "subject": "Bigroom: Puzzelsessie I",
+      "start": "2026-06-02T10:30:00.0000000",
+      "end": "2026-06-02T11:30:00.0000000",
+      "location": "Teamruimtes",
       "joinUrl": null
     },
     {
-      "subject": "AI toepassingen voor SD ParnasSys",
-      "start": "2026-05-26T15:00:00.0000000",
-      "end": "2026-05-26T16:00:00.0000000",
-      "location": "Microsoft Teams-vergadering",
+      "subject": "Bigroom: tussentijdse evaluatie",
+      "start": "2026-06-02T11:30:00.0000000",
+      "end": "2026-06-02T12:00:00.0000000",
+      "location": "VK LB 0.2 Topi Share (28)",
       "joinUrl": null
     },
     {
-      "subject": "Gespreksondersteuning P.O.C",
-      "start": "2026-05-28T09:00:00.0000000",
-      "end": "2026-05-28T10:00:00.0000000",
-      "location": "VK LB 1.7 Topi Conf (12)",
+      "subject": "Bigroom: Puzzelsessie II",
+      "start": "2026-06-02T13:00:00.0000000",
+      "end": "2026-06-02T14:30:00.0000000",
+      "location": "Teamruimtes",
       "joinUrl": null
     },
     {
-      "subject": "GTM Parro Portaal",
-      "start": "2026-05-28T10:30:00.0000000",
-      "end": "2026-05-28T11:15:00.0000000",
-      "location": "Microsoft Teams-vergadering; VK LB 2.5 Lerarenkamer (12)",
+      "subject": "Big Room Planning presentaties en afsluitende borrel",
+      "start": "2026-06-02T15:00:00.0000000",
+      "end": "2026-06-02T16:30:00.0000000",
+      "location": "Club Topicana",
       "joinUrl": null
     },
     {
-      "subject": "Onder de motorkap van AI (1/1)",
-      "start": "2026-05-28T13:00:00.0000000",
-      "end": "2026-05-28T17:00:00.0000000",
-      "location": "VK S25 1 - Ada Lovelace",
+      "subject": "Bigroom: Eindpresentatie + borrel",
+      "start": "2026-06-02T15:00:00.0000000",
+      "end": "2026-06-02T17:00:00.0000000",
+      "location": "VK LB 0.1 Club Topicana (150)",
+      "joinUrl": null
+    },
+    {
+      "subject": "Save the date: Eerste bigroom planning",
+      "start": "2026-06-02T00:00:00.0000000",
+      "end": "2026-06-03T00:00:00.0000000",
+      "location": "",
+      "joinUrl": null
+    },
+    {
+      "subject": "Bijpraten Rick-Bas",
+      "start": "2026-06-04T16:00:00.0000000",
+      "end": "2026-06-04T16:45:00.0000000",
+      "location": "VK LB 0.4 Topi Care (8)",
       "joinUrl": null
     },
     {
       "subject": "Stand up",
-      "start": "2026-05-25T12:35:00.0000000",
-      "end": "2026-05-25T13:00:00.0000000",
+      "start": "2026-06-04T12:35:00.0000000",
+      "end": "2026-06-04T13:00:00.0000000",
       "location": "online of in de 1e lijns ruimte",
       "joinUrl": null
     },
     {
-      "subject": "Stand up",
-      "start": "2026-05-28T12:35:00.0000000",
-      "end": "2026-05-28T13:00:00.0000000",
-      "location": "online of in de 1e lijns ruimte",
+      "subject": "Geannuleerd: SD-overleg",
+      "start": "2026-06-02T14:00:00.0000000",
+      "end": "2026-06-02T15:00:00.0000000",
+      "location": "VK LB 2.5 Lerarenkamer (12)",
       "joinUrl": null
     },
     {
       "subject": "Tickets evalueren",
-      "start": "2026-05-26T16:00:00.0000000",
-      "end": "2026-05-26T16:30:00.0000000",
+      "start": "2026-06-02T16:00:00.0000000",
+      "end": "2026-06-02T16:30:00.0000000",
       "location": "Microsoft Teams-vergadering",
       "joinUrl": null
     },
     {
       "subject": "Tickets evalueren",
-      "start": "2026-05-28T16:00:00.0000000",
-      "end": "2026-05-28T16:30:00.0000000",
+      "start": "2026-06-04T16:00:00.0000000",
+      "end": "2026-06-04T16:30:00.0000000",
       "location": "Microsoft Teams-vergadering",
-      "joinUrl": null
-    },
-    {
-      "subject": "Schoolkassa Review",
-      "start": "2026-05-26T09:30:00.0000000",
-      "end": "2026-05-26T10:15:00.0000000",
-      "location": "VK LB 1.12 Topi Impact (9) (Deventer)",
       "joinUrl": null
     },
     {
       "subject": "AI inloopspreekuur",
-      "start": "2026-05-28T11:00:00.0000000",
-      "end": "2026-05-28T12:00:00.0000000",
+      "start": "2026-06-04T11:00:00.0000000",
+      "end": "2026-06-04T12:00:00.0000000",
       "location": "club topicana",
       "joinUrl": null
     }
   ],
-  "updatedAt": "2026-06-01T22:30:00.492Z",
+  "updatedAt": "2026-06-01T22:30:43.496Z",
   "date": "1-6-2026"
 }
