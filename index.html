@@ -3362,39 +3362,49 @@ function renderSpotifyPlayer(data) {
 
 async function spotifyTogglePlay() {
   if (!spotifyToken) return;
-  // Gebruik Web Playback SDK als beschikbaar
-  if (spotifyPlayer && spotifyPlayerReady) {
-    spotifyPlayer.togglePlay();
-    return;
+  try {
+    // Haal huidige staat op
+    const res = await fetch('https://api.spotify.com/v1/me/player', {
+      headers: { Authorization: `Bearer ${spotifyToken}` }
+    });
+    if (res.status === 204 || !res.ok) {
+      // Niets speelt — start op dashboard device
+      if (spotifyDeviceId) await playOnDashboard();
+      return;
+    }
+    const state = await res.json();
+    const isPlaying = state.is_playing;
+    const endpoint = isPlaying ? 'pause' : 'play';
+    await fetch(`https://api.spotify.com/v1/me/player/${endpoint}`, {
+      method: 'PUT',
+      headers: { Authorization: `Bearer ${spotifyToken}` }
+    });
+    setTimeout(spotifyFetchNowPlaying, 300);
+  } catch(e) {
+    console.error('[Spotify] Toggle fout:', e.message);
   }
-  // Fallback naar API
-  if (!spotifyCurrentTrack) return;
-  const isPlaying = spotifyCurrentTrack.is_playing;
-  await fetch(`https://api.spotify.com/v1/me/player/${isPlaying ? 'pause' : 'play'}`, {
-    method: 'PUT',
-    headers: { Authorization: `Bearer ${spotifyToken}` }
-  });
-  setTimeout(spotifyFetchNowPlaying, 300);
 }
 
 async function spotifyNext() {
   if (!spotifyToken) return;
-  if (spotifyPlayer && spotifyPlayerReady) { spotifyPlayer.nextTrack(); return; }
-  await fetch('https://api.spotify.com/v1/me/player/next', {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${spotifyToken}` }
-  });
-  setTimeout(spotifyFetchNowPlaying, 500);
+  try {
+    await fetch('https://api.spotify.com/v1/me/player/next', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${spotifyToken}` }
+    });
+    setTimeout(spotifyFetchNowPlaying, 600);
+  } catch(e) { console.error('[Spotify] Next fout:', e.message); }
 }
 
 async function spotifyPrev() {
   if (!spotifyToken) return;
-  if (spotifyPlayer && spotifyPlayerReady) { spotifyPlayer.previousTrack(); return; }
-  await fetch('https://api.spotify.com/v1/me/player/previous', {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${spotifyToken}` }
-  });
-  setTimeout(spotifyFetchNowPlaying, 500);
+  try {
+    await fetch('https://api.spotify.com/v1/me/player/previous', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${spotifyToken}` }
+    });
+    setTimeout(spotifyFetchNowPlaying, 600);
+  } catch(e) { console.error('[Spotify] Prev fout:', e.message); }
 }
 
 // ─── Dagelijkse notities ────────────────────────────────
