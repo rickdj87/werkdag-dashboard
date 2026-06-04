@@ -2,43 +2,43 @@
   "events": [
     {
       "subject": "Bigroom: Kick-off",
-      "start": "2026-06-02T07:00:00.0000000",
-      "end": "2026-06-02T08:15:00.0000000",
+      "start": "2026-06-02T09:00:00.0000000",
+      "end": "2026-06-02T10:15:00.0000000",
       "location": "VK LB 0.2 Topi Share (28)",
       "joinUrl": null
     },
     {
       "subject": "Bigroom: Puzzelsessie I",
-      "start": "2026-06-02T08:30:00.0000000",
-      "end": "2026-06-02T09:30:00.0000000",
+      "start": "2026-06-02T10:30:00.0000000",
+      "end": "2026-06-02T11:30:00.0000000",
       "location": "Teamruimtes",
       "joinUrl": null
     },
     {
       "subject": "Bigroom: tussentijdse evaluatie",
-      "start": "2026-06-02T09:30:00.0000000",
-      "end": "2026-06-02T10:00:00.0000000",
+      "start": "2026-06-02T11:30:00.0000000",
+      "end": "2026-06-02T12:00:00.0000000",
       "location": "VK LB 0.2 Topi Share (28)",
       "joinUrl": null
     },
     {
       "subject": "Bigroom: Puzzelsessie II",
-      "start": "2026-06-02T11:00:00.0000000",
-      "end": "2026-06-02T12:30:00.0000000",
+      "start": "2026-06-02T13:00:00.0000000",
+      "end": "2026-06-02T14:30:00.0000000",
       "location": "Teamruimtes",
       "joinUrl": null
     },
     {
       "subject": "Big Room Planning presentaties en afsluitende borrel",
-      "start": "2026-06-02T13:00:00.0000000",
-      "end": "2026-06-02T14:30:00.0000000",
+      "start": "2026-06-02T15:00:00.0000000",
+      "end": "2026-06-02T16:30:00.0000000",
       "location": "Club Topicana",
       "joinUrl": null
     },
     {
       "subject": "Bigroom: Eindpresentatie + borrel",
-      "start": "2026-06-02T13:00:00.0000000",
-      "end": "2026-06-02T15:00:00.0000000",
+      "start": "2026-06-02T15:00:00.0000000",
+      "end": "2026-06-02T17:00:00.0000000",
       "location": "VK LB 0.1 Club Topicana (150)",
       "joinUrl": null
     },
@@ -51,61 +51,61 @@
     },
     {
       "subject": "Overleg hoe nu verder met Raia",
-      "start": "2026-06-03T11:30:00.0000000",
-      "end": "2026-06-03T12:00:00.0000000",
+      "start": "2026-06-03T13:30:00.0000000",
+      "end": "2026-06-03T14:00:00.0000000",
       "location": "Microsoft Teams-vergadering",
       "joinUrl": null
     },
     {
       "subject": "AI toepassingen voor ParnasSys Servicedesk",
-      "start": "2026-06-04T11:00:00.0000000",
-      "end": "2026-06-04T11:30:00.0000000",
+      "start": "2026-06-04T13:00:00.0000000",
+      "end": "2026-06-04T13:30:00.0000000",
       "location": "VK LB 2.7 Gymzaal (12)",
       "joinUrl": null
     },
     {
       "subject": "Bijpraten Rick-Bas",
-      "start": "2026-06-04T14:00:00.0000000",
-      "end": "2026-06-04T14:45:00.0000000",
+      "start": "2026-06-04T16:00:00.0000000",
+      "end": "2026-06-04T16:45:00.0000000",
       "location": "VK LB 0.4 Topi Care (8)",
       "joinUrl": null
     },
     {
       "subject": "Stand up",
-      "start": "2026-06-04T10:35:00.0000000",
-      "end": "2026-06-04T11:00:00.0000000",
+      "start": "2026-06-04T12:35:00.0000000",
+      "end": "2026-06-04T13:00:00.0000000",
       "location": "online of in de 1e lijns ruimte",
       "joinUrl": null
     },
     {
       "subject": "Geannuleerd: SD-overleg",
-      "start": "2026-06-02T12:00:00.0000000",
-      "end": "2026-06-02T13:00:00.0000000",
+      "start": "2026-06-02T14:00:00.0000000",
+      "end": "2026-06-02T15:00:00.0000000",
       "location": "VK LB 2.5 Lerarenkamer (12)",
       "joinUrl": null
     },
     {
       "subject": "Geannuleerd: Tickets evalueren",
-      "start": "2026-06-02T14:00:00.0000000",
-      "end": "2026-06-02T14:30:00.0000000",
+      "start": "2026-06-02T16:00:00.0000000",
+      "end": "2026-06-02T16:30:00.0000000",
       "location": "Microsoft Teams-vergadering",
       "joinUrl": null
     },
     {
       "subject": "Tickets evalueren",
-      "start": "2026-06-04T14:00:00.0000000",
-      "end": "2026-06-04T14:30:00.0000000",
+      "start": "2026-06-04T16:00:00.0000000",
+      "end": "2026-06-04T16:30:00.0000000",
       "location": "Microsoft Teams-vergadering",
       "joinUrl": null
     },
     {
       "subject": "AI inloopspreekuur",
-      "start": "2026-06-04T09:00:00.0000000",
-      "end": "2026-06-04T10:00:00.0000000",
+      "start": "2026-06-04T11:00:00.0000000",
+      "end": "2026-06-04T12:00:00.0000000",
       "location": "club topicana",
       "joinUrl": null
     }
   ],
-  "updatedAt": "2026-06-04T09:50:01.082Z",
+  "updatedAt": "2026-06-04T09:51:01.830Z",
   "date": "4-6-2026"
 }
