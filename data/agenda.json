@@ -57,13 +57,6 @@
       "joinUrl": null
     },
     {
-      "subject": "AI toepassingen voor ParnasSys Servicedesk",
-      "start": "2026-06-04T13:00:00.0000000",
-      "end": "2026-06-04T13:30:00.0000000",
-      "location": "VK LB 2.7 Gymzaal (12)",
-      "joinUrl": null
-    },
-    {
       "subject": "Bijpraten Rick-Bas",
       "start": "2026-06-04T16:00:00.0000000",
       "end": "2026-06-04T16:45:00.0000000",
@@ -106,6 +99,6 @@
       "joinUrl": null
     }
   ],
-  "updatedAt": "2026-06-04T07:00:01.627Z",
+  "updatedAt": "2026-06-04T07:00:02.843Z",
   "date": "4-6-2026"
 }
