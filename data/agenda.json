@@ -1,111 +1,111 @@
 {
   "events": [
     {
-      "subject": "Bigroom: Kick-off",
-      "start": "2026-06-02T07:00:00.0000000",
-      "end": "2026-06-02T08:15:00.0000000",
-      "location": "VK LB 0.2 Topi Share (28)",
+      "subject": "AI Toepassingen voor Servicedesk ParnasSys",
+      "start": "2026-06-11T08:00:00.0000000",
+      "end": "2026-06-11T08:30:00.0000000",
+      "location": "VK LB 3.5 Rekenkamer (4)",
       "joinUrl": null
     },
     {
-      "subject": "Bigroom: Puzzelsessie I",
-      "start": "2026-06-02T08:30:00.0000000",
-      "end": "2026-06-02T09:30:00.0000000",
-      "location": "Teamruimtes",
+      "subject": "GTM Parro Portaal",
+      "start": "2026-06-11T08:30:00.0000000",
+      "end": "2026-06-11T09:15:00.0000000",
+      "location": "Microsoft Teams-vergadering; VK LB 2.5 Lerarenkamer (12)",
       "joinUrl": null
     },
     {
-      "subject": "Bigroom: tussentijdse evaluatie",
-      "start": "2026-06-02T09:30:00.0000000",
-      "end": "2026-06-02T10:00:00.0000000",
-      "location": "VK LB 0.2 Topi Share (28)",
+      "subject": "Teamdoel Vaker releasen",
+      "start": "2026-06-11T11:30:00.0000000",
+      "end": "2026-06-11T12:00:00.0000000",
+      "location": "VK LB 3.5 Rekenkamer (4)",
       "joinUrl": null
     },
     {
-      "subject": "Bigroom: Puzzelsessie II",
-      "start": "2026-06-02T11:00:00.0000000",
-      "end": "2026-06-02T12:30:00.0000000",
-      "location": "Teamruimtes",
-      "joinUrl": null
-    },
-    {
-      "subject": "Big Room Planning presentaties en afsluitende borrel",
-      "start": "2026-06-02T13:00:00.0000000",
-      "end": "2026-06-02T14:30:00.0000000",
-      "location": "Club Topicana",
-      "joinUrl": null
-    },
-    {
-      "subject": "Bigroom: Eindpresentatie + borrel",
-      "start": "2026-06-02T13:00:00.0000000",
-      "end": "2026-06-02T15:00:00.0000000",
-      "location": "VK LB 0.1 Club Topicana (150)",
-      "joinUrl": null
-    },
-    {
-      "subject": "Save the date: Eerste bigroom planning",
-      "start": "2026-06-02T00:00:00.0000000",
-      "end": "2026-06-03T00:00:00.0000000",
-      "location": "",
-      "joinUrl": null
-    },
-    {
-      "subject": "Overleg hoe nu verder met Raia",
-      "start": "2026-06-03T11:30:00.0000000",
-      "end": "2026-06-03T12:00:00.0000000",
+      "subject": "Kletsen over specialismes",
+      "start": "2026-06-11T12:00:00.0000000",
+      "end": "2026-06-11T12:30:00.0000000",
       "location": "Microsoft Teams-vergadering",
       "joinUrl": null
     },
     {
-      "subject": "AI toepassingen voor ParnasSys Servicedesk",
-      "start": "2026-06-04T11:00:00.0000000",
-      "end": "2026-06-04T11:30:00.0000000",
-      "location": "VK LB 2.7 Gymzaal (12)",
+      "subject": "SAVE THE DATE Volleybaltoernooi",
+      "start": "2026-06-15T16:00:00.0000000",
+      "end": "2026-06-15T19:00:00.0000000",
+      "location": "De scheg Deventer",
       "joinUrl": null
     },
     {
-      "subject": "Bijpraten Rick-Bas",
-      "start": "2026-06-04T14:00:00.0000000",
-      "end": "2026-06-04T14:45:00.0000000",
-      "location": "VK LB 0.4 Topi Care (8)",
+      "subject": "Data retentie in Parro",
+      "start": "2026-06-16T13:00:00.0000000",
+      "end": "2026-06-16T14:00:00.0000000",
+      "location": "VK LB 1.7 Topi Conf (12)",
       "joinUrl": null
     },
     {
-      "subject": "Stand up",
-      "start": "2026-06-04T10:35:00.0000000",
-      "end": "2026-06-04T11:00:00.0000000",
-      "location": "online of in de 1e lijns ruimte",
-      "joinUrl": null
-    },
-    {
-      "subject": "Geannuleerd: SD-overleg",
-      "start": "2026-06-02T12:00:00.0000000",
-      "end": "2026-06-02T13:00:00.0000000",
+      "subject": "SD-overleg",
+      "start": "2026-06-16T12:00:00.0000000",
+      "end": "2026-06-16T13:00:00.0000000",
       "location": "VK LB 2.5 Lerarenkamer (12)",
       "joinUrl": null
     },
     {
-      "subject": "Geannuleerd: Tickets evalueren",
-      "start": "2026-06-02T14:00:00.0000000",
-      "end": "2026-06-02T14:30:00.0000000",
+      "subject": "PS-overleg",
+      "start": "2026-06-11T13:00:00.0000000",
+      "end": "2026-06-11T14:00:00.0000000",
+      "location": "VK LB 2.6 Schoolplein (10)",
+      "joinUrl": null
+    },
+    {
+      "subject": "Schoolkassa GTM Buckaroo",
+      "start": "2026-06-15T12:00:00.0000000",
+      "end": "2026-06-15T12:30:00.0000000",
+      "location": "VK LB 2.4 Speelhoek (8)",
+      "joinUrl": null
+    },
+    {
+      "subject": "Tickets evalueren",
+      "start": "2026-06-16T14:00:00.0000000",
+      "end": "2026-06-16T14:30:00.0000000",
       "location": "Microsoft Teams-vergadering",
       "joinUrl": null
     },
     {
       "subject": "Tickets evalueren",
-      "start": "2026-06-04T14:00:00.0000000",
-      "end": "2026-06-04T14:30:00.0000000",
+      "start": "2026-06-11T14:00:00.0000000",
+      "end": "2026-06-11T14:30:00.0000000",
       "location": "Microsoft Teams-vergadering",
       "joinUrl": null
     },
     {
+      "subject": "Schoolkassa Review",
+      "start": "2026-06-15T11:00:00.0000000",
+      "end": "2026-06-15T11:45:00.0000000",
+      "location": "VK LB 2.5 Lerarenkamer (12)",
+      "joinUrl": null
+    },
+    {
       "subject": "AI inloopspreekuur",
-      "start": "2026-06-04T09:00:00.0000000",
-      "end": "2026-06-04T10:00:00.0000000",
+      "start": "2026-06-11T09:00:00.0000000",
+      "end": "2026-06-11T10:00:00.0000000",
       "location": "club topicana",
+      "joinUrl": null
+    },
+    {
+      "subject": "Stand up",
+      "start": "2026-06-11T10:35:00.0000000",
+      "end": "2026-06-11T11:00:00.0000000",
+      "location": "online of in de 1e lijns ruimte",
+      "joinUrl": null
+    },
+    {
+      "subject": "Stand up",
+      "start": "2026-06-15T10:35:00.0000000",
+      "end": "2026-06-15T11:00:00.0000000",
+      "location": "online of in de 1e lijns ruimte",
       "joinUrl": null
     }
   ],
-  "updatedAt": "2026-06-09T14:36:01.268Z",
+  "updatedAt": "2026-06-09T14:36:13.138Z",
   "date": "9-6-2026"
 }
