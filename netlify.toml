@@ -1,13 +1,4 @@
 [build]
   publish = "/"
   functions = "netlify/functions"
-
-# Voorkom dat Power Automate data-updates een nieuwe deploy triggeren
-[build.environment]
-  NODE_VERSION = "18"
-
-[[plugins]]
-
-# Negeer wijzigingen in de data/ map voor deploys
-[context.production]
-  ignore = "git diff --quiet HEAD^ HEAD -- data/"
+  ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- . ':!data'"
