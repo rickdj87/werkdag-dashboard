@@ -1,7 +1,13 @@
 [build]
+  publish = "/"
   functions = "netlify/functions"
 
-[[headers]]
-  for = "/*"
-  [headers.values]
-    Access-Control-Allow-Origin = "*"
+# Voorkom dat Power Automate data-updates een nieuwe deploy triggeren
+[build.environment]
+  NODE_VERSION = "18"
+
+[[plugins]]
+
+# Negeer wijzigingen in de data/ map voor deploys
+[context.production]
+  ignore = "git diff --quiet HEAD^ HEAD -- data/"
