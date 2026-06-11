@@ -1,13 +1,6 @@
 {
   "events": [
     {
-      "subject": "Project UGGS",
-      "start": "2026-06-11T13:00:00.0000000",
-      "end": "2026-06-11T14:00:00.0000000",
-      "location": "VK LB 0.1 Club Topicana (150)",
-      "joinUrl": null
-    },
-    {
       "subject": "SAVE THE DATE Volleybaltoernooi",
       "start": "2026-06-15T16:00:00.0000000",
       "end": "2026-06-15T19:00:00.0000000",
@@ -36,13 +29,6 @@
       "joinUrl": null
     },
     {
-      "subject": "PS-overleg",
-      "start": "2026-06-11T13:00:00.0000000",
-      "end": "2026-06-11T14:00:00.0000000",
-      "location": "VK LB 2.6 Schoolplein (10)",
-      "joinUrl": null
-    },
-    {
       "subject": "Schoolkassa GTM Buckaroo",
       "start": "2026-06-15T12:00:00.0000000",
       "end": "2026-06-15T12:30:00.0000000",
@@ -60,6 +46,13 @@
       "subject": "Tickets evalueren",
       "start": "2026-06-11T14:00:00.0000000",
       "end": "2026-06-11T14:30:00.0000000",
+      "location": "Microsoft Teams-vergadering",
+      "joinUrl": null
+    },
+    {
+      "subject": "Tickets evalueren",
+      "start": "2026-06-18T14:00:00.0000000",
+      "end": "2026-06-18T14:30:00.0000000",
       "location": "Microsoft Teams-vergadering",
       "joinUrl": null
     },
@@ -92,6 +85,6 @@
       "joinUrl": null
     }
   ],
-  "updatedAt": "2026-06-11T13:59:01.208Z",
+  "updatedAt": "2026-06-11T14:00:01.741Z",
   "date": "11-6-2026"
 }
