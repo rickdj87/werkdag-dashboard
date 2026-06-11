@@ -1189,6 +1189,40 @@ input[type=range].pct-slider {
 /* Offline banner */
 [data-theme="redactioneel"] #offline-banner { margin: 0 0 0 0; border-radius: 0; }
 
+
+/* ═══ MODULE TOGGLE SCHAKELAARS ═══════════════════════ */
+.module-toggle-grid { display: flex; flex-direction: column; gap: 6px; }
+.module-toggle-item {
+  display: flex; align-items: center; gap: 12px; padding: 11px 14px;
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: var(--r); transition: all 0.15s; cursor: pointer; user-select: none;
+}
+.module-toggle-item:hover { border-color: var(--border2); background: var(--bg4); }
+.module-toggle-icon { font-size: 18px; flex-shrink: 0; width: 26px; text-align: center; }
+.module-toggle-info { flex: 1; min-width: 0; }
+.module-toggle-name { font-size: 13px; color: var(--text); font-weight: 400; transition: color 0.15s; }
+.module-toggle-name.hidden-mod { color: var(--text3); text-decoration: line-through; }
+.module-toggle-desc { font-size: 11px; color: var(--text3); margin-top: 1px; }
+.module-toggle-switch {
+  width: 36px; height: 20px; border-radius: 10px;
+  background: var(--bg4); border: 1px solid var(--border2);
+  position: relative; flex-shrink: 0; transition: all 0.2s;
+}
+.module-toggle-switch.on { background: var(--accent); border-color: var(--accent); }
+.module-toggle-switch::after {
+  content: ''; position: absolute; width: 14px; height: 14px; border-radius: 50%;
+  background: white; top: 2px; left: 2px;
+  transition: transform 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+.module-toggle-switch.on::after { transform: translateX(16px); }
+.module-bulk-btns { display: flex; gap: 6px; margin-bottom: 10px; justify-content: flex-end; }
+.module-bulk-btn {
+  font-size: 11px; padding: 4px 10px; border-radius: 20px;
+  border: 1px solid var(--border2); background: transparent;
+  color: var(--text3); cursor: pointer; font-family: var(--font-body); transition: all 0.15s;
+}
+.module-bulk-btn:hover { border-color: var(--border3); color: var(--text2); }
+
 /* Scrollbar global */
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
@@ -1439,6 +1473,7 @@ input[type=range].pct-slider {
     </div>
   </div>
 
+  <div id="module-agenda-projecten">
   <!-- Rij 1: Agenda + Projecten -->
   <div class="grid-main">
 
@@ -1477,6 +1512,9 @@ input[type=range].pct-slider {
 
   </div>
 
+  </div>
+
+  <div id="module-bugs-todo">
   <!-- Rij 2: Bug melden + Buglijst + To-do -->
   <div class="grid-bottom">
 
@@ -1554,6 +1592,9 @@ input[type=range].pct-slider {
 
   </div>
 
+  </div>
+
+  <div id="module-focus-notities-weer">
   <!-- Rij 3: Focustimer + Snelle notities + Weer -->
   <div class="grid-bottom">
 
@@ -1607,6 +1648,9 @@ input[type=range].pct-slider {
 
   </div>
 
+  </div>
+
+  <div id="module-notities">
   <!-- Rij 3: Notities -->
   <div class="grid-full">
     <div class="card">
@@ -1627,6 +1671,9 @@ input[type=range].pct-slider {
     </div>
   </div>
 
+  </div>
+
+  <div id="module-slack">
   <!-- Rij 4: Slack -->
   <div class="grid-full">
     <div class="card">
@@ -1652,6 +1699,9 @@ input[type=range].pct-slider {
     </div>
   </div>
 
+  </div>
+
+  <div id="module-spotify">
   <!-- Rij 4: Spotify -->
   <div class="grid-full">
     <div class="spotify-card">
@@ -1679,6 +1729,9 @@ input[type=range].pct-slider {
     </div>
   </div>
 
+  </div>
+
+  <div id="module-claude">
   <!-- Rij 4: Claude -->
   <div class="grid-full">
     <div class="claude-card">
@@ -1703,6 +1756,7 @@ input[type=range].pct-slider {
       </div>
     </div>
   </div>
+  </div>
 
 </div>
 </div>
@@ -1711,6 +1765,69 @@ input[type=range].pct-slider {
 <div class="notif-bar" id="notif-bar"></div>
 
 <script>
+
+// ═══ MODULE BEHEER ═══════════════════════════════════════
+const MODULES = [
+  { id: 'module-agenda-projecten', name: 'Agenda & Projecten', icon: '📅', desc: 'Outlook agenda van vandaag en de rest van de week' },
+  { id: 'module-bugs-todo',        name: 'Bugs & To-do',       icon: '🐛', desc: 'Bug meldingen, tracker en takenlijst' },
+  { id: 'module-focus-notities-weer', name: 'Focustimer, Notities & Weer', icon: '⏱', desc: 'Pomodoro timer, sticky notes en weerswidget' },
+  { id: 'module-notities',         name: 'Dagelijkse notities', icon: '📝', desc: 'Aantekeningen per dag, navigeerbaar per datum' },
+  { id: 'module-slack',            name: 'Slack kanalen',       icon: '💬', desc: 'Snelle toegang tot kanalen en ongelezen berichten' },
+  { id: 'module-spotify',          name: 'Spotify',             icon: '🎵', desc: 'Muziekspeler en bediening vanuit het dashboard' },
+  { id: 'module-claude',           name: 'Claude assistent',    icon: '🤖', desc: 'AI assistent met ParnasSys werkcontext' },
+];
+
+let hiddenModules = JSON.parse(localStorage.getItem('ps_hidden_modules') || '[]');
+
+function applyModuleVisibility() {
+  MODULES.forEach(m => {
+    const el = document.getElementById(m.id);
+    if (el) el.style.display = hiddenModules.includes(m.id) ? 'none' : '';
+  });
+}
+
+function toggleModule(moduleId) {
+  const idx = hiddenModules.indexOf(moduleId);
+  if (idx === -1) hiddenModules.push(moduleId);
+  else hiddenModules.splice(idx, 1);
+  localStorage.setItem('ps_hidden_modules', JSON.stringify(hiddenModules));
+  applyModuleVisibility();
+  renderModulesList();
+}
+
+function renderModulesList() {
+  const list = document.getElementById('modules-list');
+  if (!list) return;
+  const visibleCount = MODULES.filter(m => !hiddenModules.includes(m.id)).length;
+  const countEl = document.getElementById('modules-visible-count');
+  if (countEl) countEl.textContent = visibleCount + ' van ' + MODULES.length + ' zichtbaar';
+  const rows = MODULES.map(m => {
+    const hidden = hiddenModules.includes(m.id);
+    return '<div class="module-toggle-item" onclick="toggleModule(\'' + m.id + '\')">' +
+      '<span class="module-toggle-icon">' + m.icon + '</span>' +
+      '<div class="module-toggle-info">' +
+        '<div class="module-toggle-name' + (hidden ? ' hidden-mod' : '') + '">' + m.name + '</div>' +
+        '<div class="module-toggle-desc">' + (m.desc || '') + '</div>' +
+      '</div>' +
+      '<div class="module-toggle-switch ' + (hidden ? '' : 'on') + '"></div>' +
+    '</div>';
+  }).join('');
+  list.innerHTML =
+    '<div class="module-bulk-btns">' +
+      '<button class="module-bulk-btn" onclick="setAllModules(true);event.stopPropagation()">Alles tonen</button>' +
+      '<button class="module-bulk-btn" onclick="setAllModules(false);event.stopPropagation()">Alles verbergen</button>' +
+    '</div>' +
+    '<div class="module-toggle-grid">' + rows + '</div>';
+}
+
+function setAllModules(visible) {
+  hiddenModules = visible ? [] : MODULES.map(m => m.id);
+  localStorage.setItem('ps_hidden_modules', JSON.stringify(hiddenModules));
+  applyModuleVisibility();
+  renderModulesList();
+  notify(visible ? 'Alle modules zichtbaar' : 'Alle modules verborgen', 'info');
+}
+
 // ─── State ───────────────────────────────────────────────
 let cfg = {};
 const PROXY_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
@@ -1781,6 +1898,7 @@ const ACCENTS = [
 function openThemeModal() {
   renderThemeSwatches();
   renderAccentDots();
+  renderModulesList();
   document.getElementById('theme-modal').classList.add('open');
 }
 
@@ -2220,6 +2338,7 @@ function startDashboard() {
   renderStickyNotes();
   loadWeather();
   loadCloudData();
+  applyModuleVisibility();
 }
 
 function setDate() {
@@ -4066,6 +4185,13 @@ window.addEventListener('DOMContentLoaded', () => {
       <button class="modal-close" onclick="closeThemeModal()">×</button>
     </div>
     <div class="modal-body" style="gap:20px;">
+      <div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <div class="manage-section-title" style="margin:0;">Modules</div>
+          <span style="font-size:11px;color:var(--text3);" id="modules-visible-count"></span>
+        </div>
+        <div id="modules-list"></div>
+      </div>
       <div>
         <div class="manage-section-title">Weergave</div>
         <div class="theme-modal-grid" id="theme-swatches"></div>
