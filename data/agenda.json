@@ -1,13 +1,6 @@
 {
   "events": [
     {
-      "subject": "GTM Parro Portaal",
-      "start": "2026-06-11T08:30:00.0000000",
-      "end": "2026-06-11T09:15:00.0000000",
-      "location": "Microsoft Teams-vergadering; VK LB 2.5 Lerarenkamer (12)",
-      "joinUrl": null
-    },
-    {
       "subject": "Teamdoel Vaker releasen",
       "start": "2026-06-11T11:30:00.0000000",
       "end": "2026-06-11T12:00:00.0000000",
@@ -106,6 +99,6 @@
       "joinUrl": null
     }
   ],
-  "updatedAt": "2026-06-11T09:15:01.041Z",
+  "updatedAt": "2026-06-11T09:16:01.786Z",
   "date": "11-6-2026"
 }
