@@ -85,6 +85,13 @@
       "joinUrl": null
     },
     {
+      "subject": "AI inloopspreekuur",
+      "start": "2026-06-18T09:00:00.0000000",
+      "end": "2026-06-18T10:00:00.0000000",
+      "location": "club topicana",
+      "joinUrl": null
+    },
+    {
       "subject": "Stand up",
       "start": "2026-06-11T10:35:00.0000000",
       "end": "2026-06-11T11:00:00.0000000",
@@ -99,6 +106,6 @@
       "joinUrl": null
     }
   ],
-  "updatedAt": "2026-06-11T08:59:00.888Z",
+  "updatedAt": "2026-06-11T09:00:01.460Z",
   "date": "11-6-2026"
 }
