@@ -28,5 +28,10 @@
     "text": "wk-pool invullen (EN OPSLAAN!)",
     "done": false,
     "priority": "Vandaag"
+  },
+  {
+    "text": "Zendesk-widget testen op Parro/Schoolkassa",
+    "done": false,
+    "priority": "Vandaag"
   }
 ]
