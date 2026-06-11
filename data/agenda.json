@@ -1,13 +1,6 @@
 {
   "events": [
     {
-      "subject": "Kletsen over specialismes",
-      "start": "2026-06-11T12:00:00.0000000",
-      "end": "2026-06-11T12:30:00.0000000",
-      "location": "Microsoft Teams-vergadering; VK LB 0.1 Club Topicana (150)",
-      "joinUrl": null
-    },
-    {
       "subject": "Project UGGS",
       "start": "2026-06-11T13:00:00.0000000",
       "end": "2026-06-11T14:00:00.0000000",
@@ -92,6 +85,6 @@
       "joinUrl": null
     }
   ],
-  "updatedAt": "2026-06-11T12:29:01.513Z",
+  "updatedAt": "2026-06-11T12:30:01.573Z",
   "date": "11-6-2026"
 }
