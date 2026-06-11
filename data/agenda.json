@@ -15,6 +15,13 @@
       "joinUrl": null
     },
     {
+      "subject": "Project UGGS",
+      "start": "2026-06-11T13:00:00.0000000",
+      "end": "2026-06-11T14:00:00.0000000",
+      "location": "VK LB 0.1 Club Topicana (150)",
+      "joinUrl": null
+    },
+    {
       "subject": "SAVE THE DATE Volleybaltoernooi",
       "start": "2026-06-15T16:00:00.0000000",
       "end": "2026-06-15T19:00:00.0000000",
@@ -92,6 +99,6 @@
       "joinUrl": null
     }
   ],
-  "updatedAt": "2026-06-11T11:46:01.633Z",
+  "updatedAt": "2026-06-11T11:47:00.984Z",
   "date": "11-6-2026"
 }
