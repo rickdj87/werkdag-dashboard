@@ -4,6 +4,12 @@
     "pct": 0,
     "status": "Actief",
     "deadline": "2026-06-30",
-    "color": "#C8F55A"
+    "color": "#C8F55A",
+    "subtasks": [
+      {
+        "text": "Vragen opstellen",
+        "done": false
+      }
+    ]
   }
 ]
