@@ -48,5 +48,10 @@
     "text": "Huub appen",
     "done": false,
     "priority": "Vandaag"
+  },
+  {
+    "text": "DISA regelen",
+    "done": false,
+    "priority": "Vandaag"
   }
 ]
