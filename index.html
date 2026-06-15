@@ -1236,6 +1236,16 @@ input[type=range].pct-slider {
   display: contents; /* transparante wrapper */
 }
 
+
+/* Notificatie instellingen */
+.notif-time-btn {
+  padding: 8px; font-size: 12px; font-weight: 500; font-family: var(--font-body);
+  border-radius: var(--r); border: 1px solid var(--border2); background: var(--bg3);
+  color: var(--text2); cursor: pointer; transition: all 0.15s; text-align: center;
+}
+.notif-time-btn:hover { border-color: var(--border3); color: var(--text); }
+.notif-time-btn.active { background: var(--accent-dim); color: var(--accent); border-color: var(--accent); }
+
 /* Scrollbar global */
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
@@ -1481,6 +1491,7 @@ input[type=range].pct-slider {
     </div>
     <div class="topbar-right">
       <button class="topbar-btn" onclick="refreshAll()">↻ Vernieuwen</button>
+      <button class="topbar-btn" id="notif-topbar-btn" onclick="openNotifSettings()" title="Notificatie instellingen">🔔</button>
       <button class="topbar-btn" onclick="openThemeModal()">🎨 Thema</button>
       <button class="topbar-btn" onclick="showSetup()">Instellingen</button>
     </div>
@@ -1793,6 +1804,44 @@ input[type=range].pct-slider {
 
 </div>
 </div>
+
+<!-- Notificatie instellingen modal -->
+<div class="modal-overlay" id="notif-settings-modal">
+  <div class="modal" style="max-width:420px;">
+    <div class="modal-head">
+      <span class="modal-title">🔔 Afspraak notificaties</span>
+      <button class="modal-close" onclick="document.getElementById('notif-settings-modal').classList.remove('open')">×</button>
+    </div>
+    <div class="modal-body" style="gap:16px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--bg3);border-radius:var(--r);border:1px solid var(--border);">
+        <div>
+          <div style="font-size:13px;color:var(--text);font-weight:500;">Notificaties inschakelen</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:2px;">Systeemmelding voor aankomende afspraken</div>
+        </div>
+        <div id="notif-toggle" onclick="toggleNotifEnabled()"
+          style="width:36px;height:20px;border-radius:10px;position:relative;cursor:pointer;transition:all 0.2s;flex-shrink:0;">
+          <div id="notif-toggle-knob" style="position:absolute;width:14px;height:14px;border-radius:50%;background:white;top:2px;transition:transform 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.3);left:2px;"></div>
+        </div>
+      </div>
+      <div id="notif-options" style="display:flex;flex-direction:column;gap:10px;">
+        <div style="font-size:12px;font-weight:500;color:var(--text2);">Hoe ver van tevoren?</div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;" id="notif-timing-btns">
+          <button onclick="setNotifMinutes(5)"  id="notif-btn-5"  class="notif-time-btn">5 min</button>
+          <button onclick="setNotifMinutes(10)" id="notif-btn-10" class="notif-time-btn">10 min</button>
+          <button onclick="setNotifMinutes(15)" id="notif-btn-15" class="notif-time-btn">15 min</button>
+          <button onclick="setNotifMinutes(1)"  id="notif-btn-1"  class="notif-time-btn">1 min</button>
+        </div>
+      </div>
+      <div id="notif-permission-warning" style="display:none;background:var(--amber-dim);border:1px solid rgba(255,184,77,0.2);border-radius:var(--r);padding:10px 12px;font-size:12px;color:var(--amber);line-height:1.5;">
+        ⚠ Notificaties zijn geblokkeerd in je browser. Klik op het slotje in de adresbalk → Meldingen → Toestaan.
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="topbar-btn" onclick="document.getElementById('notif-settings-modal').classList.remove('open')">Sluiten</button>
+    </div>
+  </div>
+</div>
+
 
 <!-- Notifications -->
 <div class="notif-bar" id="notif-bar"></div>
@@ -2396,6 +2445,7 @@ function startDashboard() {
   loadWeather();
   loadCloudData();
   applyModuleVisibility();
+  initNotifications();
 }
 
 function setDate() {
@@ -2569,6 +2619,15 @@ async function loadAgenda() {
 }
 
 function renderAgenda(events) {
+  // Sla events op voor notificatie-checker
+  window._currentAgendaEvents = (window._currentAgendaEvents || []);
+  // Voeg toe en dedupleer op subject+start
+  events.forEach(e => {
+    const key = (e.subject || '') + (e.start?.dateTime || e.start || '');
+    if (!window._currentAgendaEvents.find(x => (x.subject||'')+(x.start?.dateTime||x.start||'') === key)) {
+      window._currentAgendaEvents.push(e);
+    }
+  });
   // Sorteer op starttijd
   events = events.slice().sort(function(a, b) {
     var getMs = function(e) {
@@ -4207,6 +4266,124 @@ window.deployUpdate = async function(htmlContent, proxyContent) {
   if (htmlContent) await pushToGitHub(htmlContent, 'index.html');
   if (proxyContent) await pushToGitHub(proxyContent, 'netlify/functions/proxy.js');
 };
+
+
+
+// ─── Notificatie modal beheer ────────────────────────
+function openNotifSettings() {
+  updateNotifModal();
+  document.getElementById('notif-settings-modal').classList.add('open');
+}
+
+function updateNotifModal() {
+  const enabled = notifSettings.enabled;
+  const mb = notifSettings.minutesBefore || 5;
+  const toggle = document.getElementById('notif-toggle');
+  const knob = document.getElementById('notif-toggle-knob');
+  const options = document.getElementById('notif-options');
+  const warning = document.getElementById('notif-permission-warning');
+
+  if (toggle) {
+    toggle.style.background = enabled ? 'var(--accent)' : 'var(--bg4)';
+    toggle.style.border = '1px solid ' + (enabled ? 'var(--accent)' : 'var(--border2)');
+  }
+  if (knob) knob.style.transform = enabled ? 'translateX(16px)' : 'translateX(0)';
+  if (options) options.style.opacity = enabled ? '1' : '0.4';
+  if (options) options.style.pointerEvents = enabled ? 'auto' : 'none';
+
+  // Check browser toestemming
+  if (warning) {
+    warning.style.display = (enabled && Notification.permission === 'denied') ? 'block' : 'none';
+  }
+
+  // Timing knoppen
+  [1, 5, 10, 15].forEach(m => {
+    const btn = document.getElementById('notif-btn-' + m);
+    if (btn) btn.classList.toggle('active', m === mb);
+  });
+}
+
+function toggleNotifEnabled() {
+  notifSettings.enabled = !notifSettings.enabled;
+  if (notifSettings.enabled && Notification.permission === 'default') {
+    Notification.requestPermission().then(p => {
+      if (p === 'granted') notify('🔔 Notificaties ingeschakeld', 'success');
+      updateNotifModal();
+    });
+  }
+  saveNotifSettings();
+  updateNotifModal();
+  notify(notifSettings.enabled ? '🔔 Notificaties ingeschakeld' : '🔕 Notificaties uitgeschakeld', 'info');
+}
+
+function setNotifMinutes(m) {
+  notifSettings.minutesBefore = m;
+  notifiedEvents.clear(); // Reset zodat nieuwe timing direct werkt
+  saveNotifSettings();
+  updateNotifModal();
+  const label = m === 1 ? '1 minuut' : m + ' minuten';
+  notify('⏰ Melding ' + label + ' van tevoren', 'info');
+}
+
+// ─── Afspraak notificaties ────────────────────────────
+let notifiedEvents = new Set();
+
+// Notificatie instellingen
+let notifSettings = JSON.parse(localStorage.getItem('ps_notif_settings') || '{"enabled":true,"minutesBefore":5}');
+
+function saveNotifSettings() {
+  localStorage.setItem('ps_notif_settings', JSON.stringify(notifSettings));
+}
+
+function initNotifications() {
+  if (!('Notification' in window)) return;
+  if (notifSettings.enabled && Notification.permission === 'default') {
+    Notification.requestPermission().then(p => {
+      if (p === 'granted') notify('🔔 Afspraak-notificaties ingeschakeld', 'success');
+    });
+  }
+  setInterval(checkUpcomingMeetings, 60 * 1000);
+  setTimeout(checkUpcomingMeetings, 3000);
+}
+
+function checkUpcomingMeetings() {
+  if (!notifSettings.enabled) return;
+  if (Notification.permission !== 'granted') return;
+
+  const now = new Date();
+  const allEvents = window._currentAgendaEvents || [];
+  const mb = notifSettings.minutesBefore || 5;
+
+  allEvents.forEach(e => {
+    const attr = e.attributes || e;
+    const startRaw = attr.start?.dateTime || attr.start?.date || attr.start || '';
+    let startStr = String(startRaw).trim().replace(/\.0+$/, '');
+    if (!startStr) return;
+    const startDate = startStr.match(/Z$|[+\-]\d{2}:?\d{2}$/)
+      ? new Date(startStr) : new Date(startStr + 'Z');
+    if (isNaN(startDate)) return;
+
+    const diffMinutes = (startDate - now) / 60000;
+    const eventKey = (attr.subject || attr.title || 'Afspraak') + startStr + mb;
+
+    if (diffMinutes >= (mb - 0.5) && diffMinutes <= (mb + 0.5) && !notifiedEvents.has(eventKey)) {
+      notifiedEvents.add(eventKey);
+      const title = attr.subject || attr.title || 'Afspraak';
+      const location = attr.location?.displayName || attr.location || '';
+      const startFmt = startDate.toLocaleTimeString('nl-NL', {
+        hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Amsterdam'
+      });
+      const minLabel = mb === 1 ? '1 minuut' : mb + ' minuten';
+      const notif = new Notification('📅 Over ' + minLabel + ': ' + title, {
+        body: startFmt + (location ? ' · ' + location : ''),
+        icon: 'data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'><rect width=\'100\' height=\'100\' fill=\'%230E0E0C\' rx=\'20\'/><text y=\'68\' x=\'50\' text-anchor=\'middle\' font-size=\'60\' fill=\'%23C8F55A\'>W</text></svg>',
+        tag: eventKey, renotify: false,
+      });
+      notif.onclick = () => { window.focus(); notif.close(); };
+      setTimeout(() => notif.close(), 10000);
+    }
+  });
+}
 
 // ─── Notificaties ────────────────────────────────────────
 function notify(msg, type = 'info') {
