@@ -36,13 +36,6 @@
       "joinUrl": null
     },
     {
-      "subject": "Schoolkassa GTM Buckaroo",
-      "start": "2026-06-15T12:00:00.0000000",
-      "end": "2026-06-15T12:30:00.0000000",
-      "location": "VK LB 2.4 Speelhoek (8)",
-      "joinUrl": null
-    },
-    {
       "subject": "Tickets evalueren",
       "start": "2026-06-16T14:00:00.0000000",
       "end": "2026-06-16T14:30:00.0000000",
@@ -78,6 +71,6 @@
       "joinUrl": null
     }
   ],
-  "updatedAt": "2026-06-15T12:29:01.218Z",
+  "updatedAt": "2026-06-15T12:30:01.449Z",
   "date": "15-6-2026"
 }
