@@ -53,5 +53,10 @@
     "text": "DISA regelen",
     "done": false,
     "priority": "Vandaag"
+  },
+  {
+    "text": "Figma documenten doorlezen",
+    "done": false,
+    "priority": "Vandaag"
   }
 ]
