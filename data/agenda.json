@@ -1,13 +1,6 @@
 {
   "events": [
     {
-      "subject": "testnotificatie",
-      "start": "2026-06-15T13:45:00.0000000",
-      "end": "2026-06-15T14:15:00.0000000",
-      "location": "",
-      "joinUrl": null
-    },
-    {
       "subject": "SAVE THE DATE Volleybaltoernooi",
       "start": "2026-06-15T16:00:00.0000000",
       "end": "2026-06-15T19:00:00.0000000",
@@ -85,6 +78,6 @@
       "joinUrl": null
     }
   ],
-  "updatedAt": "2026-06-15T14:14:00.706Z",
+  "updatedAt": "2026-06-15T14:15:01.103Z",
   "date": "15-6-2026"
 }
