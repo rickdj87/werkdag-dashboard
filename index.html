@@ -1223,6 +1223,19 @@ input[type=range].pct-slider {
 }
 .module-bulk-btn:hover { border-color: var(--border3); color: var(--text2); }
 
+
+/* ─── Auto-fit grids voor module zichtbaarheid ─────── */
+.grid-main {
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+}
+.grid-bottom {
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+.grid-main > div[id^="card-"],
+.grid-bottom > div[id^="card-"] {
+  display: contents; /* transparante wrapper */
+}
+
 /* Scrollbar global */
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
@@ -1477,6 +1490,7 @@ input[type=range].pct-slider {
   <!-- Rij 1: Agenda + Projecten -->
   <div class="grid-main">
 
+    <div id="card-agenda">
     <div class="card" id="agenda-card">
       <div class="card-head">
         <span class="card-title"><span class="card-title-dot" style="background:var(--blue)"></span>Agenda vandaag</span>
@@ -1496,6 +1510,9 @@ input[type=range].pct-slider {
       </div>
     </div>
 
+    </div>
+
+    <div id="card-projecten">
     <div class="card" id="projects-card">
       <div class="card-head">
         <span class="card-title"><span class="card-title-dot" style="background:var(--accent)"></span>Lopende projecten</span>
@@ -1512,12 +1529,15 @@ input[type=range].pct-slider {
 
   </div>
 
+    </div>
+
   </div>
 
   <div id="module-bugs-todo">
   <!-- Rij 2: Bug melden + Buglijst + To-do -->
   <div class="grid-bottom">
 
+    <div id="card-bug-melden">
     <div class="card">
       <div class="card-head">
         <span class="card-title"><span class="card-title-dot" style="background:var(--red)"></span>Bug melden</span>
@@ -1556,6 +1576,8 @@ input[type=range].pct-slider {
       </div>
     </div>
 
+    </div>
+    <div id="card-bug-tracker">
     <div class="card">
       <div class="card-head">
         <span class="card-title"><span class="card-title-dot" style="background:var(--red)"></span>Bug tracker</span>
@@ -1572,6 +1594,8 @@ input[type=range].pct-slider {
       <div class="bug-list" id="bug-list-schoolkassa"></div>
     </div>
 
+    </div>
+    <div id="card-todo">
     <div class="card">
       <div class="card-head">
         <span class="card-title"><span class="card-title-dot" style="background:var(--amber)"></span>To-do</span>
@@ -1592,6 +1616,8 @@ input[type=range].pct-slider {
 
   </div>
 
+    </div>
+
   </div>
 
   <div id="module-focus-notities-weer">
@@ -1599,6 +1625,7 @@ input[type=range].pct-slider {
   <div class="grid-bottom">
 
     <!-- Focustimer -->
+    <div id="card-focustimer">
     <div class="card focus-card">
       <div class="card-head" style="width:100%;">
         <span class="card-title"><span class="card-title-dot" style="background:var(--accent)"></span>Focustimer</span>
@@ -1624,7 +1651,9 @@ input[type=range].pct-slider {
       <div class="focus-sessions" id="focus-sessions-label">Pomodoro · 25 min werk · 5 min pauze</div>
     </div>
 
+    </div>
     <!-- Snelle notities -->
+    <div id="card-snelle-notities">
     <div class="card">
       <div class="card-head">
         <span class="card-title"><span class="card-title-dot" style="background:var(--amber)"></span>Snelle notities</span>
@@ -1634,7 +1663,9 @@ input[type=range].pct-slider {
       <div class="sticky-grid" id="sticky-grid"></div>
     </div>
 
+    </div>
     <!-- Weer -->
+    <div id="card-weer">
     <div class="card weather-card" id="weather-card">
       <div class="card-head">
         <span class="card-title"><span class="card-title-dot" style="background:var(--blue)"></span>Weer — Deventer</span>
@@ -1647,6 +1678,8 @@ input[type=range].pct-slider {
     </div>
 
   </div>
+
+    </div>
 
   </div>
 
@@ -1768,13 +1801,18 @@ input[type=range].pct-slider {
 
 // ═══ MODULE BEHEER ═══════════════════════════════════════
 const MODULES = [
-  { id: 'module-agenda-projecten', name: 'Agenda & Projecten', icon: '📅', desc: 'Outlook agenda van vandaag en de rest van de week' },
-  { id: 'module-bugs-todo',        name: 'Bugs & To-do',       icon: '🐛', desc: 'Bug meldingen, tracker en takenlijst' },
-  { id: 'module-focus-notities-weer', name: 'Focustimer, Notities & Weer', icon: '⏱', desc: 'Pomodoro timer, sticky notes en weerswidget' },
-  { id: 'module-notities',         name: 'Dagelijkse notities', icon: '📝', desc: 'Aantekeningen per dag, navigeerbaar per datum' },
-  { id: 'module-slack',            name: 'Slack kanalen',       icon: '💬', desc: 'Snelle toegang tot kanalen en ongelezen berichten' },
-  { id: 'module-spotify',          name: 'Spotify',             icon: '🎵', desc: 'Muziekspeler en bediening vanuit het dashboard' },
-  { id: 'module-claude',           name: 'Claude assistent',    icon: '🤖', desc: 'AI assistent met ParnasSys werkcontext' },
+  { id: 'card-agenda',          name: 'Agenda',              icon: '📅', desc: 'Outlook agenda van vandaag en de rest van de week' },
+  { id: 'card-projecten',       name: 'Lopende projecten',   icon: '📊', desc: 'Actieve projecten met voortgang en deadlines' },
+  { id: 'card-bug-melden',      name: 'Bug melden',          icon: '🐛', desc: 'Snel een bug rapporteren via Slack' },
+  { id: 'card-bug-tracker',     name: 'Bug tracker',         icon: '🔴', desc: 'Overzicht van open bugs per product' },
+  { id: 'card-todo',            name: 'To-do',               icon: '✅', desc: 'Takenlijst met prioriteiten' },
+  { id: 'card-focustimer',      name: 'Focustimer',          icon: '⏱', desc: 'Pomodoro timer voor gefocust werken' },
+  { id: 'card-snelle-notities', name: 'Snelle notities',     icon: '📌', desc: 'Gekleurde sticky notes' },
+  { id: 'card-weer',            name: 'Weer',                icon: '🌤', desc: 'Weerswidget voor Deventer' },
+  { id: 'module-notities',      name: 'Dagelijkse notities', icon: '📝', desc: 'Aantekeningen per dag, navigeerbaar per datum' },
+  { id: 'module-slack',         name: 'Slack kanalen',       icon: '💬', desc: 'Snelle toegang tot kanalen en ongelezen berichten' },
+  { id: 'module-spotify',       name: 'Spotify',             icon: '🎵', desc: 'Muziekspeler en bediening vanuit het dashboard' },
+  { id: 'module-claude',        name: 'Claude assistent',    icon: '🤖', desc: 'AI assistent met ParnasSys werkcontext' },
 ];
 
 let hiddenModules = JSON.parse(localStorage.getItem('ps_hidden_modules') || '[]');
@@ -1782,7 +1820,26 @@ let hiddenModules = JSON.parse(localStorage.getItem('ps_hidden_modules') || '[]'
 function applyModuleVisibility() {
   MODULES.forEach(m => {
     const el = document.getElementById(m.id);
-    if (el) el.style.display = hiddenModules.includes(m.id) ? 'none' : '';
+    if (!el) return;
+    const hide = hiddenModules.includes(m.id);
+    if (m.id.startsWith('card-')) {
+      // Individuele kaart: verberg de kaart zelf
+      const card = el.querySelector('.card, .focus-card, .weather-card');
+      if (card) card.style.display = hide ? 'none' : '';
+      // Als alle kaarten in een grid verborgen zijn, verberg de rij
+      updateGridVisibility();
+    } else {
+      el.style.display = hide ? 'none' : '';
+    }
+  });
+}
+
+function updateGridVisibility() {
+  // Verberg lege grid-rijen automatisch
+  document.querySelectorAll('.grid-main, .grid-bottom').forEach(grid => {
+    const visibleCards = Array.from(grid.querySelectorAll('.card, .focus-card, .weather-card'))
+      .filter(c => c.style.display !== 'none');
+    grid.parentElement.style.display = visibleCards.length === 0 ? 'none' : '';
   });
 }
 
