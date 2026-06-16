@@ -1246,6 +1246,46 @@ input[type=range].pct-slider {
 .notif-time-btn:hover { border-color: var(--border3); color: var(--text); }
 .notif-time-btn.active { background: var(--accent-dim); color: var(--accent); border-color: var(--accent); }
 
+
+/* ─── To-do verbeteringen ──────────────────────────── */
+.todo-item { position: relative; }
+.todo-delete {
+  width: 18px; height: 18px; border-radius: 4px; border: none;
+  background: transparent; color: var(--text3); cursor: pointer;
+  font-size: 15px; display: flex; align-items: center; justify-content: center;
+  opacity: 0; transition: all 0.15s; flex-shrink: 0; line-height: 1;
+  font-family: var(--font-body);
+}
+.todo-item:hover .todo-delete { opacity: 1; }
+.todo-delete:hover { color: var(--red); background: var(--red-dim); }
+.todo-date-badge {
+  font-size: 10px; padding: 2px 7px; border-radius: 20px;
+  background: var(--bg4); color: var(--text3);
+  font-family: var(--font-mono); white-space: nowrap; flex-shrink: 0;
+}
+.todo-date-badge.today { background: var(--accent-dim); color: var(--accent); }
+.todo-date-badge.tomorrow { background: var(--blue-dim); color: var(--blue); }
+.todo-date-badge.overdue { background: var(--red-dim); color: var(--red); }
+.todo-add-date {
+  padding: 7px 8px; font-size: 12px; font-family: var(--font-body);
+  background: var(--bg3); border: 1px solid var(--border2); border-radius: var(--r);
+  color: var(--text2); cursor: pointer; color-scheme: dark;
+  width: 130px; flex-shrink: 0;
+}
+.todo-section-label {
+  font-size: 10px; font-weight: 500; color: var(--text3);
+  text-transform: uppercase; letter-spacing: 0.08em;
+  padding: 8px 10px 4px; display: flex; align-items: center; gap: 6px;
+}
+.todo-section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.todo-clear-btn {
+  font-size: 11px; padding: 3px 10px; border-radius: 20px;
+  border: 1px solid var(--border2); background: transparent;
+  color: var(--text3); cursor: pointer; font-family: var(--font-body);
+  transition: all 0.15s; white-space: nowrap;
+}
+.todo-clear-btn:hover { border-color: var(--red); color: var(--red); background: var(--red-dim); }
+
 /* Scrollbar global */
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
@@ -1610,17 +1650,16 @@ input[type=range].pct-slider {
     <div class="card">
       <div class="card-head">
         <span class="card-title"><span class="card-title-dot" style="background:var(--amber)"></span>To-do</span>
-        <span class="card-badge badge-amber" id="todo-count">0 open</span>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <span class="card-badge badge-amber" id="todo-count">0 open</span>
+          <button class="todo-clear-btn" onclick="clearDoneTodos()" title="Verwijder alle afgeronde taken">✓ Verwijder afgerond</button>
+        </div>
       </div>
       <div class="divider"></div>
       <div class="todo-list" id="todo-list"></div>
-      <div class="todo-add">
-        <input type="text" id="todo-input" placeholder="Nieuwe taak..." onkeydown="if(event.key==='Enter')addTodo()">
-        <select id="todo-prio-select" style="font-size:12px;padding:7px 8px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);color:var(--text2);font-family:var(--font-body);cursor:pointer;">
-          <option value="Vandaag">Vandaag</option>
-          <option value="Morgen">Morgen</option>
-          <option value="Geen datum">Geen datum</option>
-        </select>
+      <div class="todo-add" style="flex-wrap:wrap;gap:6px;">
+        <input type="text" id="todo-input" placeholder="Nieuwe taak..." onkeydown="if(event.key==='Enter')addTodo()" style="flex:1;min-width:140px;">
+        <input type="date" id="todo-date-input" class="todo-add-date" title="Datum (optioneel)">
         <button class="todo-add-btn" onclick="addTodo()">+</button>
       </div>
     </div>
@@ -4006,18 +4045,68 @@ function applyTemplate(type) {
 function renderTodos() {
   const list = document.getElementById('todo-list');
   const open = todos.filter(t => !t.done).length;
+  const done = todos.filter(t => t.done).length;
   document.getElementById('todo-count').textContent = open + ' open';
+
   if (!todos.length) {
     list.innerHTML = '<div class="empty-state">Nog geen taken</div>';
     return;
   }
-  list.innerHTML = todos.map((t, i) => `
+
+  // Sorteerfunctie
+  const today = new Date(); today.setHours(0,0,0,0);
+  const tomorrow = new Date(today); tomorrow.setDate(today.getDate() + 1);
+
+  function todoSortKey(t) {
+    if (t.done) return '9999-99-99';
+    if (t.date) return t.date; // ISO datum — sorteert chronologisch
+    if (t.priority === 'Vandaag') return today.toISOString().split('T')[0];
+    if (t.priority === 'Morgen') return tomorrow.toISOString().split('T')[0];
+    return '9998-99-99'; // Geen datum — voor done maar na rest
+  }
+
+  const sorted = todos
+    .map((t, i) => ({ ...t, _idx: i }))
+    .sort((a, b) => todoSortKey(a).localeCompare(todoSortKey(b)));
+
+  function dateBadge(t) {
+    if (t.date) {
+      const d = new Date(t.date + 'T00:00:00');
+      const diff = Math.round((d - today) / 86400000);
+      if (diff < 0) return '<span class="todo-date-badge overdue">Te laat</span>';
+      if (diff === 0) return '<span class="todo-date-badge today">Vandaag</span>';
+      if (diff === 1) return '<span class="todo-date-badge tomorrow">Morgen</span>';
+      return '<span class="todo-date-badge">' + d.toLocaleDateString('nl-NL', {day:'numeric',month:'short'}) + '</span>';
+    }
+    if (t.priority === 'Vandaag') return '<span class="todo-date-badge today">Vandaag</span>';
+    if (t.priority === 'Morgen') return '<span class="todo-date-badge tomorrow">Morgen</span>';
+    return '<span class="todo-date-badge">Geen datum</span>';
+  }
+
+  let html = '';
+  const openItems = sorted.filter(t => !t.done);
+  const doneItems = sorted.filter(t => t.done);
+
+  html += openItems.map(t => `
     <div class="todo-item">
-      <div class="todo-check ${t.done ? 'done' : ''}" onclick="toggleTodo(${i})"></div>
-      <span class="todo-text ${t.done ? 'done' : ''}">${t.text}</span>
-      <span class="card-badge ${t.priority === 'Vandaag' ? 'badge-amber' : 'badge-muted'}">${t.priority}</span>
-    </div>
-  `).join('');
+      <div class="todo-check" onclick="toggleTodo(${t._idx})"></div>
+      <span class="todo-text">${t.text}</span>
+      ${dateBadge(t)}
+      <button class="todo-delete" onclick="deleteTodo(${t._idx})" title="Verwijderen">×</button>
+    </div>`).join('');
+
+  if (doneItems.length > 0) {
+    html += '<div class="todo-section-label" style="margin-top:6px;">Afgerond (' + doneItems.length + ')</div>';
+    html += doneItems.map(t => `
+      <div class="todo-item">
+        <div class="todo-check done" onclick="toggleTodo(${t._idx})"></div>
+        <span class="todo-text done">${t.text}</span>
+        ${dateBadge(t)}
+        <button class="todo-delete" onclick="deleteTodo(${t._idx})" title="Verwijderen">×</button>
+      </div>`).join('');
+  }
+
+  list.innerHTML = html;
 }
 
 function toggleTodo(i) {
@@ -4029,12 +4118,27 @@ function toggleTodo(i) {
 function addTodo() {
   const input = document.getElementById('todo-input');
   const prioEl = document.getElementById('todo-prio-select');
+  const dateEl = document.getElementById('todo-date-input');
   const text = input.value.trim();
   if (!text) return;
   const priority = prioEl ? prioEl.value : 'Vandaag';
-  todos.push({ text, done: false, priority });
+  const date = dateEl && dateEl.value ? dateEl.value : null;
+  todos.push({ text, done: false, priority, date });
   saveTodos();
   input.value = '';
+  if (dateEl) dateEl.value = '';
+  renderTodos();
+}
+
+function deleteTodo(i) {
+  todos.splice(i, 1);
+  saveTodos();
+  renderTodos();
+}
+
+function clearDoneTodos() {
+  todos = todos.filter(t => !t.done);
+  saveTodos();
   renderTodos();
 }
 
