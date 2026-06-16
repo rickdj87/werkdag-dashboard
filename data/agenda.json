@@ -15,6 +15,13 @@
       "joinUrl": null
     },
     {
+      "subject": "Topiconf 2026",
+      "start": "2026-06-23T07:00:00.0000000",
+      "end": "2026-06-23T16:00:00.0000000",
+      "location": "Gasfabriek, Zutphenseweg 6, 7418 AJ Deventer",
+      "joinUrl": null
+    },
+    {
       "subject": "SD-overleg",
       "start": "2026-06-16T12:00:00.0000000",
       "end": "2026-06-16T13:00:00.0000000",
@@ -64,6 +71,6 @@
       "joinUrl": null
     }
   ],
-  "updatedAt": "2026-06-16T06:59:01.317Z",
+  "updatedAt": "2026-06-16T07:00:01.762Z",
   "date": "16-6-2026"
 }
