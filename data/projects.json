@@ -1,14 +1,14 @@
 [
   {
     "name": "Schoolkassa interne FAQ",
-    "pct": 0,
+    "pct": 20,
     "status": "Actief",
     "deadline": "2026-06-30",
     "color": "#C8F55A",
     "subtasks": [
       {
         "text": "Vragen opstellen",
-        "done": false
+        "done": true
       },
       {
         "text": "Tickets erbij zoeken",
