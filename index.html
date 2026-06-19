@@ -1286,6 +1286,51 @@ input[type=range].pct-slider {
 }
 .todo-clear-btn:hover { border-color: var(--red); color: var(--red); background: var(--red-dim); }
 
+
+/* ═══ BRAIN DUMP MODULE ═════════════════════════════════ */
+.braindump-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--r-lg); overflow: hidden; }
+.braindump-head { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; border-bottom: 1px solid var(--border); }
+.braindump-head-left { display: flex; align-items: center; gap: 10px; }
+.braindump-icon { width: 30px; height: 30px; border-radius: 8px; background: var(--blue-dim); display: flex; align-items: center; justify-content: center; font-size: 16px; }
+.braindump-title { font-size: 13px; font-weight: 500; color: var(--text); }
+.braindump-sub { font-size: 11px; color: var(--text3); margin-top: 1px; }
+.braindump-badge { font-size: 11px; padding: 3px 10px; border-radius: 20px; background: var(--bg3); color: var(--text3); font-family: var(--font-mono); transition: all 0.2s; }
+.braindump-badge.active { background: var(--blue-dim); color: var(--blue); }
+.braindump-badge.done { background: var(--green-dim); color: var(--green); }
+.braindump-phase { padding: 16px 20px; display: flex; flex-direction: column; gap: 12px; }
+.braindump-textarea {
+  width: 100%; min-height: 160px; resize: vertical; font-size: 13px;
+  font-family: var(--font-body); line-height: 1.7; color: var(--text);
+  background: var(--bg3); border: 1px solid var(--border2); border-radius: var(--r);
+  padding: 12px; outline: none; transition: border-color 0.15s;
+}
+.braindump-textarea:focus { border-color: var(--border3); }
+.braindump-textarea::placeholder { color: var(--text3); }
+.braindump-footer { display: flex; align-items: center; justify-content: space-between; }
+.braindump-item {
+  display: flex; align-items: center; gap: 10px; padding: 9px 12px;
+  background: var(--bg3); border-radius: var(--r); border: 1px solid var(--border);
+  transition: border-color 0.15s;
+}
+.braindump-item.skipped { opacity: 0.3; pointer-events: none; }
+.braindump-item-check { width: 16px; height: 16px; flex-shrink: 0; cursor: pointer; accent-color: var(--accent); }
+.braindump-item-text { flex: 1; font-size: 13px; color: var(--text); }
+.braindump-item-prio {
+  font-size: 11px; padding: 3px 8px; border-radius: var(--r);
+  background: var(--bg4); border: 1px solid var(--border2);
+  color: var(--text2); font-family: var(--font-body); cursor: pointer;
+}
+.braindump-skip-btn {
+  width: 22px; height: 22px; border-radius: 4px; background: transparent;
+  border: none; color: var(--text3); cursor: pointer; font-size: 16px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s; flex-shrink: 0;
+}
+.braindump-skip-btn:hover { color: var(--red); background: var(--red-dim); }
+.braindump-success { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 24px 20px; text-align: center; }
+.braindump-success-icon { font-size: 36px; }
+.braindump-action-row { display: flex; gap: 8px; justify-content: space-between; align-items: center; padding-top: 12px; border-top: 1px solid var(--border); }
+
 /* Scrollbar global */
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
@@ -1535,6 +1580,60 @@ input[type=range].pct-slider {
       <button class="topbar-btn" onclick="openThemeModal()">🎨 Thema</button>
       <button class="topbar-btn" onclick="showSetup()">Instellingen</button>
     </div>
+  </div>
+
+  <div id="module-braindump">
+  <!-- Brain dump -->
+  <div class="grid-full">
+    <div class="braindump-card">
+      <div class="braindump-head">
+        <div class="braindump-head-left">
+          <div class="braindump-icon">🧠</div>
+          <div>
+            <div class="braindump-title">Ochtend brain dump</div>
+            <div class="braindump-sub" id="bd-sub">Nog niet gestart vandaag</div>
+          </div>
+        </div>
+        <span class="braindump-badge" id="bd-badge">Leeg</span>
+      </div>
+
+      <!-- Fase 1: Dump -->
+      <div class="braindump-phase" id="bd-phase-dump">
+        <textarea class="braindump-textarea" id="bd-textarea"
+          placeholder="Typ alles wat in je hoofd zit. Geen structuur nodig — één gedachte per regel.
+
+Bijv:
+Email sturen naar Loes over de demo
+Zendesk widget testen op Schoolkassa
+DISA regelen voor einde week
+Prive: boekhouding doen" oninput="bdUpdateCount()"></textarea>
+        <div class="braindump-footer">
+          <span class="notes-saved" id="bd-count">0 regels</span>
+          <button class="submit-btn" id="bd-verwerk-btn" onclick="bdVerwerk()" disabled>Verwerk →</button>
+        </div>
+      </div>
+
+      <!-- Fase 2: Verwerken -->
+      <div class="braindump-phase" id="bd-phase-verwerk" style="display:none;">
+        <div style="font-size:12px;color:var(--text3);">Vink aan wat een to-do wordt. De rest wordt gearchiveerd in je dagelijkse notities.</div>
+        <div id="bd-item-list" style="display:flex;flex-direction:column;gap:6px;"></div>
+        <div class="braindump-action-row">
+          <button class="topbar-btn" onclick="bdTerug()">← Terug</button>
+          <button class="submit-btn" id="bd-voeg-btn" onclick="bdVoegToe()" disabled>Voeg toe aan to-do</button>
+        </div>
+      </div>
+
+      <!-- Fase 3: Klaar -->
+      <div class="braindump-phase" id="bd-phase-klaar" style="display:none;">
+        <div class="braindump-success">
+          <div class="braindump-success-icon">✅</div>
+          <div style="font-size:14px;font-weight:500;color:var(--text);">Brain dump verwerkt!</div>
+          <div id="bd-klaar-text" style="font-size:12px;color:var(--text3);line-height:1.6;"></div>
+          <button class="topbar-btn" onclick="bdReset()" style="margin-top:4px;">↺ Nieuwe dump starten</button>
+        </div>
+      </div>
+    </div>
+  </div>
   </div>
 
   <div id="module-agenda-projecten">
@@ -1895,6 +1994,7 @@ input[type=range].pct-slider {
 
 // ═══ MODULE BEHEER ═══════════════════════════════════════
 const MODULES = [
+  { id: 'module-braindump',    name: 'Brain dump',          icon: '🧠', desc: 'Ochtend brain dump — verwerk gedachten naar to-do' },
   { id: 'card-agenda',          name: 'Agenda',              icon: '📅', desc: 'Outlook agenda van vandaag en de rest van de week' },
   { id: 'card-projecten',       name: 'Lopende projecten',   icon: '📊', desc: 'Actieve projecten met voortgang en deadlines' },
   { id: 'card-bug-melden',      name: 'Bug melden',          icon: '🐛', desc: 'Snel een bug rapporteren via Slack' },
@@ -2491,6 +2591,7 @@ function startDashboard() {
   loadCloudData();
   applyModuleVisibility();
   initNotifications();
+  bdInit();
 }
 
 function setDate() {
@@ -4518,6 +4619,122 @@ function checkUpcomingMeetings() {
       setTimeout(() => notif.close(), 10000);
     }
   });
+}
+
+
+// ─── Brain dump ──────────────────────────────────────
+let bdSavedDumps = JSON.parse(localStorage.getItem('ps_braindumps') || '{}');
+
+function bdInit() {
+  // Laad eventuele opgeslagen dump van vandaag
+  const today = new Date().toISOString().split('T')[0];
+  const saved = bdSavedDumps[today];
+  if (saved && saved.text) {
+    document.getElementById('bd-textarea').value = saved.text;
+    document.getElementById('bd-sub').textContent = 'Vandaag om ' + (saved.time || '?');
+    bdUpdateCount();
+  }
+}
+
+function bdUpdateCount() {
+  const val = document.getElementById('bd-textarea').value;
+  const lines = val.split('\n').filter(l => l.trim().length > 0);
+  document.getElementById('bd-count').textContent = lines.length + (lines.length === 1 ? ' regel' : ' regels');
+  document.getElementById('bd-verwerk-btn').disabled = lines.length === 0;
+  const badge = document.getElementById('bd-badge');
+  if (lines.length > 0) {
+    badge.textContent = lines.length + ' gedachten';
+    badge.className = 'braindump-badge active';
+  } else {
+    badge.textContent = 'Leeg';
+    badge.className = 'braindump-badge';
+  }
+  // Auto-opslaan
+  const today = new Date().toISOString().split('T')[0];
+  const now = new Date().toLocaleTimeString('nl-NL', {hour:'2-digit', minute:'2-digit'});
+  bdSavedDumps[today] = { text: val, time: now };
+  localStorage.setItem('ps_braindumps', JSON.stringify(bdSavedDumps));
+}
+
+function bdVerwerk() {
+  const val = document.getElementById('bd-textarea').value;
+  const lines = val.split('\n').filter(l => l.trim().length > 0);
+  document.getElementById('bd-phase-dump').style.display = 'none';
+  document.getElementById('bd-phase-verwerk').style.display = 'flex';
+
+  const list = document.getElementById('bd-item-list');
+  list.innerHTML = lines.map((line, i) => `
+    <div class="braindump-item" id="bd-row-${i}">
+      <input type="checkbox" class="braindump-item-check" id="bd-cb-${i}" onchange="bdUpdateVoeg()">
+      <span class="braindump-item-text">${line.trim()}</span>
+      <select class="braindump-item-prio" id="bd-prio-${i}">
+        <option>Vandaag</option>
+        <option>Morgen</option>
+        <option>Geen datum</option>
+      </select>
+      <button class="braindump-skip-btn" onclick="bdSkip(${i})" title="Overslaan">×</button>
+    </div>`).join('');
+}
+
+function bdSkip(i) {
+  document.getElementById('bd-row-' + i).classList.add('skipped');
+  document.getElementById('bd-cb-' + i).checked = false;
+  bdUpdateVoeg();
+}
+
+function bdUpdateVoeg() {
+  const checked = document.querySelectorAll('#bd-item-list input[type=checkbox]:checked').length;
+  const btn = document.getElementById('bd-voeg-btn');
+  btn.disabled = checked === 0;
+  btn.textContent = checked > 0 ? 'Voeg ' + checked + ' toe aan to-do' : 'Voeg toe aan to-do';
+}
+
+function bdVoegToe() {
+  const checkboxes = document.querySelectorAll('#bd-item-list input[type=checkbox]:checked');
+  let count = 0;
+  checkboxes.forEach(cb => {
+    const i = cb.id.replace('bd-cb-', '');
+    const text = document.getElementById('bd-row-' + i).querySelector('.braindump-item-text').textContent;
+    const prio = document.getElementById('bd-prio-' + i).value;
+    todos.push({ text, done: false, priority: prio, date: null });
+    count++;
+  });
+  if (count > 0) {
+    saveTodos();
+    renderTodos();
+  }
+
+  // Archiveer de volledige dump in dagelijkse notities
+  const today = new Date().toISOString().split('T')[0];
+  const notesKey = 'ps_notes_' + today;
+  const existing = localStorage.getItem(notesKey) || '';
+  const dumpText = document.getElementById('bd-textarea').value.trim();
+  const notesEntry = (existing ? existing + '\n\n' : '') + '── Brain dump ──\n' + dumpText;
+  localStorage.setItem(notesKey, notesEntry);
+
+  // Toon klaar-fase
+  document.getElementById('bd-phase-verwerk').style.display = 'none';
+  document.getElementById('bd-phase-klaar').style.display = 'flex';
+  document.getElementById('bd-klaar-text').textContent = count + ' taken toegevoegd aan je to-do lijst. De volledige dump is opgeslagen in je dagelijkse notities.';
+  document.getElementById('bd-badge').textContent = '✓ Gedaan';
+  document.getElementById('bd-badge').className = 'braindump-badge done';
+  document.getElementById('bd-sub').textContent = 'Verwerkt om ' + new Date().toLocaleTimeString('nl-NL', {hour:'2-digit', minute:'2-digit'});
+  notify('🧠 Brain dump verwerkt — ' + count + ' taken toegevoegd', 'success');
+}
+
+function bdTerug() {
+  document.getElementById('bd-phase-verwerk').style.display = 'none';
+  document.getElementById('bd-phase-dump').style.display = 'flex';
+}
+
+function bdReset() {
+  document.getElementById('bd-textarea').value = '';
+  document.getElementById('bd-phase-klaar').style.display = 'none';
+  document.getElementById('bd-phase-dump').style.display = 'flex';
+  document.getElementById('bd-badge').textContent = 'Leeg';
+  document.getElementById('bd-badge').className = 'braindump-badge';
+  document.getElementById('bd-sub').textContent = 'Nog niet gestart vandaag';
+  bdUpdateCount();
 }
 
 // ─── Notificaties ────────────────────────────────────────
