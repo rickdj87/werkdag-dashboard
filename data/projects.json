@@ -27,5 +27,12 @@
         "done": false
       }
     ]
+  },
+  {
+    "name": "Schooljaarstart presentatie",
+    "pct": 0,
+    "status": "Actief",
+    "deadline": "2026-08-20",
+    "color": "#6BA8FF"
   }
 ]
