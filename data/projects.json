@@ -1,7 +1,7 @@
 [
   {
     "name": "Schoolkassa interne FAQ",
-    "pct": 20,
+    "pct": 40,
     "status": "Actief",
     "deadline": "2026-06-30",
     "color": "#C8F55A",
@@ -12,7 +12,7 @@
       },
       {
         "text": "Tickets erbij zoeken",
-        "done": false
+        "done": true
       },
       {
         "text": "Antwoorden formuleren",
