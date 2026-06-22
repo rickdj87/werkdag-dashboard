@@ -29,5 +29,11 @@
     "done": false,
     "priority": "Geen datum",
     "date": null
+  },
+  {
+    "text": "Bugs Parro controleren en afmelden",
+    "done": false,
+    "priority": "Vandaag",
+    "date": null
   }
 ]
