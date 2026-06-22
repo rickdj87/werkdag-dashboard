@@ -55,8 +55,15 @@
       "end": "2026-06-29T11:00:00.0000000",
       "location": "online of in de 1e lijns ruimte",
       "joinUrl": null
+    },
+    {
+      "subject": "Schoolkassa GTM Buckaroo",
+      "start": "2026-06-29T12:00:00.0000000",
+      "end": "2026-06-29T12:30:00.0000000",
+      "location": "VK LB 2.6 Schoolplein (10)",
+      "joinUrl": null
     }
   ],
-  "updatedAt": "2026-06-22T12:00:01.208Z",
+  "updatedAt": "2026-06-22T12:01:00.401Z",
   "date": "22-6-2026"
 }
