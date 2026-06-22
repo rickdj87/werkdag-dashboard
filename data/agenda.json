@@ -55,8 +55,15 @@
       "end": "2026-06-25T11:00:00.0000000",
       "location": "online of in de 1e lijns ruimte",
       "joinUrl": null
+    },
+    {
+      "subject": "Stand up",
+      "start": "2026-06-29T10:35:00.0000000",
+      "end": "2026-06-29T11:00:00.0000000",
+      "location": "online of in de 1e lijns ruimte",
+      "joinUrl": null
     }
   ],
-  "updatedAt": "2026-06-22T10:34:01.002Z",
+  "updatedAt": "2026-06-22T10:35:01.116Z",
   "date": "22-6-2026"
 }
