@@ -15,6 +15,13 @@
       "joinUrl": null
     },
     {
+      "subject": "Schoolkassa demo overstappen naar Buckaroo",
+      "start": "2026-06-30T08:30:00.0000000",
+      "end": "2026-06-30T09:30:00.0000000",
+      "location": "VK LB 3.1 Peperbus (10)",
+      "joinUrl": null
+    },
+    {
       "subject": "PS-overleg",
       "start": "2026-06-25T13:00:00.0000000",
       "end": "2026-06-25T14:00:00.0000000",
@@ -64,6 +71,6 @@
       "joinUrl": null
     }
   ],
-  "updatedAt": "2026-06-23T08:30:00.627Z",
+  "updatedAt": "2026-06-23T08:31:00.905Z",
   "date": "23-6-2026"
 }
