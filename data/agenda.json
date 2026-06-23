@@ -29,6 +29,13 @@
       "joinUrl": null
     },
     {
+      "subject": "Scribe vertalen checkin",
+      "start": "2026-06-30T13:00:00.0000000",
+      "end": "2026-06-30T13:30:00.0000000",
+      "location": "VK LB 2.7 Gymzaal (12)",
+      "joinUrl": null
+    },
+    {
       "subject": "SD-overleg",
       "start": "2026-06-30T12:00:00.0000000",
       "end": "2026-06-30T13:00:00.0000000",
@@ -85,6 +92,6 @@
       "joinUrl": null
     }
   ],
-  "updatedAt": "2026-06-23T13:03:13.247Z",
+  "updatedAt": "2026-06-23T13:04:01.434Z",
   "date": "23-6-2026"
 }
