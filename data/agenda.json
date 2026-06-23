@@ -1,13 +1,6 @@
 {
   "events": [
     {
-      "subject": "Topiconf 2026",
-      "start": "2026-06-23T07:00:00.0000000",
-      "end": "2026-06-23T16:00:00.0000000",
-      "location": "Gasfabriek, Zutphenseweg 6, 7418 AJ Deventer",
-      "joinUrl": null
-    },
-    {
       "subject": "GTM Parro Portaal",
       "start": "2026-06-29T12:30:00.0000000",
       "end": "2026-06-29T13:00:00.0000000",
@@ -99,6 +92,6 @@
       "joinUrl": null
     }
   ],
-  "updatedAt": "2026-06-23T15:59:01.263Z",
+  "updatedAt": "2026-06-23T16:00:02.025Z",
   "date": "23-6-2026"
 }
