@@ -29,6 +29,13 @@
       "joinUrl": null
     },
     {
+      "subject": "SD-overleg",
+      "start": "2026-06-30T12:00:00.0000000",
+      "end": "2026-06-30T13:00:00.0000000",
+      "location": "VK LB 2.5 Lerarenkamer (12)",
+      "joinUrl": null
+    },
+    {
       "subject": "PS-overleg",
       "start": "2026-06-25T13:00:00.0000000",
       "end": "2026-06-25T14:00:00.0000000",
@@ -78,6 +85,6 @@
       "joinUrl": null
     }
   ],
-  "updatedAt": "2026-06-23T11:59:01.025Z",
+  "updatedAt": "2026-06-23T12:00:01.669Z",
   "date": "23-6-2026"
 }
