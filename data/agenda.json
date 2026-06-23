@@ -58,13 +58,6 @@
     },
     {
       "subject": "Tickets evalueren",
-      "start": "2026-06-23T14:00:00.0000000",
-      "end": "2026-06-23T14:30:00.0000000",
-      "location": "Microsoft Teams-vergadering",
-      "joinUrl": null
-    },
-    {
-      "subject": "Tickets evalueren",
       "start": "2026-06-30T14:00:00.0000000",
       "end": "2026-06-30T14:30:00.0000000",
       "location": "Microsoft Teams-vergadering",
@@ -106,6 +99,6 @@
       "joinUrl": null
     }
   ],
-  "updatedAt": "2026-06-23T14:29:01.556Z",
+  "updatedAt": "2026-06-23T14:30:02.250Z",
   "date": "23-6-2026"
 }
