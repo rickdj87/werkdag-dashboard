@@ -36,6 +36,13 @@
       "joinUrl": null
     },
     {
+      "subject": "Caroliens en Marks 10-jarig jubileum!",
+      "start": "2026-06-30T14:00:00.0000000",
+      "end": "2026-06-30T15:00:00.0000000",
+      "location": "Microsoft Teams-vergadering",
+      "joinUrl": null
+    },
+    {
       "subject": "SD-overleg",
       "start": "2026-06-30T12:00:00.0000000",
       "end": "2026-06-30T13:00:00.0000000",
@@ -53,6 +60,13 @@
       "subject": "Tickets evalueren",
       "start": "2026-06-23T14:00:00.0000000",
       "end": "2026-06-23T14:30:00.0000000",
+      "location": "Microsoft Teams-vergadering",
+      "joinUrl": null
+    },
+    {
+      "subject": "Tickets evalueren",
+      "start": "2026-06-30T14:00:00.0000000",
+      "end": "2026-06-30T14:30:00.0000000",
       "location": "Microsoft Teams-vergadering",
       "joinUrl": null
     },
@@ -92,6 +106,6 @@
       "joinUrl": null
     }
   ],
-  "updatedAt": "2026-06-23T13:59:00.841Z",
+  "updatedAt": "2026-06-23T14:00:01.163Z",
   "date": "23-6-2026"
 }
