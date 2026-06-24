@@ -1,6 +1,13 @@
 {
   "events": [
     {
+      "subject": "Ticket doornemen voor instructie en demo",
+      "start": "2026-06-25T14:00:00.0000000",
+      "end": "2026-06-25T14:30:00.0000000",
+      "location": "",
+      "joinUrl": null
+    },
+    {
       "subject": "GTM Parro Portaal",
       "start": "2026-06-29T12:30:00.0000000",
       "end": "2026-06-29T13:00:00.0000000",
@@ -92,6 +99,6 @@
       "joinUrl": null
     }
   ],
-  "updatedAt": "2026-06-24T08:07:01.539Z",
+  "updatedAt": "2026-06-24T08:08:00.790Z",
   "date": "24-6-2026"
 }
