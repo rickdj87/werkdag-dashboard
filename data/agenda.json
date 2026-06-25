@@ -1,13 +1,6 @@
 {
   "events": [
     {
-      "subject": "Ticket doornemen voor instructie en demo",
-      "start": "2026-06-25T14:00:00.0000000",
-      "end": "2026-06-25T14:30:00.0000000",
-      "location": "VK LB 2.4 Speelhoek (8)",
-      "joinUrl": null
-    },
-    {
       "subject": "GTM Parro Portaal",
       "start": "2026-06-29T12:30:00.0000000",
       "end": "2026-06-29T13:00:00.0000000",
@@ -64,13 +57,6 @@
       "joinUrl": null
     },
     {
-      "subject": "Tickets evalueren",
-      "start": "2026-06-25T14:00:00.0000000",
-      "end": "2026-06-25T14:30:00.0000000",
-      "location": "Microsoft Teams-vergadering",
-      "joinUrl": null
-    },
-    {
       "subject": "AI inloopspreekuur",
       "start": "2026-07-02T09:00:00.0000000",
       "end": "2026-07-02T10:00:00.0000000",
@@ -92,6 +78,6 @@
       "joinUrl": null
     }
   ],
-  "updatedAt": "2026-06-25T14:29:01.020Z",
+  "updatedAt": "2026-06-25T14:30:01.218Z",
   "date": "25-6-2026"
 }
