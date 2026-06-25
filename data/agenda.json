@@ -43,6 +43,13 @@
       "joinUrl": null
     },
     {
+      "subject": "Overleg 1e lijn",
+      "start": "2026-07-02T11:30:00.0000000",
+      "end": "2026-07-02T12:30:00.0000000",
+      "location": "VK LB 2.7 Gymzaal (12)",
+      "joinUrl": null
+    },
+    {
       "subject": "SD-overleg",
       "start": "2026-06-30T12:00:00.0000000",
       "end": "2026-06-30T13:00:00.0000000",
@@ -92,6 +99,6 @@
       "joinUrl": null
     }
   ],
-  "updatedAt": "2026-06-25T11:29:00.780Z",
+  "updatedAt": "2026-06-25T11:30:01.543Z",
   "date": "25-6-2026"
 }
