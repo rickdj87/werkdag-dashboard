@@ -1,13 +1,6 @@
 {
   "events": [
     {
-      "subject": "Rick/Loes",
-      "start": "2026-06-29T11:30:00.0000000",
-      "end": "2026-06-29T12:00:00.0000000",
-      "location": "Microsoft Teams-vergadering",
-      "joinUrl": null
-    },
-    {
       "subject": "GTM Parro Portaal",
       "start": "2026-06-29T12:30:00.0000000",
       "end": "2026-06-29T13:00:00.0000000",
@@ -85,6 +78,6 @@
       "joinUrl": null
     }
   ],
-  "updatedAt": "2026-06-29T11:59:00.744Z",
+  "updatedAt": "2026-06-29T12:00:01.023Z",
   "date": "29-6-2026"
 }
