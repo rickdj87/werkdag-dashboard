@@ -64,17 +64,17 @@
       "joinUrl": null
     },
     {
+      "subject": "Schoolkassa Review",
+      "start": "2026-07-06T11:00:00.0000000",
+      "end": "2026-07-06T11:45:00.0000000",
+      "location": "VK LB 2.5 Lerarenkamer (12)",
+      "joinUrl": null
+    },
+    {
       "subject": "AI inloopspreekuur",
       "start": "2026-07-02T09:00:00.0000000",
       "end": "2026-07-02T10:00:00.0000000",
       "location": "club topicana",
-      "joinUrl": null
-    },
-    {
-      "subject": "Stand up",
-      "start": "2026-06-29T10:35:00.0000000",
-      "end": "2026-06-29T11:00:00.0000000",
-      "location": "online of in de 1e lijns ruimte",
       "joinUrl": null
     },
     {
@@ -85,6 +85,6 @@
       "joinUrl": null
     }
   ],
-  "updatedAt": "2026-06-29T10:59:01.661Z",
+  "updatedAt": "2026-06-29T11:00:00.915Z",
   "date": "29-6-2026"
 }
