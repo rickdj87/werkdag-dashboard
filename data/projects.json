@@ -41,5 +41,12 @@
     "status": "Actief",
     "deadline": "",
     "color": "#5BDB8A"
+  },
+  {
+    "name": "Artikelen overstap Schoolkassa Buckaroo",
+    "pct": 0,
+    "status": "Actief",
+    "deadline": "",
+    "color": "#FFB84D"
   }
 ]
