@@ -34,5 +34,12 @@
     "status": "Actief",
     "deadline": "2026-08-20",
     "color": "#6BA8FF"
+  },
+  {
+    "name": "Artikelen Parro Portaal",
+    "pct": 0,
+    "status": "Actief",
+    "deadline": "",
+    "color": "#5BDB8A"
   }
 ]
