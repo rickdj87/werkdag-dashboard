@@ -1,13 +1,6 @@
 {
   "events": [
     {
-      "subject": "GTM Parro Portaal",
-      "start": "2026-06-29T12:30:00.0000000",
-      "end": "2026-06-29T13:00:00.0000000",
-      "location": "VK LB 2.5 Lerarenkamer (12); Microsoft Teams-vergadering",
-      "joinUrl": null
-    },
-    {
       "subject": "Schoolkassa demo overstappen naar Buckaroo",
       "start": "2026-06-30T08:30:00.0000000",
       "end": "2026-06-30T09:30:00.0000000",
@@ -71,6 +64,6 @@
       "joinUrl": null
     }
   ],
-  "updatedAt": "2026-06-29T12:59:01.874Z",
+  "updatedAt": "2026-06-29T13:00:01.449Z",
   "date": "29-6-2026"
 }
