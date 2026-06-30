@@ -1,13 +1,6 @@
 {
   "events": [
     {
-      "subject": "Caroliens en Marks 10-jarig jubileum!",
-      "start": "2026-06-30T14:00:00.0000000",
-      "end": "2026-06-30T15:00:00.0000000",
-      "location": "Microsoft Teams-vergadering",
-      "joinUrl": null
-    },
-    {
       "subject": "Raia Support Agent v4",
       "start": "2026-07-02T08:00:00.0000000",
       "end": "2026-07-02T09:00:00.0000000",
@@ -43,6 +36,6 @@
       "joinUrl": null
     }
   ],
-  "updatedAt": "2026-06-30T14:59:00.686Z",
+  "updatedAt": "2026-06-30T15:00:00.866Z",
   "date": "30-6-2026"
 }
