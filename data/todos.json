@@ -65,5 +65,11 @@
     "done": true,
     "priority": "Vandaag",
     "date": null
+  },
+  {
+    "text": "Artikel schrijven over media download + darkmoad",
+    "done": false,
+    "priority": "Vandaag",
+    "date": "2026-07-02"
   }
 ]
