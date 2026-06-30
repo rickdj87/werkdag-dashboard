@@ -29,13 +29,6 @@
       "joinUrl": null
     },
     {
-      "subject": "Tickets evalueren",
-      "start": "2026-06-30T14:00:00.0000000",
-      "end": "2026-06-30T14:30:00.0000000",
-      "location": "Microsoft Teams-vergadering",
-      "joinUrl": null
-    },
-    {
       "subject": "Schoolkassa Review",
       "start": "2026-07-06T11:00:00.0000000",
       "end": "2026-07-06T11:45:00.0000000",
@@ -50,6 +43,6 @@
       "joinUrl": null
     }
   ],
-  "updatedAt": "2026-06-30T14:29:01.079Z",
+  "updatedAt": "2026-06-30T14:30:01.717Z",
   "date": "30-6-2026"
 }
