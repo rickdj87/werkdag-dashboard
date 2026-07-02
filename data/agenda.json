@@ -15,6 +15,13 @@
       "joinUrl": null
     },
     {
+      "subject": "PS-overleg",
+      "start": "2026-07-09T13:00:00.0000000",
+      "end": "2026-07-09T14:00:00.0000000",
+      "location": "VK LB 2.6 Schoolplein (10)",
+      "joinUrl": null
+    },
+    {
       "subject": "Schoolkassa Review",
       "start": "2026-07-06T11:00:00.0000000",
       "end": "2026-07-06T11:45:00.0000000",
@@ -29,6 +36,6 @@
       "joinUrl": null
     }
   ],
-  "updatedAt": "2026-07-02T13:00:00.771Z",
+  "updatedAt": "2026-07-02T13:01:01.108Z",
   "date": "2-7-2026"
 }
