@@ -1,13 +1,6 @@
 {
   "events": [
     {
-      "subject": "Overleg 1e lijn",
-      "start": "2026-07-02T11:30:00.0000000",
-      "end": "2026-07-02T12:30:00.0000000",
-      "location": "VK LB 2.7 Gymzaal (12)",
-      "joinUrl": null
-    },
-    {
       "subject": "Artikel Downloaden bestanden Parro",
       "start": "2026-07-02T12:00:00.0000000",
       "end": "2026-07-02T12:30:00.0000000",
@@ -43,6 +36,6 @@
       "joinUrl": null
     }
   ],
-  "updatedAt": "2026-07-02T11:48:01.343Z",
+  "updatedAt": "2026-07-02T11:49:00.700Z",
   "date": "2-7-2026"
 }
