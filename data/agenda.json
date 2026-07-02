@@ -22,6 +22,13 @@
       "joinUrl": null
     },
     {
+      "subject": "Halfjaargesprek Rick-Bas",
+      "start": "2026-07-09T11:45:00.0000000",
+      "end": "2026-07-09T12:45:00.0000000",
+      "location": "VK LB 1.9 Gifkikker (8)",
+      "joinUrl": null
+    },
+    {
       "subject": "Schoolkassa Review",
       "start": "2026-07-06T11:00:00.0000000",
       "end": "2026-07-06T11:45:00.0000000",
@@ -36,6 +43,6 @@
       "joinUrl": null
     }
   ],
-  "updatedAt": "2026-07-02T11:44:01.205Z",
+  "updatedAt": "2026-07-02T11:45:01.325Z",
   "date": "2-7-2026"
 }
