@@ -1,13 +1,6 @@
 {
   "events": [
     {
-      "subject": "Artikel Downloaden bestanden Parro",
-      "start": "2026-07-02T12:00:00.0000000",
-      "end": "2026-07-02T12:30:00.0000000",
-      "location": "Microsoft Teams-vergadering; VK LB 2.1 Belcel Aap (2)",
-      "joinUrl": null
-    },
-    {
       "subject": "ParnasSys sprint demo estafette 5.20",
       "start": "2026-07-07T11:10:00.0000000",
       "end": "2026-07-07T12:00:00.0000000",
@@ -36,6 +29,6 @@
       "joinUrl": null
     }
   ],
-  "updatedAt": "2026-07-02T12:29:01.573Z",
+  "updatedAt": "2026-07-02T12:30:02.756Z",
   "date": "2-7-2026"
 }
