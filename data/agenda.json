@@ -34,8 +34,15 @@
       "end": "2026-07-13T12:30:00.0000000",
       "location": "VK LB 2.6 Schoolplein (10)",
       "joinUrl": null
+    },
+    {
+      "subject": "GTM Parro Portaal",
+      "start": "2026-07-13T12:30:00.0000000",
+      "end": "2026-07-13T13:00:00.0000000",
+      "location": "VK LB 2.5 Lerarenkamer (12)",
+      "joinUrl": null
     }
   ],
-  "updatedAt": "2026-07-06T12:29:00.881Z",
+  "updatedAt": "2026-07-06T12:30:01.268Z",
   "date": "6-7-2026"
 }
