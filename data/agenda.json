@@ -22,13 +22,6 @@
       "joinUrl": null
     },
     {
-      "subject": "Schoolkassa Review",
-      "start": "2026-07-06T11:00:00.0000000",
-      "end": "2026-07-06T11:45:00.0000000",
-      "location": "VK LB 2.5 Lerarenkamer (12)",
-      "joinUrl": null
-    },
-    {
       "subject": "AI inloopspreekuur",
       "start": "2026-07-09T09:00:00.0000000",
       "end": "2026-07-09T10:00:00.0000000",
@@ -36,6 +29,6 @@
       "joinUrl": null
     }
   ],
-  "updatedAt": "2026-07-06T11:45:00.375Z",
+  "updatedAt": "2026-07-06T11:46:00.739Z",
   "date": "6-7-2026"
 }
