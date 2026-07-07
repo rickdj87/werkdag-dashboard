@@ -1,13 +1,6 @@
 {
   "events": [
     {
-      "subject": "ParnasSys sprint demo estafette 5.20",
-      "start": "2026-07-07T11:10:00.0000000",
-      "end": "2026-07-07T12:00:00.0000000",
-      "location": "https://meet.google.com/hhh-ptde-asf",
-      "joinUrl": null
-    },
-    {
       "subject": "Halfjaargesprek Rick-Bas",
       "start": "2026-07-09T11:45:00.0000000",
       "end": "2026-07-09T12:45:00.0000000",
@@ -15,10 +8,24 @@
       "joinUrl": null
     },
     {
+      "subject": "SD-overleg",
+      "start": "2026-07-14T12:00:00.0000000",
+      "end": "2026-07-14T13:00:00.0000000",
+      "location": "VK LB 2.5 Lerarenkamer (12)",
+      "joinUrl": null
+    },
+    {
       "subject": "PS-overleg",
       "start": "2026-07-09T13:00:00.0000000",
       "end": "2026-07-09T14:00:00.0000000",
       "location": "VK LB 2.6 Schoolplein (10)",
+      "joinUrl": null
+    },
+    {
+      "subject": "Parro Sprint review",
+      "start": "2026-07-14T12:00:00.0000000",
+      "end": "2026-07-14T12:45:00.0000000",
+      "location": "VK LB 2.7 Gymzaal (12)",
       "joinUrl": null
     },
     {
@@ -43,6 +50,6 @@
       "joinUrl": null
     }
   ],
-  "updatedAt": "2026-07-07T11:59:00.970Z",
+  "updatedAt": "2026-07-07T12:00:01.631Z",
   "date": "7-7-2026"
 }
