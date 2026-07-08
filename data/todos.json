@@ -66,5 +66,11 @@
     "done": false,
     "priority": "Vandaag",
     "date": "2026-07-02"
+  },
+  {
+    "text": "Bug aanmaken Schoolkassa 603878",
+    "done": false,
+    "priority": "Vandaag",
+    "date": null
   }
 ]
