@@ -1,13 +1,6 @@
 {
   "events": [
     {
-      "subject": "Halfjaargesprek Rick-Bas",
-      "start": "2026-07-09T11:45:00.0000000",
-      "end": "2026-07-09T12:45:00.0000000",
-      "location": "VK LB 1.9 Gifkikker (8)",
-      "joinUrl": null
-    },
-    {
       "subject": "SD-overleg",
       "start": "2026-07-14T12:00:00.0000000",
       "end": "2026-07-14T13:00:00.0000000",
@@ -50,6 +43,6 @@
       "joinUrl": null
     }
   ],
-  "updatedAt": "2026-07-09T12:44:01.147Z",
+  "updatedAt": "2026-07-09T12:45:01.506Z",
   "date": "9-7-2026"
 }
