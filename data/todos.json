@@ -72,5 +72,17 @@
     "done": true,
     "priority": "Vandaag",
     "date": null
+  },
+  {
+    "text": "Halfjaarsgesprek",
+    "done": false,
+    "priority": "Vandaag",
+    "date": null
+  },
+  {
+    "text": "Tasseninpakken voor weekend weg.",
+    "done": false,
+    "priority": "Vandaag",
+    "date": null
   }
 ]
