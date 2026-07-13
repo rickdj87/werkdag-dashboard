@@ -22,13 +22,6 @@
       "joinUrl": null
     },
     {
-      "subject": "Schoolkassa GTM Buckaroo",
-      "start": "2026-07-13T12:00:00.0000000",
-      "end": "2026-07-13T12:30:00.0000000",
-      "location": "VK LB 2.6 Schoolplein (10)",
-      "joinUrl": null
-    },
-    {
       "subject": "Canceled: GTM Parro Portaal",
       "start": "2026-07-13T12:30:00.0000000",
       "end": "2026-07-13T13:00:00.0000000",
@@ -36,6 +29,6 @@
       "joinUrl": null
     }
   ],
-  "updatedAt": "2026-07-13T12:29:01.645Z",
+  "updatedAt": "2026-07-13T12:30:01.186Z",
   "date": "13-7-2026"
 }
