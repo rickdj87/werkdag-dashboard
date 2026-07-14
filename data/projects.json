@@ -48,5 +48,12 @@
     "status": "Actief",
     "deadline": "",
     "color": "#FFB84D"
+  },
+  {
+    "name": "Kennisartikel Starten met Parro",
+    "pct": 0,
+    "status": "Actief",
+    "deadline": "",
+    "color": "#FF6B6B"
   }
 ]
