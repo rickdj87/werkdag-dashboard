@@ -1,6 +1,13 @@
 {
   "events": [
     {
+      "subject": "Bug prioriteiten sessie met Productspecialisten",
+      "start": "2026-07-16T12:00:00.0000000",
+      "end": "2026-07-16T13:00:00.0000000",
+      "location": "VK LB 3.1 Peperbus (10) (Deventer)",
+      "joinUrl": null
+    },
+    {
       "subject": "AI inloopspreekuur",
       "start": "2026-07-16T09:00:00.0000000",
       "end": "2026-07-16T10:00:00.0000000",
@@ -15,6 +22,6 @@
       "joinUrl": null
     }
   ],
-  "updatedAt": "2026-07-16T09:56:00.965Z",
+  "updatedAt": "2026-07-16T09:57:00.853Z",
   "date": "16-7-2026"
 }
