@@ -20,8 +20,15 @@
       "end": "2026-07-23T10:00:00.0000000",
       "location": "club topicana",
       "joinUrl": null
+    },
+    {
+      "subject": "Schoolkassa GTM Buckaroo",
+      "start": "2026-07-27T12:00:00.0000000",
+      "end": "2026-07-27T12:30:00.0000000",
+      "location": "VK LB 2.6 Schoolplein (10)",
+      "joinUrl": null
     }
   ],
-  "updatedAt": "2026-07-20T12:00:00.734Z",
+  "updatedAt": "2026-07-20T12:01:00.831Z",
   "date": "20-7-2026"
 }
