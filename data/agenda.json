@@ -23,13 +23,6 @@
     },
     {
       "subject": "AI inloopspreekuur",
-      "start": "2026-07-23T09:00:00.0000000",
-      "end": "2026-07-23T10:00:00.0000000",
-      "location": "club topicana",
-      "joinUrl": null
-    },
-    {
-      "subject": "AI inloopspreekuur",
       "start": "2026-07-30T09:00:00.0000000",
       "end": "2026-07-30T10:00:00.0000000",
       "location": "club topicana",
@@ -50,6 +43,6 @@
       "joinUrl": null
     }
   ],
-  "updatedAt": "2026-07-23T10:00:01.619Z",
+  "updatedAt": "2026-07-23T10:01:00.532Z",
   "date": "23-7-2026"
 }
