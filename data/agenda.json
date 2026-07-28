@@ -15,6 +15,13 @@
       "joinUrl": null
     },
     {
+      "subject": "Parro Sprint review",
+      "start": "2026-08-04T12:00:00.0000000",
+      "end": "2026-08-04T12:45:00.0000000",
+      "location": "VK LB 2.7 Gymzaal (12)",
+      "joinUrl": null
+    },
+    {
       "subject": "AI inloopspreekuur",
       "start": "2026-07-30T09:00:00.0000000",
       "end": "2026-07-30T10:00:00.0000000",
@@ -22,6 +29,6 @@
       "joinUrl": null
     }
   ],
-  "updatedAt": "2026-07-28T12:00:01.765Z",
+  "updatedAt": "2026-07-28T12:01:01.743Z",
   "date": "28-7-2026"
 }
