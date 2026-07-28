@@ -1,6 +1,13 @@
 {
   "events": [
     {
+      "subject": "ParnasSys sprint demo estafette 5.21",
+      "start": "2026-08-04T11:10:00.0000000",
+      "end": "2026-08-04T12:00:00.0000000",
+      "location": "https://meet.google.com/hhh-ptde-asf",
+      "joinUrl": null
+    },
+    {
       "subject": "SD-overleg",
       "start": "2026-07-28T12:00:00.0000000",
       "end": "2026-07-28T13:00:00.0000000",
@@ -15,6 +22,6 @@
       "joinUrl": null
     }
   ],
-  "updatedAt": "2026-07-28T11:09:01.089Z",
+  "updatedAt": "2026-07-28T11:11:00.843Z",
   "date": "28-7-2026"
 }
