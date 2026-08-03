@@ -1,13 +1,6 @@
 {
   "events": [
     {
-      "subject": "Stand-up Servicedesk",
-      "start": "2026-08-03T10:35:00.0000000",
-      "end": "2026-08-03T11:00:00.0000000",
-      "location": "https://meet.google.com/axw-oijr-zkj of op kantoor",
-      "joinUrl": null
-    },
-    {
       "subject": "ParnasSys sprint demo estafette 5.21",
       "start": "2026-08-04T11:10:00.0000000",
       "end": "2026-08-04T12:00:00.0000000",
@@ -36,6 +29,6 @@
       "joinUrl": null
     }
   ],
-  "updatedAt": "2026-08-03T11:00:00.555Z",
+  "updatedAt": "2026-08-03T11:01:01.179Z",
   "date": "3-8-2026"
 }
