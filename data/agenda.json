@@ -1,7 +1,14 @@
 {
   "events": [
     {
-      "subject": "Parro Vertalen ",
+      "subject": "Check-in Parro Vertalen GTM",
+      "start": "2026-08-10T13:00:00.0000000",
+      "end": "2026-08-10T13:45:00.0000000",
+      "location": "VK LB 2.5 Lerarenkamer (12)",
+      "joinUrl": null
+    },
+    {
+      "subject": "Canceled: Parro Vertalen ",
       "start": "2026-08-10T13:45:00.0000000",
       "end": "2026-08-10T14:15:00.0000000",
       "location": "VK LB 2.5 Lerarenkamer (12)",
@@ -36,6 +43,6 @@
       "joinUrl": null
     }
   ],
-  "updatedAt": "2026-08-04T13:07:00.434Z",
+  "updatedAt": "2026-08-04T13:08:00.766Z",
   "date": "4-8-2026"
 }
