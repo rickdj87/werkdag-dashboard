@@ -29,13 +29,6 @@
       "joinUrl": null
     },
     {
-      "subject": "Canceled: GTM Parro Portaal",
-      "start": "2026-08-04T13:00:00.0000000",
-      "end": "2026-08-04T13:30:00.0000000",
-      "location": "VK LB 2.5 Lerarenkamer (12)",
-      "joinUrl": null
-    },
-    {
       "subject": "GTM Parro Portaal",
       "start": "2026-08-10T12:30:00.0000000",
       "end": "2026-08-10T13:00:00.0000000",
@@ -43,6 +36,6 @@
       "joinUrl": null
     }
   ],
-  "updatedAt": "2026-08-04T13:29:00.471Z",
+  "updatedAt": "2026-08-04T13:30:00.722Z",
   "date": "4-8-2026"
 }
