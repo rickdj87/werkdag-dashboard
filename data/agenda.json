@@ -1,13 +1,6 @@
 {
   "events": [
     {
-      "subject": "ParnasSys sprint demo estafette 5.21",
-      "start": "2026-08-04T11:10:00.0000000",
-      "end": "2026-08-04T12:00:00.0000000",
-      "location": "https://meet.google.com/hhh-ptde-asf",
-      "joinUrl": null
-    },
-    {
       "subject": "Parro Sprint review",
       "start": "2026-08-04T12:00:00.0000000",
       "end": "2026-08-04T12:45:00.0000000",
@@ -43,6 +36,6 @@
       "joinUrl": null
     }
   ],
-  "updatedAt": "2026-08-04T11:59:01.149Z",
+  "updatedAt": "2026-08-04T12:00:01.598Z",
   "date": "4-8-2026"
 }
