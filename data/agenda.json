@@ -22,6 +22,13 @@
       "joinUrl": null
     },
     {
+      "subject": "AI inloopspreekuur",
+      "start": "2026-08-13T09:00:00.0000000",
+      "end": "2026-08-13T10:00:00.0000000",
+      "location": "club topicana",
+      "joinUrl": null
+    },
+    {
       "subject": "Schoolkassa GTM Buckaroo",
       "start": "2026-08-10T12:00:00.0000000",
       "end": "2026-08-10T12:30:00.0000000",
@@ -36,6 +43,6 @@
       "joinUrl": null
     }
   ],
-  "updatedAt": "2026-08-06T08:59:00.759Z",
+  "updatedAt": "2026-08-06T09:00:01.762Z",
   "date": "6-8-2026"
 }
