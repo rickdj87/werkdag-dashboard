@@ -15,6 +15,13 @@
       "joinUrl": null
     },
     {
+      "subject": "Bug prioriteiten sessie met Productspecialisten",
+      "start": "2026-08-20T12:00:00.0000000",
+      "end": "2026-08-20T13:00:00.0000000",
+      "location": "VK LB 3.1 Peperbus (10)",
+      "joinUrl": null
+    },
+    {
       "subject": "Schoolkassa Review",
       "start": "2026-08-17T11:00:00.0000000",
       "end": "2026-08-17T11:45:00.0000000",
@@ -29,6 +36,6 @@
       "joinUrl": null
     }
   ],
-  "updatedAt": "2026-08-13T11:59:01.223Z",
+  "updatedAt": "2026-08-13T12:00:01.612Z",
   "date": "13-8-2026"
 }
