@@ -1,13 +1,6 @@
 {
   "events": [
     {
-      "subject": "AI ontwikkelingen doornemen",
-      "start": "2026-08-13T07:00:00.0000000",
-      "end": "2026-08-13T07:30:00.0000000",
-      "location": "VK LB 1.10 Topi Honey (6)",
-      "joinUrl": null
-    },
-    {
       "subject": "Buckaroo GTM vervolg mail en artikel",
       "start": "2026-08-17T07:30:00.0000000",
       "end": "2026-08-17T08:00:00.0000000",
@@ -36,6 +29,6 @@
       "joinUrl": null
     }
   ],
-  "updatedAt": "2026-08-13T07:30:00.638Z",
+  "updatedAt": "2026-08-13T07:31:00.689Z",
   "date": "13-8-2026"
 }
