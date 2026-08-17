@@ -36,6 +36,13 @@
       "joinUrl": null
     },
     {
+      "subject": "Buckaroo-artikelen schrijven",
+      "start": "2026-08-18T00:00:00.0000000",
+      "end": "2026-08-19T00:00:00.0000000",
+      "location": "",
+      "joinUrl": null
+    },
+    {
       "subject": "Bug prioriteiten sessie met Productspecialisten",
       "start": "2026-08-20T12:00:00.0000000",
       "end": "2026-08-20T13:00:00.0000000",
@@ -64,6 +71,6 @@
       "joinUrl": null
     }
   ],
-  "updatedAt": "2026-08-17T07:39:01.376Z",
+  "updatedAt": "2026-08-17T07:40:00.688Z",
   "date": "17-8-2026"
 }
