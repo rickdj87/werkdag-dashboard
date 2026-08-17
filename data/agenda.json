@@ -15,10 +15,24 @@
       "joinUrl": null
     },
     {
+      "subject": "0641271841 bellen ivm 605560",
+      "start": "2026-08-17T09:30:00.0000000",
+      "end": "2026-08-17T10:00:00.0000000",
+      "location": "",
+      "joinUrl": null
+    },
+    {
       "subject": "Buckaroo multi-accounts",
       "start": "2026-08-17T13:00:00.0000000",
       "end": "2026-08-17T13:45:00.0000000",
       "location": "VK LB 2.6 Schoolplein (10)",
+      "joinUrl": null
+    },
+    {
+      "subject": "Ticket 605787",
+      "start": "2026-08-18T13:00:00.0000000",
+      "end": "2026-08-18T13:30:00.0000000",
+      "location": "Microsoft Teams-vergadering",
       "joinUrl": null
     },
     {
@@ -50,6 +64,6 @@
       "joinUrl": null
     }
   ],
-  "updatedAt": "2026-08-17T07:29:00.814Z",
+  "updatedAt": "2026-08-17T07:30:01.828Z",
   "date": "17-8-2026"
 }
