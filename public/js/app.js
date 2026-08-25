@@ -2047,9 +2047,27 @@ function ensureSpotifyShell() {
     <div class="spotify-panel" id="spotify-panel-playlists">
       <div id="spotify-playlists-list" class="spotify-nothing">Log in om je playlists te zien</div>
     </div>
+    <div style="text-align:center;padding:8px 20px 4px;">
+      <a href="#" onclick="spotifyLogout();return false;" style="font-size:11px;color:var(--text3);text-decoration:underline;">Spotify-account loskoppelen</a>
+    </div>
   `;
   spotifyShellBuilt = true;
   updateSpotifyPlayerUI();
+}
+
+function spotifyLogout() {
+  localStorage.removeItem('spotify_token');
+  localStorage.removeItem('spotify_refresh_token');
+  localStorage.removeItem('spotify_code_verifier');
+  localStorage.removeItem('spotify_state');
+  spotifyToken = null;
+  clearInterval(spotifyPollTimer);
+  if (spotifyPlayer) { try { spotifyPlayer.disconnect(); } catch(e) {} spotifyPlayer = null; }
+  spotifyPlayerReady = false;
+  spotifyDeviceId = null;
+  spotifyPlaylists = null;
+  renderSpotifyLogin();
+  notify('Spotify-account loskoppeld — log opnieuw in voor toegang tot playlists', 'info');
 }
 
 function spotifySwitchTab(tab) {
