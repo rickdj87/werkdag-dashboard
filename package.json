@@ -2,7 +2,29 @@
   "name": "werkdag-dashboard",
   "version": "1.0.0",
   "description": "ParnasSys werkdag dashboard",
-  "dependencies": {
-    "@netlify/blobs": "^8.1.0"
+  "main": "electron-main.js",
+  "scripts": {
+    "start": "node server.js",
+    "electron": "electron .",
+    "build": "electron-builder --mac"
+  },
+  "devDependencies": {
+    "electron": "^31.0.0",
+    "electron-builder": "^24.0.0",
+    "wrangler": "^4.125.0"
+  },
+  "build": {
+    "appId": "nl.topicus.werkdag-dashboard",
+    "productName": "Werkdag Dashboard",
+    "mac": {
+      "category": "public.app-category.productivity",
+      "target": "dmg"
+    },
+    "files": [
+      "public/**/*",
+      "server.js",
+      "electron-main.js",
+      "data/**/*"
+    ]
   }
 }

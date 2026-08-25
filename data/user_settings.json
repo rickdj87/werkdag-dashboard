@@ -1,7 +1,7 @@
 {
   "slackName": "Rick de Jong",
-  "theme": "parnassys-dark",
-  "accent": "#E85A8A",
+  "theme": "dark",
+  "accent": "#C8F55A",
   "accentText": "#0E0E0C",
   "colorName": "lime"
 }

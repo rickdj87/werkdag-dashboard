@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ParnasSys — Werkdag</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Werkdag">
+  <meta name="theme-color" content="#0E0E0C">
+  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%230E0E0C' rx='20'/><text y='68' x='50' text-anchor='middle' font-size='60' fill='%23C8F55A'>W</text></svg>">
+  <script src="https://sdk.scdn.co/spotify-player.js"></script>
+</head>
+<body>
+
+<!-- SETUP SCREEN -->
+<div id="setup-screen">
+  <div class="setup-logo">ParnasSys<br><span>Werkdag</span></div>
+  <p class="setup-subtitle" style="margin-top:8px;margin-bottom:24px;">Stel je dashboard in — duurt ongeveer 5 minuten</p>
+
+  <!-- Voortgangsindicator -->
+  <div class="wizard-progress" id="wizard-progress">
+    <div class="wizard-step-indicator">
+      <div class="wizard-step-num active" id="step-num-1">1</div>
+      <span class="wizard-step-label active" id="step-label-1">Profiel</span>
+    </div>
+    <div class="wizard-connector"></div>
+    <div class="wizard-step-indicator">
+      <div class="wizard-step-num inactive" id="step-num-2">2</div>
+      <span class="wizard-step-label inactive" id="step-label-2">Agenda</span>
+    </div>
+    <div class="wizard-connector"></div>
+    <div class="wizard-step-indicator">
+      <div class="wizard-step-num inactive" id="step-num-3">3</div>
+      <span class="wizard-step-label inactive" id="step-label-3">Jira</span>
+    </div>
+    <div class="wizard-connector"></div>
+    <div class="wizard-step-indicator">
+      <div class="wizard-step-num inactive" id="step-num-4">4</div>
+      <span class="wizard-step-label inactive" id="step-label-4">Slack</span>
+    </div>
+    <div class="wizard-connector"></div>
+    <div class="wizard-step-indicator">
+      <div class="wizard-step-num inactive" id="step-num-5">5</div>
+      <span class="wizard-step-label inactive" id="step-label-5">Claude</span>
+    </div>
+    <div class="wizard-connector"></div>
+    <div class="wizard-step-indicator">
+      <div class="wizard-step-num inactive" id="step-num-6">6</div>
+      <span class="wizard-step-label inactive" id="step-label-6">Thema</span>
+    </div>
+  </div>
+
+  <!-- Stap 1: Profiel -->
+  <div class="wizard-panel active" id="wizard-step-1">
+    <div>
+      <div class="setup-section-title">Wie ben jij?</div>
+      <div class="setup-section-sub">Jouw naam wordt gebruikt voor de begroeting en Slack berichten.</div>
+    </div>
+    <div class="setup-field-group">
+      <div class="setup-field-label">Volledige naam <span class="required">verplicht</span></div>
+      <input class="setup-input" id="slack-name" type="text" placeholder="Bijv. Rick de Jong">
+    </div>
+    <div class="setup-field-group">
+      <div class="setup-field-label">Jira e-mailadres <span class="required">verplicht</span></div>
+      <input class="setup-input" id="jira-email" type="text" placeholder="jouw@email.nl">
+      <p class="setup-help">Hetzelfde e-mailadres waarmee je inlogt op Jira / Atlassian</p>
+    </div>
+  </div>
+
+  <!-- Stap 2: Agenda -->
+  <div class="wizard-panel" id="wizard-step-2">
+    <div>
+      <div class="setup-section-title">Microsoft 365 agenda</div>
+      <div class="setup-section-sub">Verbind je Outlook agenda voor een live overzicht van je afspraken vandaag en de rest van de week.</div>
+    </div>
+    <div class="setup-field-group">
+      <div class="setup-field-label">Bearer token <span>optioneel</span></div>
+      <input class="setup-input" id="ms-token" type="password" placeholder="Laat leeg om over te slaan">
+      <p class="setup-help">
+        Hoe ophalen:<br>
+        1. Ga naar <a href="https://developer.microsoft.com/en-us/graph/graph-explorer" target="_blank">Graph Explorer</a><br>
+        2. Log in met je Microsoft 365 account<br>
+        3. Klik op je avatar rechtsboven → "Access token" → kopieer
+      </p>
+    </div>
+    <div class="setup-card" style="background:var(--amber-dim);border-color:rgba(255,184,77,0.2);">
+      <div style="font-size:12px;color:var(--amber);line-height:1.6;">
+        ⚠ De Graph API token verloopt na 1 uur. Je moet hem dagelijks vernieuwen via Graph Explorer. We werken aan een permanente oplossing.
+      </div>
+    </div>
+  </div>
+
+  <!-- Stap 3: Jira -->
+  <div class="wizard-panel" id="wizard-step-3">
+    <div>
+      <div class="setup-section-title">Jira koppeling</div>
+      <div class="setup-section-sub">Voor het ophalen van projecten en het aanmaken van bug tickets.</div>
+    </div>
+    <div class="setup-field-group">
+      <div class="setup-field-label">Jira domein <span class="required">verplicht voor Jira</span></div>
+      <input class="setup-input" id="jira-domain" type="text" placeholder="topicuseducation.atlassian.net">
+    </div>
+    <div class="setup-field-group">
+      <div class="setup-field-label">API token <span class="required">verplicht voor Jira</span></div>
+      <input class="setup-input" id="jira-token" type="password" placeholder="Laat leeg om over te slaan">
+      <p class="setup-help">
+        Hoe ophalen:<br>
+        1. Ga naar <a href="https://id.atlassian.com/manage-profile/security/api-tokens" target="_blank">Atlassian security</a><br>
+        2. Klik "Create API token" → geef naam → kopieer
+      </p>
+    </div>
+  </div>
+
+  <!-- Stap 4: Slack -->
+  <div class="wizard-panel" id="wizard-step-4">
+    <div>
+      <div class="setup-section-title">Slack koppeling</div>
+      <div class="setup-section-sub">Voor het versturen van bugmeldingen vanuit jouw naam naar de juiste kanalen.</div>
+    </div>
+    <div class="setup-field-group">
+      <div class="setup-field-label">User OAuth Token <span>optioneel</span></div>
+      <input class="setup-input" id="slack-token" type="password" placeholder="xoxp-... (laat leeg om over te slaan)">
+      <p class="setup-help">
+        Hoe ophalen:<br>
+        1. Ga naar <a href="https://api.slack.com/apps" target="_blank">api.slack.com/apps</a> → Werkdag Dashboard<br>
+        2. Klik "OAuth & Permissions"<br>
+        3. Kopieer de <strong>User OAuth Token</strong> (xoxp-...)
+      </p>
+    </div>
+  </div>
+
+  <!-- Stap 5: Claude -->
+  <div class="wizard-panel" id="wizard-step-5">
+    <div>
+      <div class="setup-section-title">Claude AI assistent</div>
+      <div class="setup-section-sub">Voor de ingebouwde AI assistent die jouw werkcontext kent en je helpt met vragen over bugs, projecten en klantcommunicatie.</div>
+    </div>
+    <div class="setup-field-group">
+      <div class="setup-field-label">Anthropic API key <span>optioneel</span></div>
+      <input class="setup-input" id="claude-token" type="password" placeholder="sk-ant-... (laat leeg om over te slaan)">
+      <p class="setup-help">
+        Hoe ophalen:<br>
+        1. Ga naar <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a><br>
+        2. Klik "API Keys" → "Create Key"<br>
+        3. Kopieer de key — wordt maar één keer getoond!
+      </p>
+    </div>
+  </div>
+
+  <!-- Stap 6: Thema -->
+  <div class="wizard-panel" id="wizard-step-6">
+    <div>
+      <div class="setup-section-title">Kies je thema</div>
+      <div class="setup-section-sub">Pas het uiterlijk van je dashboard aan.</div>
+    </div>
+    <div class="setup-field-group">
+      <div class="setup-field-label">Weergave</div>
+      <div class="theme-grid">
+        <div class="theme-option selected" id="theme-dark" onclick="selectTheme('dark')">
+          <div class="theme-preview" style="background:#0E0E0C;">
+            <div class="theme-preview-bar" style="background:#1C1C19;"></div>
+            <div class="theme-preview-content">
+              <div class="theme-preview-line" style="background:#C8F55A;width:60%;"></div>
+              <div class="theme-preview-line" style="background:#2A2A27;width:80%;"></div>
+              <div class="theme-preview-line" style="background:#2A2A27;width:50%;"></div>
+            </div>
+          </div>
+          <div class="theme-name">Donker</div>
+          <div class="theme-desc">Standaard — donkere achtergrond</div>
+        </div>
+        <div class="theme-option" id="theme-light" onclick="selectTheme('light')">
+          <div class="theme-preview" style="background:#F5F4F0;">
+            <div class="theme-preview-bar" style="background:#E8E6E1;"></div>
+            <div class="theme-preview-content">
+              <div class="theme-preview-line" style="background:#1A6B3C;width:60%;"></div>
+              <div class="theme-preview-line" style="background:#D8D6D1;width:80%;"></div>
+              <div class="theme-preview-line" style="background:#D8D6D1;width:50%;"></div>
+            </div>
+          </div>
+          <div class="theme-name">Licht</div>
+          <div class="theme-desc">Lichte achtergrond</div>
+        </div>
+        <div class="theme-option" id="theme-system" onclick="selectTheme('system')">
+          <div class="theme-preview" style="background:linear-gradient(135deg,#0E0E0C 50%,#F5F4F0 50%);">
+            <div class="theme-preview-bar" style="background:rgba(255,255,255,0.1);"></div>
+            <div class="theme-preview-content">
+              <div class="theme-preview-line" style="background:rgba(255,255,255,0.3);width:60%;"></div>
+              <div class="theme-preview-line" style="background:rgba(255,255,255,0.15);width:80%;"></div>
+            </div>
+          </div>
+          <div class="theme-name">Systeem</div>
+          <div class="theme-desc">Volgt je apparaatinstelling</div>
+        </div>
+      </div>
+    </div>
+    <div class="setup-field-group">
+      <div class="setup-field-label">Accentkleur</div>
+      <div class="color-grid">
+        <div class="color-option selected" id="color-lime" style="background:#C8F55A;" onclick="selectColor('lime','#C8F55A','#0E0E0C')" title="Lime (standaard)"></div>
+        <div class="color-option" id="color-blue" style="background:#6BA8FF;" onclick="selectColor('blue','#6BA8FF','#0E0E0C')" title="Blauw"></div>
+        <div class="color-option" id="color-teal" style="background:#5BDB8A;" onclick="selectColor('teal','#5BDB8A','#0E0E0C')" title="Groen"></div>
+        <div class="color-option" id="color-orange" style="background:#FFB84D;" onclick="selectColor('orange','#FFB84D','#0E0E0C')" title="Oranje"></div>
+        <div class="color-option" id="color-purple" style="background:#C97FFF;" onclick="selectColor('purple','#C97FFF','#0E0E0C')" title="Paars"></div>
+        <div class="color-option" id="color-red" style="background:#FF6B6B;" onclick="selectColor('red','#FF6B6B','#0E0E0C')" title="Rood"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navigatie knoppen -->
+  <div class="wizard-nav" id="wizard-nav">
+    <button class="wizard-back" id="wizard-back-btn" onclick="wizardBack()" style="display:none;">← Terug</button>
+    <button class="wizard-next" id="wizard-next-btn" onclick="wizardNext()">Volgende →</button>
+  </div>
+
+  <span class="setup-skip" onclick="skipSetup()">Overslaan en demo-modus gebruiken</span>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard">
+<div class="app">
+
+  <div id="editorial-sidebar" class="editorial-sidebar">
+    <div class="es-day" id="es-day"></div>
+    <div class="es-month" id="es-month"></div>
+    <div class="es-sep"></div>
+    <div class="es-wk-label">WK</div>
+    <div class="es-week" id="es-week"></div>
+    <div class="es-spacer"></div>
+    <div class="es-brand">PARNASSYS</div>
+  </div>
+  <div id="offline-banner" style="display:none;background:var(--amber-dim);border:1px solid rgba(255,184,77,0.3);border-radius:var(--r);padding:8px 14px;font-size:12px;color:var(--amber);margin-bottom:12px;">
+    ⚠ Geen internetverbinding — dashboard werkt met lokale data
+  </div>
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-title"><span id="greeting-text">Goedemorgen</span>, <span id="greeting-name">Productspecialist</span></div>
+      <div class="topbar-date" id="topbar-date"></div>
+    </div>
+    <div class="topbar-right">
+      <button class="topbar-btn" onclick="refreshAll()">↻ Vernieuwen</button>
+      <button class="topbar-btn" id="notif-topbar-btn" onclick="openNotifSettings()" title="Notificatie instellingen">🔔</button>
+      <button class="topbar-btn" onclick="openThemeModal()">🎨 Thema</button>
+      <button class="topbar-btn" onclick="showSetup()">Instellingen</button>
+    </div>
+  </div>
+
+  <div id="module-braindump">
+  <!-- Brain dump -->
+  <div class="grid-full">
+    <div class="braindump-card">
+      <div class="braindump-head">
+        <div class="braindump-head-left">
+          <div class="braindump-icon">🧠</div>
+          <div>
+            <div class="braindump-title">Ochtend brain dump</div>
+            <div class="braindump-sub" id="bd-sub">Nog niet gestart vandaag</div>
+          </div>
+        </div>
+        <span class="braindump-badge" id="bd-badge">Leeg</span>
+      </div>
+
+      <!-- Fase 1: Dump -->
+      <div class="braindump-phase" id="bd-phase-dump">
+        <textarea class="braindump-textarea" id="bd-textarea"
+          placeholder="Typ alles wat in je hoofd zit. Geen structuur nodig — één gedachte per regel.
+
+Bijv:
+Email sturen naar Loes over de demo
+Zendesk widget testen op Schoolkassa
+DISA regelen voor einde week
+Prive: boekhouding doen" oninput="bdUpdateCount()"></textarea>
+        <div class="braindump-footer">
+          <span class="notes-saved" id="bd-count">0 regels</span>
+          <button class="submit-btn" id="bd-verwerk-btn" onclick="bdVerwerk()" disabled>Verwerk →</button>
+        </div>
+      </div>
+
+      <!-- Fase 2: Verwerken -->
+      <div class="braindump-phase" id="bd-phase-verwerk" style="display:none;">
+        <div style="font-size:12px;color:var(--text3);">Vink aan wat een to-do wordt. De rest wordt gearchiveerd in je dagelijkse notities.</div>
+        <div id="bd-item-list" style="display:flex;flex-direction:column;gap:6px;"></div>
+        <div class="braindump-action-row">
+          <button class="topbar-btn" onclick="bdTerug()">← Terug</button>
+          <button class="submit-btn" id="bd-voeg-btn" onclick="bdVoegToe()" disabled>Voeg toe aan to-do</button>
+        </div>
+      </div>
+
+      <!-- Fase 3: Klaar -->
+      <div class="braindump-phase" id="bd-phase-klaar" style="display:none;">
+        <div class="braindump-success">
+          <div class="braindump-success-icon">✅</div>
+          <div style="font-size:14px;font-weight:500;color:var(--text);">Brain dump verwerkt!</div>
+          <div id="bd-klaar-text" style="font-size:12px;color:var(--text3);line-height:1.6;"></div>
+          <button class="topbar-btn" onclick="bdReset()" style="margin-top:4px;">↺ Nieuwe dump starten</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  </div>
+
+  <div id="module-agenda-projecten">
+  <!-- Rij 1: Agenda + Projecten -->
+  <div class="grid-main">
+
+    <div id="card-agenda">
+    <div class="card" id="agenda-card">
+      <div class="card-head">
+        <span class="card-title"><span class="card-title-dot" style="background:var(--blue)"></span>Agenda vandaag</span>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <span class="card-badge badge-blue" id="agenda-count">—</span>
+          <button class="topbar-btn" id="token-refresh-btn" style="padding:4px 10px;font-size:11px;" onclick="showTokenRefresh()">🔑 Token vernieuwen</button>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div id="agenda-cors-notice" style="display:none;" class="cors-notice" style="margin-bottom:8px;">⚠ Agenda ophalen mislukt. Controleer je Microsoft 365 token via Instellingen → stap 2. De token verloopt elk uur.</div>
+      <div class="agenda-list" id="agenda-list">
+        <div class="loading-state"><div class="spin"></div>Ophalen...</div>
+      </div>
+      <div class="agenda-section-label" style="margin-top:8px;">Rest van de week</div>
+      <div class="week-list" id="week-list">
+        <div class="loading-state"><div class="spin"></div>Ophalen...</div>
+      </div>
+    </div>
+
+    </div>
+
+    <div id="card-projecten">
+    <div class="card" id="projects-card">
+      <div class="card-head">
+        <span class="card-title"><span class="card-title-dot" style="background:var(--accent)"></span>Lopende projecten</span>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <span class="card-badge badge-accent" id="projects-count">—</span>
+          <button class="topbar-btn" style="padding:4px 10px;font-size:11px;" onclick="openProjectModal()">+ Beheren</button>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div class="project-list" id="project-list">
+        <div class="empty-state">Klik op "+ Beheren" om projecten toe te voegen</div>
+      </div>
+    </div>
+
+  </div>
+
+    </div>
+
+  </div>
+
+  <div id="module-bugs-todo">
+  <!-- Rij 2: Bug melden + Buglijst + To-do -->
+  <div class="grid-bottom">
+
+    <div id="card-bug-melden">
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title"><span class="card-title-dot" style="background:var(--red)"></span>Bug melden</span>
+        <button class="topbar-btn" style="padding:4px 10px;font-size:11px;" onclick="openBugSettings()">⚙ Tags</button>
+      </div>
+      <div class="divider"></div>
+      <div class="bug-form">
+        <div class="template-btns">
+          <button class="template-btn" onclick="applyTemplate('ui')">UI afwijking</button>
+          <button class="template-btn" onclick="applyTemplate('crash')">Crash / fout</button>
+          <button class="template-btn" onclick="applyTemplate('performance')">Trage werking</button>
+          <button class="template-btn" onclick="applyTemplate('data')">Verkeerde data</button>
+          <button class="template-btn" onclick="applyTemplate('toegang')">Toegangsprobleem</button>
+        </div>
+        <div class="bug-form-row">
+          <select class="form-select" id="bug-channel" disabled style="opacity:0.5;" title="Kanaal wordt automatisch bepaald op basis van project">
+            <option value="auto">Kanaal automatisch</option>
+          </select>
+          <select class="form-select" id="bug-prio">
+            <option value="High">Hoog</option>
+            <option value="Medium" selected>Normaal</option>
+            <option value="Low">Laag</option>
+          </select>
+        </div>
+        <div class="bug-form-row">
+          <select class="form-select" id="bug-project" onchange="updateChannelLabel(this.value)">
+            <option value="PARRO">PARRO → #parro-bugs + #par-bugs</option>
+            <option value="SCHOOLKASSA">SCHOOLKASSA → #par-bugs</option>
+            <option value="OVERIG">OVERIG → #par-bugs</option>
+          </select>
+          <input class="form-input" id="bug-zendesk" placeholder="Zendesk URL (optioneel)">
+        </div>
+        <input class="form-input" id="bug-title" placeholder="Korte omschrijving...">
+        <textarea class="form-textarea" id="bug-desc" placeholder="Stappen om te reproduceren, verwacht gedrag..."></textarea>
+        <button class="submit-btn" onclick="submitBug()">Verstuur naar Slack + Jira →</button>
+      </div>
+    </div>
+
+    </div>
+    <div id="card-bug-tracker">
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title"><span class="card-title-dot" style="background:var(--red)"></span>Bug tracker</span>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <span class="card-badge badge-red" id="bugs-count">—</span>
+          <button class="topbar-btn" style="padding:4px 10px;font-size:11px;" onclick="openBugModal()">+ Beheren</button>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div class="bug-section-title">Parro</div>
+      <div class="bug-list" id="bug-list-parro"></div>
+      <div class="divider" style="margin:10px 0;"></div>
+      <div class="bug-section-title">Schoolkassa</div>
+      <div class="bug-list" id="bug-list-schoolkassa"></div>
+    </div>
+
+    </div>
+    <div id="card-todo">
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title"><span class="card-title-dot" style="background:var(--amber)"></span>To-do</span>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <span class="card-badge badge-amber" id="todo-count">0 open</span>
+          <button class="todo-clear-btn" onclick="clearDoneTodos()" title="Verwijder alle afgeronde taken">✓ Verwijder afgerond</button>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div class="todo-list" id="todo-list"></div>
+      <div class="todo-add" style="flex-wrap:wrap;gap:6px;">
+        <input type="text" id="todo-input" placeholder="Nieuwe taak..." onkeydown="if(event.key==='Enter')addTodo()" style="flex:1;min-width:140px;">
+        <input type="date" id="todo-date-input" class="todo-add-date" title="Datum (optioneel)">
+        <button class="todo-add-btn" onclick="addTodo()">+</button>
+      </div>
+    </div>
+
+  </div>
+
+    </div>
+
+  </div>
+
+  <div id="module-focus-notities-weer">
+  <!-- Rij 3: Focustimer + Snelle notities + Weer -->
+  <div class="grid-bottom">
+
+    <!-- Focustimer -->
+    <div id="card-focustimer">
+    <div class="card focus-card">
+      <div class="card-head" style="width:100%;">
+        <span class="card-title"><span class="card-title-dot" style="background:var(--accent)"></span>Focustimer</span>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <span class="card-badge badge-muted" id="focus-sessions-badge">0 sessies</span>
+          <button class="topbar-btn" style="padding:4px 10px;font-size:11px;" onclick="openFocusSettings()">⚙</button>
+        </div>
+      </div>
+      <div class="focus-ring">
+        <svg width="120" height="120" viewBox="0 0 120 120">
+          <circle class="focus-ring-bg" cx="60" cy="60" r="52"/>
+          <circle class="focus-ring-fill" id="focus-ring-fill" cx="60" cy="60" r="52"
+            stroke-dasharray="326.7" stroke-dashoffset="0"/>
+        </svg>
+        <div class="focus-time" id="focus-time">25:00</div>
+      </div>
+      <span class="focus-phase work" id="focus-phase">Werken</span>
+      <div class="focus-btns">
+        <button class="focus-btn" onclick="focusReset()">↺</button>
+        <button class="focus-btn primary" id="focus-start-btn" onclick="focusToggle()">Start</button>
+        <button class="focus-btn" onclick="focusSkip()">⏭</button>
+      </div>
+      <div class="focus-sessions" id="focus-sessions-label">Pomodoro · 25 min werk · 5 min pauze</div>
+    </div>
+
+    </div>
+    <!-- Snelle notities -->
+    <div id="card-snelle-notities">
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title"><span class="card-title-dot" style="background:var(--amber)"></span>Snelle notities</span>
+        <span class="card-badge badge-amber" id="sticky-count">0</span>
+      </div>
+      <div class="divider"></div>
+      <div class="sticky-grid" id="sticky-grid"></div>
+    </div>
+
+    </div>
+    <!-- Weer -->
+    <div id="card-weer">
+    <div class="card weather-card" id="weather-card">
+      <div class="card-head">
+        <span class="card-title"><span class="card-title-dot" style="background:var(--blue)"></span>Weer — Deventer</span>
+        <span class="card-badge badge-blue" id="weather-badge">Laden...</span>
+      </div>
+      <div class="divider"></div>
+      <div id="weather-body">
+        <div class="loading-state"><div class="spin"></div>Ophalen...</div>
+      </div>
+    </div>
+
+  </div>
+
+    </div>
+
+  </div>
+
+  <div id="module-notities">
+  <!-- Rij 3: Notities -->
+  <div class="grid-full">
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title"><span class="card-title-dot" style="background:var(--blue)"></span>Dagelijkse notities</span>
+        <div class="notes-date-nav">
+          <button class="notes-date-btn" onclick="changeNotesDate(-1)" title="Vorige dag">‹</button>
+          <span class="notes-date-label" id="notes-date-label">Vandaag</span>
+          <button class="notes-date-btn" onclick="changeNotesDate(1)" title="Volgende dag">›</button>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <textarea class="notes-area" id="notes-area" placeholder="Aantekeningen voor vandaag... (standup, klantgesprekken, actiepunten)" oninput="saveNotes()"></textarea>
+      <div class="notes-footer">
+        <span class="notes-saved" id="notes-saved">Automatisch opgeslagen</span>
+        <button class="topbar-btn" style="padding:4px 10px;font-size:11px;" onclick="clearNotes()">Leegmaken</button>
+      </div>
+    </div>
+  </div>
+
+  </div>
+
+  <div id="module-slack">
+  <!-- Rij 4: Slack -->
+  <div class="grid-full">
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title"><span class="card-title-dot" style="background:var(--green)"></span>Slack kanalen</span>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <span class="slack-refresh" id="slack-refresh-time">Laden...</span>
+          <span class="card-badge badge-green" id="slack-status">Verbinden...</span>
+          <button class="topbar-btn" style="padding:4px 10px;font-size:11px;" onclick="openSlackManageModal()">+ Beheren</button>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div class="slack-grid" id="slack-channels">
+        <div>
+          <div class="slack-group-label">Prioriteit</div>
+          <div class="slack-prominent" id="slack-prominent"></div>
+        </div>
+        <div>
+          <div class="slack-group-label">Overige kanalen</div>
+          <div class="slack-normal" id="slack-normal"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  </div>
+
+  <div id="module-spotify">
+  <!-- Rij 4: Spotify -->
+  <div class="grid-full">
+    <div class="spotify-card">
+      <div class="spotify-head">
+        <div class="spotify-head-left">
+          <div class="spotify-icon">
+            <svg viewBox="0 0 24 24"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
+          </div>
+          <div>
+            <div class="spotify-title">Spotify</div>
+            <div class="spotify-sub" id="spotify-sub">Verbinden...</div>
+          </div>
+        </div>
+        <span class="card-badge" id="spotify-badge">—</span>
+      </div>
+      <div class="spotify-body" id="spotify-body">
+        <div class="spotify-login">
+          <div class="spotify-nothing">Log in om je muziek te zien en bedienen</div>
+          <button class="spotify-login-btn" onclick="spotifyLogin()">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="white"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
+            Inloggen met Spotify
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  </div>
+
+  <div id="module-claude">
+  <!-- Rij 4: Claude -->
+  <div class="grid-full">
+    <div class="claude-card">
+      <div class="claude-head">
+        <div class="claude-head-left">
+          <div class="claude-avatar">
+            <svg viewBox="0 0 24 24"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"/></svg>
+          </div>
+          <div>
+            <div class="claude-title">ParnasSys assistent</div>
+            <div class="claude-sub">Aangedreven door Claude — ken jouw werkcontext</div>
+          </div>
+        </div>
+        <span class="card-badge badge-accent">Actief</span>
+      </div>
+      <div class="chat-window" id="chat-window"></div>
+      <div class="chat-input-row">
+        <input class="chat-input" id="chat-input" placeholder="Stel een vraag over je werkdag, bugs, projecten..." onkeydown="if(event.key==='Enter')sendChat()">
+        <button class="chat-send" id="chat-send" onclick="sendChat()">
+          <svg viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+  </div>
+
+</div>
+</div>
+
+<!-- Notificatie instellingen modal -->
+<div class="modal-overlay" id="notif-settings-modal">
+  <div class="modal" style="max-width:420px;">
+    <div class="modal-head">
+      <span class="modal-title">🔔 Afspraak notificaties</span>
+      <button class="modal-close" onclick="document.getElementById('notif-settings-modal').classList.remove('open')">×</button>
+    </div>
+    <div class="modal-body" style="gap:16px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--bg3);border-radius:var(--r);border:1px solid var(--border);">
+        <div>
+          <div style="font-size:13px;color:var(--text);font-weight:500;">Notificaties inschakelen</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:2px;">Systeemmelding voor aankomende afspraken</div>
+        </div>
+        <div id="notif-toggle" onclick="toggleNotifEnabled()"
+          style="width:36px;height:20px;border-radius:10px;position:relative;cursor:pointer;transition:all 0.2s;flex-shrink:0;">
+          <div id="notif-toggle-knob" style="position:absolute;width:14px;height:14px;border-radius:50%;background:white;top:2px;transition:transform 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.3);left:2px;"></div>
+        </div>
+      </div>
+      <div id="notif-options" style="display:flex;flex-direction:column;gap:10px;">
+        <div style="font-size:12px;font-weight:500;color:var(--text2);">Hoe ver van tevoren?</div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;" id="notif-timing-btns">
+          <button onclick="setNotifMinutes(5)"  id="notif-btn-5"  class="notif-time-btn">5 min</button>
+          <button onclick="setNotifMinutes(10)" id="notif-btn-10" class="notif-time-btn">10 min</button>
+          <button onclick="setNotifMinutes(15)" id="notif-btn-15" class="notif-time-btn">15 min</button>
+          <button onclick="setNotifMinutes(1)"  id="notif-btn-1"  class="notif-time-btn">1 min</button>
+        </div>
+      </div>
+      <div id="notif-permission-warning" style="display:none;background:var(--amber-dim);border:1px solid rgba(255,184,77,0.2);border-radius:var(--r);padding:10px 12px;font-size:12px;color:var(--amber);line-height:1.5;">
+        ⚠ Notificaties zijn geblokkeerd in je browser. Klik op het slotje in de adresbalk → Meldingen → Toestaan.
+      </div>
+      <div style="background:var(--bg3);border-radius:var(--r);padding:10px 12px;font-size:12px;color:var(--text3);line-height:1.6;">
+        💡 <strong style="color:var(--text2);">Geen melding ontvangen?</strong> Controleer ook je systeeminstellingen:<br>
+        <strong style="color:var(--text2);">Mac:</strong> Systeeminstellingen → Meldingen → Chrome → Aan<br>
+        <strong style="color:var(--text2);">Let op:</strong> Focusmodus / Niet storen blokkeert ook meldingen
+      </div>
+    </div>
+    <div class="modal-footer" style="justify-content:space-between;">
+      <button class="topbar-btn" onclick="testNotification()" style="color:var(--accent);border-color:var(--accent);">🔔 Test melding versturen</button>
+      <button class="topbar-btn" onclick="document.getElementById('notif-settings-modal').classList.remove('open')">Sluiten</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- Notifications -->
+<div class="notif-bar" id="notif-bar"></div>
+
+<script src="js/app.js"></script>
+
+
+<!-- Thema modal -->
+<div class="modal-overlay" id="theme-modal">
+  <div class="modal" style="max-width:580px;">
+    <div class="modal-head">
+      <span class="modal-title">🎨 Thema aanpassen</span>
+      <button class="modal-close" onclick="closeThemeModal()">×</button>
+    </div>
+    <div class="modal-body" style="gap:20px;">
+      <div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <div class="manage-section-title" style="margin:0;">Modules</div>
+          <span style="font-size:11px;color:var(--text3);" id="modules-visible-count"></span>
+        </div>
+        <div id="modules-list"></div>
+      </div>
+      <div>
+        <div class="manage-section-title">Weergave</div>
+        <div class="theme-modal-grid" id="theme-swatches"></div>
+      </div>
+      <div>
+        <div class="manage-section-title">Accentkleur</div>
+        <div class="accent-grid" id="accent-dots"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="topbar-btn" onclick="closeThemeModal()">Sluiten</button>
+    </div>
+  </div>
+</div>
+
+<!-- Slack beheer modal -->
+<div class="modal-overlay" id="slack-manage-modal">
+  <div class="modal" style="max-width:500px;">
+    <div class="modal-head">
+      <span class="modal-title">💬 Slack kanalen beheren</span>
+      <button class="modal-close" onclick="closeSlackManageModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="manage-section-title">Prioriteit kanalen</div>
+      <div class="manage-section" id="slack-prominent-list"></div>
+      <div class="manage-section-title" style="margin-top:12px;">Overige kanalen</div>
+      <div class="manage-section" id="slack-normal-list"></div>
+      <div class="add-project-form" style="margin-top:12px;">
+        <div class="manage-section-title">Kanaal toevoegen</div>
+        <div class="bug-form-row">
+          <input class="form-input" id="new-slack-name" placeholder="Kanaalnaam (bijv. #algemeen)">
+          <input class="form-input" id="new-slack-id" placeholder="Kanaal ID (C...)">
+        </div>
+        <div class="bug-form-row">
+          <select class="form-select" id="new-slack-type">
+            <option value="normal">Overig kanaal</option>
+            <option value="prominent">Prioriteit kanaal</option>
+          </select>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <input type="checkbox" id="new-slack-urgent" style="width:16px;height:16px;">
+            <label style="font-size:12px;color:var(--text2);">Markeer als urgent</label>
+          </div>
+        </div>
+        <button class="submit-btn" style="align-self:flex-start;" onclick="addSlackChannel()">+ Toevoegen</button>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="topbar-btn" onclick="closeSlackManageModal()">Sluiten</button>
+    </div>
+  </div>
+</div>
+
+<!-- Bugformulier instellingen modal -->
+<div class="modal-overlay" id="bug-settings-modal">
+  <div class="modal" style="max-width:480px;">
+    <div class="modal-head">
+      <span class="modal-title">🐛 Bug formulier aanpassen</span>
+      <button class="modal-close" onclick="document.getElementById('bug-settings-modal').classList.remove('open')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="manage-section-title">Projecttags</div>
+      <div class="manage-section" id="bug-project-tags-list"></div>
+      <div class="add-project-form" style="margin-top:8px;">
+        <input class="form-input" id="new-bug-tag" placeholder="Nieuwe tag (bijv. RAPPORTMODULE)">
+        <button class="submit-btn" style="align-self:flex-start;" onclick="addBugTag()">+ Toevoegen</button>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="topbar-btn" onclick="document.getElementById('bug-settings-modal').classList.remove('open')">Sluiten</button>
+    </div>
+  </div>
+</div>
+
+<!-- Focustimer instellingen -->
+<div class="modal-overlay" id="focus-settings-modal">
+  <div class="modal" style="max-width:400px;">
+    <div class="modal-head">
+      <span class="modal-title">⏱ Focustimer instellingen</span>
+      <button class="modal-close" onclick="document.getElementById('focus-settings-modal').classList.remove('open')">×</button>
+    </div>
+    <div class="modal-body" style="gap:14px;">
+      <div class="setup-field-group">
+        <div class="setup-field-label">Werktijd (minuten)</div>
+        <input class="setup-input" id="focus-work-input" type="number" min="1" max="90" value="25">
+      </div>
+      <div class="setup-field-group">
+        <div class="setup-field-label">Pauzetijd (minuten)</div>
+        <input class="setup-input" id="focus-break-input" type="number" min="1" max="30" value="5">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="topbar-btn" onclick="document.getElementById('focus-settings-modal').classList.remove('open')">Annuleren</button>
+      <button class="wizard-next" style="flex:0;padding:10px 20px;" onclick="saveFocusSettings()">Opslaan</button>
+    </div>
+  </div>
+</div>
+
+<!-- Token vernieuw modal -->
+<div class="modal-overlay" id="token-modal">
+  <div class="modal" style="max-width:480px;">
+    <div class="modal-head">
+      <span class="modal-title">🔑 Agenda token vernieuwen</span>
+      <button class="modal-close" onclick="closeTokenModal()">×</button>
+    </div>
+    <div class="modal-body" style="gap:16px;">
+      <div style="background:var(--blue-dim);border:1px solid rgba(107,168,255,0.2);border-radius:var(--r);padding:12px 14px;font-size:13px;color:var(--blue);line-height:1.6;">
+        De agenda token verloopt elk uur. Dit duurt 30 seconden.
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:24px;height:24px;border-radius:50%;background:var(--accent);color:var(--accent-text);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;flex-shrink:0;">1</div>
+          <div style="font-size:13px;color:var(--text);">Open Graph Explorer en log in</div>
+          <a href="https://developer.microsoft.com/en-us/graph/graph-explorer" target="_blank"
+            style="margin-left:auto;font-size:12px;padding:5px 12px;background:var(--accent);color:var(--accent-text);border-radius:var(--r);text-decoration:none;font-weight:500;white-space:nowrap;flex-shrink:0;">
+            Openen →
+          </a>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:24px;height:24px;border-radius:50%;background:var(--bg3);color:var(--text2);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;flex-shrink:0;">2</div>
+          <div style="font-size:13px;color:var(--text);">Klik op je avatar rechtsboven → <strong>"Access token"</strong> → kopieer</div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:10px;">
+          <div style="width:24px;height:24px;border-radius:50%;background:var(--bg3);color:var(--text2);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;flex-shrink:0;margin-top:2px;">3</div>
+          <div style="flex:1;">
+            <div style="font-size:13px;color:var(--text);margin-bottom:6px;">Plak de token hier:</div>
+            <textarea id="token-input" style="width:100%;height:80px;resize:none;font-size:11px;font-family:var(--font-mono);background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);color:var(--text);padding:8px 10px;outline:none;line-height:1.5;" placeholder="eyJ0eXAiOiJKV1Q..."></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="topbar-btn" onclick="closeTokenModal()">Annuleren</button>
+      <button class="wizard-next" style="flex:0;padding:10px 20px;" onclick="saveNewToken()">Opslaan & agenda laden</button>
+    </div>
+  </div>
+</div>
+
+<!-- Bug beheer modal -->
+<div class="modal-overlay" id="bug-modal">
+  <div class="modal">
+    <div class="modal-head">
+      <span class="modal-title">Bugs beheren</span>
+      <button class="modal-close" onclick="closeBugModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div id="bug-edit-list"></div>
+      <div class="add-project-form" style="margin-top:4px;">
+        <div style="font-size:12px;font-weight:500;color:var(--text2);margin-bottom:2px;">Bug toevoegen aan tracker</div>
+        <div class="bug-form-row">
+          <input class="form-input" id="new-bug-id" placeholder="Ticket ID (bijv. PRO-5070)">
+          <select class="form-select" id="new-bug-cat">
+            <option value="parro">Parro</option>
+            <option value="schoolkassa">Schoolkassa</option>
+          </select>
+        </div>
+        <input class="form-input" id="new-bug-title" placeholder="Omschrijving...">
+        <div class="bug-form-row">
+          <select class="form-select" id="new-bug-prio">
+            <option value="Hoog">Hoog</option>
+            <option value="Normaal" selected>Normaal</option>
+            <option value="Laag">Laag</option>
+          </select>
+          <input class="form-input" id="new-bug-jira" placeholder="Jira URL (optioneel)">
+        </div>
+        <button class="submit-btn" style="align-self:flex-start;" onclick="addBugToTracker()">+ Toevoegen aan tracker</button>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="topbar-btn" onclick="closeBugModal()">Sluiten</button>
+    </div>
+  </div>
+</div>
+
+<!-- Project beheer modal -->
+<div class="modal-overlay" id="project-modal">
+  <div class="modal">
+    <div class="modal-head">
+      <span class="modal-title">Projecten beheren</span>
+      <button class="modal-close" onclick="closeProjectModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="cors-notice">
+        ⚠ Projecten worden lokaal opgeslagen in je browser. Koppeling met Jira werkt via de proxy — voeg je Jira token toe via Instellingen.
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+        <span style="font-size:12px;color:var(--text2);">Klik op "Zichtbaar/Verborgen" om projecten te filteren</span>
+        <div style="display:flex;gap:6px;">
+          <button onclick="showAllProjects()" style="font-size:11px;padding:3px 10px;border-radius:var(--r);border:1px solid var(--border2);background:var(--bg3);color:var(--text2);cursor:pointer;font-family:var(--font-body);">Alles tonen</button>
+          <button onclick="hideAllProjects()" style="font-size:11px;padding:3px 10px;border-radius:var(--r);border:1px solid var(--border2);background:var(--bg3);color:var(--text2);cursor:pointer;font-family:var(--font-body);">Alles verbergen</button>
+        </div>
+      </div>
+      <div id="project-edit-list"></div>
+      <div class="add-project-form">
+        <div style="font-size:12px;font-weight:500;color:var(--text2);margin-bottom:2px;">Nieuw project toevoegen</div>
+        <input class="form-input" id="new-project-name" placeholder="Projectnaam...">
+        <div class="add-project-row">
+          <select class="form-select status-select" id="new-project-status">
+            <option value="Actief">Actief</option>
+            <option value="In review">In review</option>
+            <option value="Bijna klaar">Bijna klaar</option>
+            <option value="In uitvoering">In uitvoering</option>
+            <option value="Afgerond">Afgerond</option>
+          </select>
+          <input class="form-input" id="new-project-deadline" type="date" style="color-scheme:dark;">
+        </div>
+        <button class="submit-btn" style="align-self:flex-start;" onclick="addProject()">+ Toevoegen</button>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="topbar-btn" onclick="closeProjectModal()">Sluiten</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
