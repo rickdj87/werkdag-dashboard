@@ -17,6 +17,8 @@ functions/api/            Cloudflare Pages Functions (serverless backend)
 migrations/                D1-schema (SQL-migraties)
 scripts/                   Eenmalig import-script (seed-from-backup.sql)
 wrangler.jsonc              Cloudflare-configuratie (Pages + D1-binding)
+agenda-sync/                Losse Cloudflare Worker (Cron Trigger, elke 5 min) die de
+                             ICS-agenda ophaalt en in D1 zet — vervangt Power Automate
 data/                       Archief van de laatste stand vóór de D1-migratie
 server.js, electron-main.js Losstaande lokale/Electron-variant (eigen data/*.json-opslag)
 ```
@@ -101,24 +103,48 @@ Zet deze twee repo-secrets in GitHub
 
 | Secret | Waarde |
 |---|---|
-| `CLOUDFLARE_API_TOKEN` | Een API-token met rechten *Cloudflare Pages: Edit* en *D1: Edit* voor je account. Aanmaken via [dash.cloudflare.com/profile/api-tokens](https://dash.cloudflare.com/profile/api-tokens) → "Create Token" → custom token met die twee permissies. |
+| `CLOUDFLARE_API_TOKEN` | Een API-token met rechten *Cloudflare Pages: Edit*, *D1: Edit* én *Workers Scripts: Edit* (voor de agenda-sync Worker) voor je account. Aanmaken via [dash.cloudflare.com/profile/api-tokens](https://dash.cloudflare.com/profile/api-tokens) → "Create Token" → custom token met die drie permissies. |
 | `CLOUDFLARE_ACCOUNT_ID` | Te vinden via `wrangler whoami`, of rechtsonder op elke pagina in het Cloudflare-dashboard. |
 
 Zodra deze secrets staan, deployt elke push naar `main` (met wijzigingen
 buiten `data/`) automatisch.
 
-## 6. Power Automate — agenda-koppeling omzetten
+## 6. Agenda-sync — Cloudflare Worker (vervangt Power Automate)
 
-De Outlook-agenda werd voorheen door Power Automate weggeschreven naar
-`data/agenda.json` via een commit op GitHub. Dat gaat nu direct naar D1.
-Pas de HTTP-actie in de Power Automate-flow aan:
+De Outlook-agenda werd eerst door Power Automate weggeschreven, en later
+kortstondig via een generieke `set_agenda`-actie op `/api/storage`. Beide
+zijn vervangen door een eigen Cloudflare Worker in `agenda-sync/` die zelf
+elke **5 minuten** de gepubliceerde ICS-agenda ophaalt, de afspraken
+(inclusief terugkerende afspraken) parseert, en direct in de
+`agenda_events`-tabel in D1 zet.
 
-- **Oude URL:** de Netlify-functie (`.../.netlify/functions/storage`)
-- **Nieuwe URL:** `https://werkdag-dashboard.pages.dev/api/storage`
-- **Body:** ongewijzigd — nog steeds `{"action": "set_agenda", "events": [...]}`
+**Eenmalig opzetten bij een nieuw account:**
+```bash
+cd agenda-sync
+wrangler login
+wrangler secret put ICS_URL     # plak hier de "Agenda publiceren"-link uit Outlook
+wrangler deploy
+```
 
-Dit moet handmatig in Power Automate aangepast worden; dat kan niet vanuit
-deze repository.
+De ICS-link haal je op via **Outlook (web) → Instellingen → Agenda →
+Gedeelde agenda's → Publiceren** (of: agenda delen → "ICS"-link). Deze link
+bevat een geheime token — behandel 'm als een wachtwoord, zet 'm nooit in
+code of git, alleen als secret.
+
+**Testen of het werkt** (geeft alleen een aantal terug, geen agenda-inhoud):
+```bash
+curl https://werkdag-agenda-sync.<jouw-cloudflare-account>.workers.dev/
+# {"ok":true,"count":10,"updatedAt":"..."}
+```
+
+**Belangrijk:** zodra deze Worker draait, kun je de oude Power
+Automate-flow (als die nog actief is) uitzetten of verwijderen in Power
+Automate zelf — dat gaat niet vanuit deze repository.
+
+*Bekende beperking:* de RRULE-afhandeling (terugkerende afspraken) dekt de
+gangbare gevallen voor een werkagenda (dagelijks/wekelijks/maandelijks,
+met `COUNT`/`UNTIL`/`BYDAY`) maar is geen volledige RFC5545-implementatie —
+zeer ongebruikelijke herhalingspatronen kunnen gemist worden.
 
 ## 7. Databeheer
 
