@@ -20,6 +20,7 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          wranglerVersion: '4'
           command: d1 migrations apply werkdag-dashboard-db --remote
 
       - name: Deploy naar Cloudflare Pages
@@ -27,4 +28,5 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          wranglerVersion: '4'
           command: pages deploy public --project-name=werkdag-dashboard --commit-dirty=true
