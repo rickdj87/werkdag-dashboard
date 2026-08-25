@@ -1438,6 +1438,7 @@ function focusToggle() {
   } else {
     focusIsRunning = true;
     document.getElementById('focus-start-btn').textContent = 'Pauze';
+    if (!focusIsBreak) spotifyStartFocusMusic();
     focusInterval = setInterval(() => {
       focusSeconds--;
       focusUpdateDisplay();
@@ -1639,15 +1640,26 @@ function renderWeather(data) {
 // ─── Spotify ────────────────────────────────────────────
 const SPOTIFY_CLIENT_ID = '60f186f4c6f24e9f9857148027c1e377';
 const SPOTIFY_REDIRECT = window.location.origin;
-const SPOTIFY_SCOPES = 'user-read-playback-state user-modify-playback-state user-read-currently-playing streaming app-remote-control user-read-private user-read-email';
+const SPOTIFY_SCOPES = 'user-read-playback-state user-modify-playback-state user-read-currently-playing streaming app-remote-control user-read-private user-read-email playlist-read-private';
 
 let spotifyToken = localStorage.getItem('spotify_token') || null;
 let spotifyPlayer = null;
 let spotifyDeviceId = null;
 let spotifyPlayerReady = false;
-let spotifyRefreshTimer = null;
 let spotifyPollTimer = null;
 let spotifyCurrentTrack = null;
+let spotifyShellBuilt = false;
+let spotifyLastTrackId = null;
+let spotifyDraggingVolume = false;
+let spotifySearchTimer = null;
+let spotifyPlaylists = null;
+let spotifyFavoritePlaylist = JSON.parse(localStorage.getItem('spotify_fav_playlist') || 'null');
+let spotifyFocusPlaylistId = localStorage.getItem('spotify_focus_playlist_id') || null;
+let spotifyPausedForEvents = new Set();
+
+function escapeHtml(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+}
 
 async function spotifyLogin() {
   // PKCE flow — vereist door Spotify sinds 2024
@@ -1757,6 +1769,7 @@ function initSpotify() {
   spotifyFetchNowPlaying();
   clearInterval(spotifyPollTimer);
   spotifyPollTimer = setInterval(spotifyFetchNowPlaying, 5000);
+  renderSpotifyFavShortcut();
 }
 
 function initSpotifyPlayer() {
@@ -1782,11 +1795,12 @@ function initSpotifyPlayer() {
 
     spotifyPlayer.addListener('not_ready', () => {
       spotifyPlayerReady = false;
+      updateSpotifyPlayerUI();
     });
 
     spotifyPlayer.addListener('player_state_changed', state => {
       if (!state) return;
-      renderSpotifyFromState(state);
+      applySpotifyState(normalizeFromSdk(state));
     });
 
     spotifyPlayer.addListener('authentication_error', ({ message }) => {
@@ -1814,135 +1828,247 @@ function initSpotifyPlayer() {
 }
 
 function updateSpotifyPlayerUI() {
-  // Voeg "Speel hier af" knop toe als player klaar is
-  const badge = document.getElementById('spotify-badge');
-  if (badge && spotifyPlayerReady) {
-    badge.textContent = '▶ Klaar';
-    badge.className = 'card-badge badge-green';
-  }
+  ensureSpotifyShell();
+  const btn = document.getElementById('spotify-play-here-btn');
+  if (btn) btn.style.display = spotifyPlayerReady ? 'flex' : 'none';
 }
 
-function renderSpotifyFromState(state) {
-  if (!state) return;
-  const track = state.track_window?.current_track;
-  if (!track) return;
-
-  const isPlaying = !state.paused;
-  const progress = state.position;
-  const duration = track.duration_ms;
-  const pct = Math.round((progress / duration) * 100);
-  const artUrl = track.album?.images?.[0]?.url || '';
-  const trackName = track.name || 'Onbekend';
-  const artistName = track.artists?.map(a => a.name).join(', ') || '';
-  const fmt = ms => `${Math.floor(ms/60000)}:${String(Math.floor((ms%60000)/1000)).padStart(2,'0')}`;
-
-  document.getElementById('spotify-badge').textContent = isPlaying ? '▶ Speelt' : '⏸ Gepauzeerd';
-  document.getElementById('spotify-badge').className = isPlaying ? 'card-badge badge-green' : 'card-badge badge-muted';
-  document.getElementById('spotify-sub').textContent = 'Verbonden';
-
-  // Update bestaande UI of render nieuw
-  const existingTrack = document.querySelector('.spotify-track');
-  if (existingTrack) {
-    existingTrack.textContent = trackName;
-    const artist = document.querySelector('.spotify-artist');
-    if (artist) artist.textContent = artistName;
-    const fill = document.querySelector('.spotify-progress-fill');
-    if (fill) fill.style.width = pct + '%';
-    const times = document.querySelectorAll('.spotify-time');
-    if (times[0]) times[0].textContent = fmt(progress);
-    const playBtn = document.querySelector('.sp-btn.play svg');
-    if (playBtn) playBtn.parentElement.innerHTML = isPlaying
-      ? '<svg viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>'
-      : '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>';
-  } else {
-    renderSpotifyPlayerFull(track, isPlaying, progress, duration, artUrl);
+async function spotifyApiFetch(path, options = {}) {
+  if (!spotifyToken) return null;
+  const res = await fetch('https://api.spotify.com/v1' + path, {
+    ...options,
+    headers: { Authorization: `Bearer ${spotifyToken}`, ...(options.headers || {}) },
+  });
+  if (res.status === 401) {
+    spotifyToken = null;
+    localStorage.removeItem('spotify_token');
+    await spotifyRefreshToken();
+    return null;
   }
+  return res;
 }
 
 async function playOnDashboard() {
   if (!spotifyToken || !spotifyDeviceId) return;
-  // Zet playback over naar dashboard device
-  await fetch('https://api.spotify.com/v1/me/player', {
+  await spotifyApiFetch('/me/player', {
     method: 'PUT',
-    headers: { Authorization: `Bearer ${spotifyToken}`, 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ device_ids: [spotifyDeviceId], play: true }),
   });
   setTimeout(spotifyFetchNowPlaying, 500);
 }
 
-function renderSpotifyPlayerFull(track, isPlaying, progress, duration, artUrl) {
-  const trackName = track.name || 'Onbekend';
-  const artistName = track.artists?.map(a => a.name).join(', ') || '';
-  const pct = Math.round((progress / duration) * 100);
-  const fmt = ms => `${Math.floor(ms/60000)}:${String(Math.floor((ms%60000)/1000)).padStart(2,'0')}`;
-
-  document.getElementById('spotify-body').innerHTML = `
-    <div class="spotify-player">
-      ${artUrl
-        ? `<img class="spotify-art" src="${artUrl}" alt="Album art">`
-        : `<div class="spotify-art-placeholder">♪</div>`}
-      <div class="spotify-info">
-        <div class="spotify-track">${trackName}</div>
-        <div class="spotify-artist">${artistName}</div>
-        <div class="spotify-progress-wrap">
-          <span class="spotify-time">${fmt(progress)}</span>
-          <div class="spotify-progress"><div class="spotify-progress-fill" style="width:${pct}%"></div></div>
-          <span class="spotify-time" style="text-align:right">${fmt(duration)}</span>
-        </div>
-      </div>
-    </div>
-    <div class="spotify-controls">
-      <button class="sp-btn" onclick="spotifyPrev()" title="Vorige">
-        <svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg>
-      </button>
-      <button class="sp-btn play" onclick="spotifyTogglePlay()" title="${isPlaying ? 'Pauzeren' : 'Afspelen'}">
-        ${isPlaying
-          ? `<svg viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>`
-          : `<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>`}
-      </button>
-      <button class="sp-btn" onclick="spotifyNext()" title="Volgende">
-        <svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zm2-8.14L11.03 12 8 14.14V9.86zM16 6h2v12h-2z"/></svg>
-      </button>
-    </div>
-    ${spotifyPlayerReady ? `
-    <button onclick="playOnDashboard()" style="margin-top:8px;width:100%;padding:7px;font-size:12px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);color:var(--text2);cursor:pointer;font-family:var(--font-body);">
-      ▶ Afspelen via dashboard
-    </button>` : ''}`;
-}
-
 async function spotifyFetchNowPlaying() {
   if (!spotifyToken) return;
   try {
-    const res = await fetch('https://api.spotify.com/v1/me/player/currently-playing', {
-      headers: { Authorization: `Bearer ${spotifyToken}` }
-    });
-
-    if (res.status === 401) {
-      // Token verlopen — probeer te vernieuwen
-      spotifyToken = null;
-      localStorage.removeItem('spotify_token');
-      await spotifyRefreshToken();
-      return;
-    }
-
-    if (res.status === 204 || !res.ok) {
-      renderSpotifyNothing();
-      return;
-    }
-
+    const res = await spotifyApiFetch('/me/player');
+    if (!res) return; // token werd vernieuwd; volgende poll pakt het weer op
+    if (res.status === 204 || !res.ok) { applySpotifyState(null); return; }
     const data = await res.json();
-    if (!data || !data.item) { renderSpotifyNothing(); return; }
-    spotifyCurrentTrack = data;
-    renderSpotifyPlayer(data);
+    if (!data || !data.item) { applySpotifyState(null); return; }
+    applySpotifyState(normalizeFromWebApi(data));
   } catch(e) {
     console.error('[Spotify] Fout:', e.message);
   }
 }
 
+function normalizeFromWebApi(data) {
+  const track = data.item;
+  if (!track) return null;
+  return {
+    isPlaying: !!data.is_playing,
+    progressMs: data.progress_ms || 0,
+    durationMs: track.duration_ms || 0,
+    trackId: track.id,
+    trackName: track.name || 'Onbekend',
+    artistName: (track.artists || []).map(a => a.name).join(', '),
+    artUrl: track.album?.images?.[0]?.url || '',
+    shuffle: !!data.shuffle_state,
+    repeat: data.repeat_state || 'off',
+    volumePercent: data.device?.volume_percent ?? null,
+  };
+}
+
+function normalizeFromSdk(state) {
+  const track = state.track_window?.current_track;
+  if (!track) return null;
+  return {
+    isPlaying: !state.paused,
+    progressMs: state.position || 0,
+    durationMs: track.duration_ms || 0,
+    trackId: track.id,
+    trackName: track.name || 'Onbekend',
+    artistName: (track.artists || []).map(a => a.name).join(', '),
+    artUrl: track.album?.images?.[0]?.url || '',
+    shuffle: !!state.shuffle,
+    repeat: state.repeat_mode === 2 ? 'track' : state.repeat_mode === 1 ? 'context' : 'off',
+    volumePercent: null, // SDK-status geeft geen volume — laatst bekende waarde blijft staan
+  };
+}
+
+function spotifyFmtTime(ms) {
+  const total = Math.max(0, Math.round(ms / 1000));
+  return Math.floor(total / 60) + ':' + String(total % 60).padStart(2, '0');
+}
+
+function setPlayIcon(isPlaying) {
+  const btn = document.getElementById('spotify-play-btn');
+  if (!btn) return;
+  btn.title = isPlaying ? 'Pauzeren' : 'Afspelen';
+  btn.innerHTML = isPlaying
+    ? '<svg viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>'
+    : '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>';
+}
+
+function applySpotifyState(norm) {
+  ensureSpotifyShell();
+
+  const badge = document.getElementById('spotify-badge');
+  badge.textContent = norm ? (norm.isPlaying ? '▶ Speelt' : '⏸ Gepauzeerd') : 'Actief';
+  badge.className = norm && norm.isPlaying ? 'card-badge badge-green' : 'card-badge badge-muted';
+  document.getElementById('spotify-sub').textContent = 'Verbonden';
+
+  const artWrap = document.getElementById('spotify-art-wrap');
+  if (artWrap) artWrap.classList.toggle('playing', !!(norm && norm.isPlaying));
+
+  if (!norm) {
+    document.getElementById('spotify-now-track').textContent = 'Niets aan het afspelen';
+    document.getElementById('spotify-now-artist').textContent = '';
+    document.getElementById('spotify-progress-fill').style.width = '0%';
+    document.getElementById('spotify-time-elapsed').textContent = '0:00';
+    document.getElementById('spotify-time-remaining').textContent = '-0:00';
+    setPlayIcon(false);
+    spotifyCurrentTrack = null;
+    spotifyLastTrackId = null;
+    return;
+  }
+
+  spotifyCurrentTrack = norm;
+
+  if (norm.trackId !== spotifyLastTrackId) {
+    spotifyLastTrackId = norm.trackId;
+    const artEl = document.getElementById('spotify-art-el');
+    if (artEl) {
+      artEl.outerHTML = norm.artUrl
+        ? `<img class="spotify-art-lg" id="spotify-art-el" src="${norm.artUrl}" alt="Album art">`
+        : `<div class="spotify-art-lg-placeholder" id="spotify-art-el">♪</div>`;
+    }
+  }
+
+  document.getElementById('spotify-now-track').textContent = norm.trackName;
+  document.getElementById('spotify-now-artist').textContent = norm.artistName;
+
+  const pct = norm.durationMs ? Math.round((norm.progressMs / norm.durationMs) * 100) : 0;
+  document.getElementById('spotify-progress-fill').style.width = pct + '%';
+  document.getElementById('spotify-time-elapsed').textContent = spotifyFmtTime(norm.progressMs);
+  document.getElementById('spotify-time-remaining').textContent = '-' + spotifyFmtTime(Math.max(0, norm.durationMs - norm.progressMs));
+
+  setPlayIcon(norm.isPlaying);
+
+  const shuffleBtn = document.getElementById('spotify-shuffle-btn');
+  if (shuffleBtn) shuffleBtn.classList.toggle('active', norm.shuffle);
+
+  const repeatBtn = document.getElementById('spotify-repeat-btn');
+  if (repeatBtn) {
+    repeatBtn.classList.toggle('active', norm.repeat !== 'off');
+    const existingDot = repeatBtn.querySelector('.sp-repeat-one-dot');
+    if (norm.repeat === 'track' && !existingDot) {
+      repeatBtn.insertAdjacentHTML('beforeend', '<span class="sp-repeat-one-dot"></span>');
+    } else if (norm.repeat !== 'track' && existingDot) {
+      existingDot.remove();
+    }
+  }
+
+  if (norm.volumePercent !== null && !spotifyDraggingVolume) {
+    const slider = document.getElementById('spotify-volume-slider');
+    if (slider) slider.value = norm.volumePercent;
+  }
+}
+
+function ensureSpotifyShell() {
+  if (spotifyShellBuilt) return;
+  const body = document.getElementById('spotify-body');
+  if (!body) return;
+  body.innerHTML = `
+    <div class="spotify-tabs">
+      <button class="sp-tab active" id="sp-tab-now" onclick="spotifySwitchTab('now')">Nu speelt</button>
+      <button class="sp-tab" id="sp-tab-search" onclick="spotifySwitchTab('search')">Zoeken</button>
+      <button class="sp-tab" id="sp-tab-playlists" onclick="spotifySwitchTab('playlists')">Playlists</button>
+    </div>
+    <div class="spotify-panel active" id="spotify-panel-now">
+      <div class="spotify-player">
+        <div class="spotify-art-wrap" id="spotify-art-wrap">
+          <div class="spotify-art-lg-placeholder" id="spotify-art-el">♪</div>
+          <div class="spotify-eq" id="spotify-eq"><span></span><span></span><span></span></div>
+        </div>
+        <div class="spotify-now-info">
+          <div class="spotify-now-track" id="spotify-now-track">Niets aan het afspelen</div>
+          <div class="spotify-now-artist" id="spotify-now-artist"></div>
+          <div class="spotify-progress-wrap">
+            <span class="spotify-time" id="spotify-time-elapsed">0:00</span>
+            <div class="spotify-progress spotify-progress-clickable" id="spotify-progress-bar" onclick="spotifySeekClick(event)">
+              <div class="spotify-progress-fill" id="spotify-progress-fill" style="width:0%"></div>
+            </div>
+            <span class="spotify-time" id="spotify-time-remaining" style="text-align:right">-0:00</span>
+          </div>
+        </div>
+      </div>
+      <div class="spotify-controls-row">
+        <button class="sp-toggle-btn" id="spotify-shuffle-btn" onclick="spotifyToggleShuffle()" title="Shuffle">
+          <svg viewBox="0 0 24 24"><path d="M10.59 9.17 5.41 4 4 5.41l5.17 5.17zm4.83-4.76 2.71 2.71L4 21l1.41 1.41 14.12-14.12 2.7 2.7V3h-6.81zm2.71 10.76-1.41 1.41 3 3H14v2h6.83z"/></svg>
+        </button>
+        <button class="sp-btn" onclick="spotifyPrev()" title="Vorige">
+          <svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg>
+        </button>
+        <button class="sp-btn play" id="spotify-play-btn" onclick="spotifyTogglePlay()" title="Afspelen">
+          <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        </button>
+        <button class="sp-btn" onclick="spotifyNext()" title="Volgende">
+          <svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zm2-8.14L11.03 12 8 14.14V9.86zM16 6h2v12h-2z"/></svg>
+        </button>
+        <button class="sp-toggle-btn" id="spotify-repeat-btn" onclick="spotifyToggleRepeat()" title="Herhalen">
+          <svg viewBox="0 0 24 24"><path d="M7 7h10v3l4-4-4-4v3H5v6h2zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2z"/></svg>
+        </button>
+      </div>
+      <div class="spotify-volume-row">
+        <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+        <input type="range" min="0" max="100" value="50" class="spotify-volume-slider" id="spotify-volume-slider"
+          oninput="spotifyDraggingVolume=true" onchange="spotifySetVolume(this.value)">
+      </div>
+      <button class="spotify-login-btn" id="spotify-play-here-btn" onclick="playOnDashboard()"
+        style="display:none;width:100%;margin-top:12px;justify-content:center;background:var(--bg3);color:var(--text2);border:1px solid var(--border2);">
+        ▶ Afspelen via dashboard
+      </button>
+    </div>
+    <div class="spotify-panel" id="spotify-panel-search">
+      <input class="spotify-search-input" id="spotify-search-input" placeholder="Zoek nummers, artiesten of albums..." oninput="spotifyOnSearchInput(this.value)">
+      <div id="spotify-search-results"></div>
+    </div>
+    <div class="spotify-panel" id="spotify-panel-playlists">
+      <div id="spotify-playlists-list" class="spotify-nothing">Log in om je playlists te zien</div>
+    </div>
+  `;
+  spotifyShellBuilt = true;
+  updateSpotifyPlayerUI();
+}
+
+function spotifySwitchTab(tab) {
+  ['now', 'search', 'playlists'].forEach(t => {
+    const tabBtn = document.getElementById('sp-tab-' + t);
+    const panel = document.getElementById('spotify-panel-' + t);
+    if (tabBtn) tabBtn.classList.toggle('active', t === tab);
+    if (panel) panel.classList.toggle('active', t === tab);
+  });
+  if (tab === 'playlists' && !spotifyPlaylists) spotifyLoadPlaylists();
+}
+
 function renderSpotifyLogin() {
+  spotifyShellBuilt = false;
   document.getElementById('spotify-badge').textContent = 'Inloggen';
   document.getElementById('spotify-badge').className = 'card-badge badge-amber';
   document.getElementById('spotify-sub').textContent = 'Niet verbonden';
+  const slot = document.getElementById('spotify-fav-shortcut-slot');
+  if (slot) slot.innerHTML = '';
   document.getElementById('spotify-body').innerHTML = `
     <div class="spotify-login">
       <div class="spotify-nothing">Log in om je muziek te zien en bedienen</div>
@@ -1953,92 +2079,32 @@ function renderSpotifyLogin() {
     </div>`;
 }
 
-function renderSpotifyNothing() {
-  document.getElementById('spotify-badge').textContent = 'Actief';
-  document.getElementById('spotify-badge').className = 'card-badge badge-green';
-  document.getElementById('spotify-sub').textContent = 'Verbonden';
-  document.getElementById('spotify-body').innerHTML = `<div class="spotify-nothing">Niets aan het afspelen</div>`;
-}
-
-function renderSpotifyPlayer(data) {
-  const track = data.item;
-  const isPlaying = data.is_playing;
-  const progress = data.progress_ms;
-  const duration = track.duration_ms;
-  const pct = Math.round((progress / duration) * 100);
-  const artUrl = track.album?.images?.[0]?.url || '';
-  const trackName = track.name || 'Onbekend';
-  const artistName = track.artists?.map(a => a.name).join(', ') || '';
-  const fmt = ms => `${Math.floor(ms/60000)}:${String(Math.floor((ms%60000)/1000)).padStart(2,'0')}`;
-
-  document.getElementById('spotify-badge').textContent = isPlaying ? '▶ Speelt' : '⏸ Gepauzeerd';
-  document.getElementById('spotify-badge').className = isPlaying ? 'card-badge badge-green' : 'card-badge badge-muted';
-  document.getElementById('spotify-sub').textContent = 'Verbonden';
-
-  document.getElementById('spotify-body').innerHTML = `
-    <div class="spotify-player">
-      ${artUrl
-        ? `<img class="spotify-art" src="${artUrl}" alt="Album art">`
-        : `<div class="spotify-art-placeholder">♪</div>`
-      }
-      <div class="spotify-info">
-        <div class="spotify-track" title="${trackName}">${trackName}</div>
-        <div class="spotify-artist">${artistName}</div>
-        <div class="spotify-progress-wrap">
-          <span class="spotify-time">${fmt(progress)}</span>
-          <div class="spotify-progress"><div class="spotify-progress-fill" style="width:${pct}%"></div></div>
-          <span class="spotify-time" style="text-align:right">${fmt(duration)}</span>
-        </div>
-      </div>
-    </div>
-    <div class="spotify-controls">
-      <button class="sp-btn" onclick="spotifyPrev()" title="Vorige">
-        <svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg>
-      </button>
-      <button class="sp-btn play" onclick="spotifyTogglePlay()" title="${isPlaying ? 'Pauzeren' : 'Afspelen'}">
-        ${isPlaying
-          ? `<svg viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>`
-          : `<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>`
-        }
-      </button>
-      <button class="sp-btn" onclick="spotifyNext()" title="Volgende">
-        <svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zm2-8.14L11.03 12 8 14.14V9.86zM16 6h2v12h-2z"/></svg>
-      </button>
-    </div>`;
-}
-
 async function spotifyTogglePlay() {
   if (!spotifyToken) return;
   try {
-    // Haal huidige staat op
-    const res = await fetch('https://api.spotify.com/v1/me/player', {
-      headers: { Authorization: `Bearer ${spotifyToken}` }
-    });
+    const res = await spotifyApiFetch('/me/player');
+    if (!res) return;
     if (res.status === 204 || !res.ok) {
-      // Niets speelt — start op dashboard device
       if (spotifyDeviceId) await playOnDashboard();
+      else notify('Start Spotify eerst op een apparaat', 'info');
       return;
     }
     const state = await res.json();
-    const isPlaying = state.is_playing;
-    const endpoint = isPlaying ? 'pause' : 'play';
-    await fetch(`https://api.spotify.com/v1/me/player/${endpoint}`, {
-      method: 'PUT',
-      headers: { Authorization: `Bearer ${spotifyToken}` }
-    });
+    await spotifyApiFetch(`/me/player/${state.is_playing ? 'pause' : 'play'}`, { method: 'PUT' });
     setTimeout(spotifyFetchNowPlaying, 300);
   } catch(e) {
     console.error('[Spotify] Toggle fout:', e.message);
   }
 }
 
+async function spotifyPause() {
+  await spotifyApiFetch('/me/player/pause', { method: 'PUT' });
+}
+
 async function spotifyNext() {
   if (!spotifyToken) return;
   try {
-    await fetch('https://api.spotify.com/v1/me/player/next', {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${spotifyToken}` }
-    });
+    await spotifyApiFetch('/me/player/next', { method: 'POST' });
     setTimeout(spotifyFetchNowPlaying, 600);
   } catch(e) { console.error('[Spotify] Next fout:', e.message); }
 }
@@ -2046,12 +2112,217 @@ async function spotifyNext() {
 async function spotifyPrev() {
   if (!spotifyToken) return;
   try {
-    await fetch('https://api.spotify.com/v1/me/player/previous', {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${spotifyToken}` }
-    });
+    await spotifyApiFetch('/me/player/previous', { method: 'POST' });
     setTimeout(spotifyFetchNowPlaying, 600);
   } catch(e) { console.error('[Spotify] Prev fout:', e.message); }
+}
+
+async function spotifyToggleShuffle() {
+  if (!spotifyToken || !spotifyCurrentTrack) return;
+  spotifyCurrentTrack.shuffle = !spotifyCurrentTrack.shuffle;
+  applySpotifyState(spotifyCurrentTrack);
+  await spotifyApiFetch(`/me/player/shuffle?state=${spotifyCurrentTrack.shuffle}`, { method: 'PUT' });
+}
+
+async function spotifyToggleRepeat() {
+  if (!spotifyToken || !spotifyCurrentTrack) return;
+  const order = ['off', 'context', 'track'];
+  spotifyCurrentTrack.repeat = order[(order.indexOf(spotifyCurrentTrack.repeat) + 1) % order.length];
+  applySpotifyState(spotifyCurrentTrack);
+  await spotifyApiFetch(`/me/player/repeat?state=${spotifyCurrentTrack.repeat}`, { method: 'PUT' });
+}
+
+function spotifySetVolume(val) {
+  spotifyDraggingVolume = false;
+  if (!spotifyToken) return;
+  spotifyApiFetch(`/me/player/volume?volume_percent=${Math.round(val)}`, { method: 'PUT' });
+}
+
+function spotifySeekClick(e) {
+  if (!spotifyToken || !spotifyCurrentTrack || !spotifyCurrentTrack.durationMs) return;
+  const bar = document.getElementById('spotify-progress-bar');
+  const rect = bar.getBoundingClientRect();
+  const ratio = Math.min(1, Math.max(0, (e.clientX - rect.left) / rect.width));
+  const positionMs = Math.round(ratio * spotifyCurrentTrack.durationMs);
+  spotifyCurrentTrack.progressMs = positionMs;
+  applySpotifyState(spotifyCurrentTrack);
+  spotifyApiFetch(`/me/player/seek?position_ms=${positionMs}`, { method: 'PUT' });
+}
+
+// ─── Spotify — zoeken ────────────────────────────────────
+
+function spotifyOnSearchInput(value) {
+  clearTimeout(spotifySearchTimer);
+  const q = value.trim();
+  const results = document.getElementById('spotify-search-results');
+  if (!q) { results.innerHTML = ''; return; }
+  spotifySearchTimer = setTimeout(() => spotifySearch(q), 400);
+}
+
+async function spotifySearch(q) {
+  const results = document.getElementById('spotify-search-results');
+  results.innerHTML = '<div class="spotify-nothing">Zoeken...</div>';
+  try {
+    const res = await spotifyApiFetch('/search?q=' + encodeURIComponent(q) + '&type=track,artist,album&limit=6');
+    if (!res || !res.ok) { results.innerHTML = '<div class="spotify-nothing">Zoeken mislukt</div>'; return; }
+    const data = await res.json();
+    const tracks = data.tracks?.items || [];
+    const artists = data.artists?.items || [];
+    const albums = data.albums?.items || [];
+    if (!tracks.length && !artists.length && !albums.length) {
+      results.innerHTML = '<div class="spotify-nothing">Niets gevonden</div>';
+      return;
+    }
+    let html = '';
+    if (tracks.length) {
+      html += '<div class="spotify-result-group-label">Nummers</div>' + tracks.map(t => spotifyResultRow(
+        t.album?.images?.slice(-1)[0]?.url, t.name, (t.artists || []).map(a => a.name).join(', '), t.uri, 'track')).join('');
+    }
+    if (artists.length) {
+      html += '<div class="spotify-result-group-label">Artiesten</div>' + artists.map(a => spotifyResultRow(
+        a.images?.slice(-1)[0]?.url, a.name, 'Artiest', a.uri, 'artist', true)).join('');
+    }
+    if (albums.length) {
+      html += '<div class="spotify-result-group-label">Albums</div>' + albums.map(al => spotifyResultRow(
+        al.images?.slice(-1)[0]?.url, al.name, (al.artists || []).map(a => a.name).join(', '), al.uri, 'album')).join('');
+    }
+    results.innerHTML = html;
+  } catch(e) {
+    results.innerHTML = '<div class="spotify-nothing">Zoeken mislukt</div>';
+  }
+}
+
+function spotifyResultRow(imgUrl, name, sub, uri, type, round) {
+  const art = imgUrl
+    ? `<img class="spotify-result-art${round ? ' round' : ''}" src="${imgUrl}" alt="">`
+    : `<div class="spotify-result-art${round ? ' round' : ''}"></div>`;
+  return `<div class="spotify-result-item" onclick="spotifyPlayUri('${uri}', '${type}')">
+    ${art}
+    <div class="spotify-result-info">
+      <div class="spotify-result-name">${escapeHtml(name)}</div>
+      <div class="spotify-result-sub">${escapeHtml(sub)}</div>
+    </div>
+  </div>`;
+}
+
+async function spotifyPlayUri(uri, type) {
+  if (!spotifyToken) return;
+  const body = type === 'track' ? { uris: [uri] } : { context_uri: uri };
+  const query = spotifyDeviceId ? `?device_id=${spotifyDeviceId}` : '';
+  const res = await spotifyApiFetch('/me/player/play' + query, {
+    method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
+  });
+  if (res && res.status === 404) notify('Open Spotify op een apparaat en probeer opnieuw', 'info');
+  setTimeout(spotifyFetchNowPlaying, 500);
+}
+
+// ─── Spotify — playlists ─────────────────────────────────
+
+async function spotifyLoadPlaylists() {
+  if (!spotifyToken) return;
+  const list = document.getElementById('spotify-playlists-list');
+  list.innerHTML = '<div class="spotify-nothing">Laden...</div>';
+  try {
+    const res = await spotifyApiFetch('/me/playlists?limit=50');
+    if (!res || !res.ok) { list.innerHTML = '<div class="spotify-nothing">Kon playlists niet laden</div>'; return; }
+    const data = await res.json();
+    spotifyPlaylists = data.items || [];
+    if (!spotifyPlaylists.length) { list.innerHTML = '<div class="spotify-nothing">Geen playlists gevonden</div>'; return; }
+    list.innerHTML = spotifyPlaylists.map(spotifyPlaylistRow).join('');
+  } catch(e) {
+    list.innerHTML = '<div class="spotify-nothing">Kon playlists niet laden</div>';
+  }
+}
+
+function spotifyPlaylistRow(p) {
+  const img = p.images?.[p.images.length - 1]?.url || p.images?.[0]?.url;
+  const isFav = spotifyFavoritePlaylist?.id === p.id;
+  const isFocus = spotifyFocusPlaylistId === p.id;
+  const art = img ? `<img class="spotify-playlist-art" src="${img}" alt="">` : `<div class="spotify-playlist-art"></div>`;
+  return `<div class="spotify-playlist-item">
+    <div onclick="spotifyPlayPlaylist('${p.id}')" style="display:flex;align-items:center;gap:10px;flex:1;min-width:0;">
+      ${art}
+      <div class="spotify-playlist-info">
+        <div class="spotify-playlist-name">${escapeHtml(p.name)}</div>
+        <div class="spotify-playlist-sub">${p.tracks?.total ?? 0} nummers</div>
+      </div>
+    </div>
+    <div class="spotify-playlist-actions">
+      <button class="spotify-playlist-icon-btn${isFav ? ' active' : ''}" onclick="event.stopPropagation();spotifyToggleFavoritePlaylist('${p.id}')" title="Favoriet (snelkoppeling)">
+        <svg viewBox="0 0 24 24"><path d="M12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+      </button>
+      <button class="spotify-playlist-icon-btn${isFocus ? ' active' : ''}" onclick="event.stopPropagation();spotifySetFocusPlaylist('${p.id}')" title="Gebruiken als focusmuziek">
+        <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 18a8 8 0 1 1 0-16 8 8 0 0 1 0 16zm0-14a6 6 0 1 0 0 12 6 6 0 0 0 0-12zm0 10a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm0-6a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/></svg>
+      </button>
+    </div>
+  </div>`;
+}
+
+function spotifyRerenderPlaylists() {
+  if (spotifyPlaylists) document.getElementById('spotify-playlists-list').innerHTML = spotifyPlaylists.map(spotifyPlaylistRow).join('');
+}
+
+async function spotifyPlayPlaylist(id) {
+  await spotifyPlayUri('spotify:playlist:' + id, 'playlist');
+}
+
+function spotifyToggleFavoritePlaylist(id) {
+  if (spotifyFavoritePlaylist?.id === id) {
+    spotifyFavoritePlaylist = null;
+  } else {
+    const p = spotifyPlaylists?.find(pl => pl.id === id);
+    if (!p) return;
+    spotifyFavoritePlaylist = { id, name: p.name, image: p.images?.[0]?.url || '' };
+  }
+  localStorage.setItem('spotify_fav_playlist', JSON.stringify(spotifyFavoritePlaylist));
+  renderSpotifyFavShortcut();
+  saveUserSettings();
+  spotifyRerenderPlaylists();
+}
+
+function spotifySetFocusPlaylist(id) {
+  spotifyFocusPlaylistId = (spotifyFocusPlaylistId === id) ? null : id;
+  localStorage.setItem('spotify_focus_playlist_id', spotifyFocusPlaylistId || '');
+  saveUserSettings();
+  notify(spotifyFocusPlaylistId ? '🎯 Focusmuziek ingesteld' : 'Focusmuziek uitgeschakeld', 'info');
+  spotifyRerenderPlaylists();
+}
+
+function renderSpotifyFavShortcut() {
+  const slot = document.getElementById('spotify-fav-shortcut-slot');
+  if (!slot) return;
+  if (!spotifyFavoritePlaylist) { slot.innerHTML = ''; return; }
+  slot.innerHTML = `<button class="spotify-fav-shortcut" onclick="spotifyPlayPlaylist('${spotifyFavoritePlaylist.id}')" title="Snel starten">
+    ⭐<span>${escapeHtml(spotifyFavoritePlaylist.name)}</span>
+  </button>`;
+}
+
+// ─── Spotify — integraties (agenda + Pomodoro) ──────────
+
+function checkMeetingAutoPause() {
+  if (!spotifyToken || !spotifyCurrentTrack?.isPlaying) return;
+  const now = new Date();
+  const allEvents = window._currentAgendaEvents || [];
+  allEvents.forEach(e => {
+    const attr = e.attributes || e;
+    const startRaw = attr.start?.dateTime || attr.start?.date || attr.start || '';
+    let startStr = String(startRaw).trim().replace(/\.0+$/, '');
+    if (!startStr) return;
+    const startDate = startStr.match(/Z$|[+\-]\d{2}:?\d{2}$/) ? new Date(startStr) : new Date(startStr + 'Z');
+    if (isNaN(startDate)) return;
+    const diffMinutes = (startDate - now) / 60000;
+    const key = (attr.subject || attr.title || 'Afspraak') + startStr;
+    if (diffMinutes <= 0 && diffMinutes > -1 && !spotifyPausedForEvents.has(key)) {
+      spotifyPausedForEvents.add(key);
+      spotifyPause();
+      notify('⏸ Muziek gepauzeerd — vergadering begint', 'info');
+    }
+  });
+}
+
+function spotifyStartFocusMusic() {
+  if (!spotifyToken || !spotifyFocusPlaylistId) return;
+  spotifyPlayUri('spotify:playlist:' + spotifyFocusPlaylistId, 'playlist');
 }
 
 // ─── Dagelijkse notities ────────────────────────────────
@@ -2433,6 +2704,15 @@ async function loadCloudData() {
     }
     if (s.theme) { selectedTheme = s.theme; applyTheme(s.theme); }
     if (s.accent) { selectColor(s.colorName || 'lime', s.accent, s.accentText || '#0E0E0C'); }
+    if (s.spotifyFavoritePlaylist !== undefined) {
+      spotifyFavoritePlaylist = s.spotifyFavoritePlaylist;
+      localStorage.setItem('spotify_fav_playlist', JSON.stringify(spotifyFavoritePlaylist));
+      renderSpotifyFavShortcut();
+    }
+    if (s.spotifyFocusPlaylistId !== undefined) {
+      spotifyFocusPlaylistId = s.spotifyFocusPlaylistId;
+      localStorage.setItem('spotify_focus_playlist_id', spotifyFocusPlaylistId || '');
+    }
   }
 
   // Herrender alles
@@ -2482,6 +2762,8 @@ function saveUserSettings() {
     accent: selectedAccent,
     accentText: selectedAccentText,
     colorName: selectedColor,
+    spotifyFavoritePlaylist: spotifyFavoritePlaylist || null,
+    spotifyFocusPlaylistId: spotifyFocusPlaylistId || null,
   });
 }
 
@@ -2584,8 +2866,8 @@ function initNotifications() {
       if (p === 'granted') notify('🔔 Afspraak-notificaties ingeschakeld', 'success');
     });
   }
-  setInterval(checkUpcomingMeetings, 60 * 1000);
-  setTimeout(checkUpcomingMeetings, 3000);
+  setInterval(() => { checkUpcomingMeetings(); checkMeetingAutoPause(); }, 60 * 1000);
+  setTimeout(() => { checkUpcomingMeetings(); checkMeetingAutoPause(); }, 3000);
 }
 
 function checkUpcomingMeetings() {
