@@ -48,7 +48,7 @@ function toggleModule(moduleId) {
   const idx = hiddenModules.indexOf(moduleId);
   if (idx === -1) hiddenModules.push(moduleId);
   else hiddenModules.splice(idx, 1);
-  localStorage.setItem('ps_hidden_modules', JSON.stringify(hiddenModules));
+  saveHiddenModules();
   applyModuleVisibility();
   renderModulesList();
 }
@@ -80,7 +80,7 @@ function renderModulesList() {
 
 function setAllModules(visible) {
   hiddenModules = visible ? [] : MODULES.map(m => m.id);
-  localStorage.setItem('ps_hidden_modules', JSON.stringify(hiddenModules));
+  saveHiddenModules();
   applyModuleVisibility();
   renderModulesList();
   notify(visible ? 'Alle modules zichtbaar' : 'Alle modules verborgen', 'info');
@@ -1180,7 +1180,7 @@ function toggleBugStatus(i) {
   const statuses = ['Open', 'In behandeling', 'Opgelost'];
   const cur = statuses.indexOf(bugs[i].status);
   bugs[i].status = statuses[(cur + 1) % statuses.length];
-  localStorage.setItem('ps_bugs', JSON.stringify(bugs));
+  saveBugs();
   renderBugList();
 }
 
@@ -1222,12 +1222,12 @@ function renderBugEditList() {
 
 function updateBugField(i, field, val) {
   bugs[i][field] = val;
-  localStorage.setItem('ps_bugs', JSON.stringify(bugs));
+  saveBugs();
 }
 
 function deleteBug(i) {
   bugs.splice(i, 1);
-  localStorage.setItem('ps_bugs', JSON.stringify(bugs));
+  saveBugs();
   renderBugEditList();
 }
 
@@ -1239,7 +1239,7 @@ function addBugToTracker() {
   const jiraUrl = document.getElementById('new-bug-jira').value.trim();
   if (!title) { notify('Vul een omschrijving in', 'error'); return; }
   bugs.push({ id: id || '—', title, status: 'Open', prio, category: cat, jiraUrl, zendesk: '' });
-  localStorage.setItem('ps_bugs', JSON.stringify(bugs));
+  saveBugs();
   document.getElementById('new-bug-id').value = '';
   document.getElementById('new-bug-title').value = '';
   document.getElementById('new-bug-jira').value = '';
@@ -1299,7 +1299,7 @@ _${desc}_`;
 
   // Lokaal opslaan in buglijst
   bugs.unshift({ id: bugId, title: `[${project}] ${title}`, status: 'Open', prio, category, jiraUrl: '', zendesk });
-  localStorage.setItem('ps_bugs', JSON.stringify(bugs));
+  saveBugs();
   renderBugList();
 
   document.getElementById('bug-title').value = '';
@@ -2330,6 +2330,7 @@ async function sendChat() {
 // ─── Online opslag (Cloudflare D1) ───────────────────────
 const STORAGE_URL = '/api/storage';
 let syncTimer = null;
+let bugsSyncTimer = null;
 
 async function cloudGet(key) {
   try {
@@ -2407,6 +2408,20 @@ async function loadCloudData() {
     localStorage.setItem('ps_hidden_projects', JSON.stringify(hiddenProjects));
   }
 
+  // Bugs
+  if (cloudData.bugs && cloudData.bugs.length > 0) {
+    bugs = cloudData.bugs;
+    localStorage.setItem('ps_bugs', JSON.stringify(bugs));
+  }
+
+  // Verborgen modules
+  if (cloudData.hidden_modules) {
+    hiddenModules = cloudData.hidden_modules;
+    localStorage.setItem('ps_hidden_modules', JSON.stringify(hiddenModules));
+    applyModuleVisibility();
+    renderModulesList();
+  }
+
   // Gebruikersinstellingen (naam, thema)
   if (cloudData.user_settings) {
     const s = cloudData.user_settings;
@@ -2423,6 +2438,7 @@ async function loadCloudData() {
   // Herrender alles
   renderTodos();
   renderProjects();
+  renderBugList();
 }
 
 // Sla to-do's op — lokaal + online
@@ -2443,6 +2459,19 @@ function saveProjectsCloud() {
 function saveHiddenProjects() {
   localStorage.setItem('ps_hidden_projects', JSON.stringify(hiddenProjects));
   cloudSet('hidden_projects', hiddenProjects);
+}
+
+// Sla bugs op — lokaal + online
+function saveBugs() {
+  localStorage.setItem('ps_bugs', JSON.stringify(bugs));
+  clearTimeout(bugsSyncTimer);
+  bugsSyncTimer = setTimeout(() => cloudSet('bugs', bugs), 1000);
+}
+
+// Sla verborgen modules op — lokaal + online
+function saveHiddenModules() {
+  localStorage.setItem('ps_hidden_modules', JSON.stringify(hiddenModules));
+  cloudSet('hidden_modules', hiddenModules);
 }
 
 // Sla gebruikersinstellingen op — online

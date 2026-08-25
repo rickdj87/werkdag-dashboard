@@ -283,7 +283,7 @@ async function handleStorage(req, res) {
     }
 
     if (action === 'getAll') {
-      const keys = ['todos', 'projects', 'hidden_projects', 'user_settings', 'agenda'];
+      const keys = ['todos', 'projects', 'hidden_projects', 'user_settings', 'agenda', 'bugs', 'hidden_modules'];
       const data = {};
       keys.forEach(k => { data[k] = localGet(k); });
       return jsonResponse(res, 200, data);

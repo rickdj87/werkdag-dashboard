@@ -60,7 +60,7 @@ export async function onRequestPost(context) {
     }
 
     if (action === 'getAll') {
-      const keys = ['todos', 'projects', 'hidden_projects', 'user_settings', 'agenda'];
+      const keys = ['todos', 'projects', 'hidden_projects', 'user_settings', 'agenda', 'bugs', 'hidden_modules'];
       const data = {};
       for (const k of keys) data[k] = await getValue(db, k);
       return json(data);
