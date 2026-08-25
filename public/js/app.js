@@ -2321,7 +2321,11 @@ function checkMeetingAutoPause() {
 }
 
 function spotifyStartFocusMusic() {
-  if (!spotifyToken || !spotifyFocusPlaylistId) return;
+  if (!spotifyToken) return;
+  if (!spotifyFocusPlaylistId) {
+    notify('Geen focusplaylist ingesteld — kies er een via Spotify → Playlists → 🎯', 'info');
+    return;
+  }
   spotifyPlayUri('spotify:playlist:' + spotifyFocusPlaylistId, 'playlist');
 }
 
