@@ -2808,7 +2808,7 @@ function testNotification() {
   }
   const notif = new Notification('📅 Testmelding werkdag dashboard', {
     body: 'Notificaties werken correct! Je ontvangt een melding ' + (notifSettings.minutesBefore || 5) + ' minuten voor elke afspraak.',
-    icon: 'data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'><rect width=\'100\' height=\'100\' fill=\'%230E0E0C\' rx=\'20\'/><text y=\'68\' x=\'50\' text-anchor=\'middle\' font-size=\'60\' fill=\'%23C8F55A\'>W</text></svg>',
+    icon: 'data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'><rect width=\'100\' height=\'100\' fill=\'%230E0E0C\' rx=\'20\'/><path d=\'M26 52l17 17 31-35\' stroke=\'%23C8F55A\' stroke-width=\'12\' stroke-linecap=\'round\' stroke-linejoin=\'round\' fill=\'none\'/></svg>',
     tag: 'test-notif',
   });
   notif.onclick = () => { window.focus(); notif.close(); };
@@ -2923,7 +2923,7 @@ function checkUpcomingMeetings() {
       const minLabel = mb === 1 ? '1 minuut' : mb + ' minuten';
       const notif = new Notification('📅 Over ' + minLabel + ': ' + title, {
         body: startFmt + (location ? ' · ' + location : ''),
-        icon: 'data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'><rect width=\'100\' height=\'100\' fill=\'%230E0E0C\' rx=\'20\'/><text y=\'68\' x=\'50\' text-anchor=\'middle\' font-size=\'60\' fill=\'%23C8F55A\'>W</text></svg>',
+        icon: 'data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'><rect width=\'100\' height=\'100\' fill=\'%230E0E0C\' rx=\'20\'/><path d=\'M26 52l17 17 31-35\' stroke=\'%23C8F55A\' stroke-width=\'12\' stroke-linecap=\'round\' stroke-linejoin=\'round\' fill=\'none\'/></svg>',
         tag: eventKey, renotify: false,
       });
       notif.onclick = () => { window.focus(); notif.close(); };
