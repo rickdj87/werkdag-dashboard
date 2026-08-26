@@ -2034,6 +2034,15 @@ function ensureSpotifyShell() {
         <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
         <input type="range" min="0" max="100" value="50" class="spotify-volume-slider" id="spotify-volume-slider"
           oninput="spotifyDraggingVolume=true" onchange="spotifySetVolume(this.value)">
+        <div class="spotify-device-wrap">
+          <button class="spotify-device-btn" id="spotify-device-btn" onclick="spotifyToggleDevicePicker()" title="Apparaat kiezen">
+            <svg viewBox="0 0 24 24"><path d="M4 6h16v10h-4v2h2v2H6v-2h2v-2H4V6zm2 2v6h12V8H6zm12 9a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/></svg>
+          </button>
+          <div class="spotify-device-panel" id="spotify-device-panel">
+            <div class="spotify-device-panel-label">Afspelen op</div>
+            <div id="spotify-device-list" class="spotify-nothing" style="padding:10px 8px;">Laden...</div>
+          </div>
+        </div>
       </div>
       <button class="spotify-login-btn" id="spotify-play-here-btn" onclick="playOnDashboard()"
         style="display:none;width:100%;margin-top:12px;justify-content:center;background:var(--bg3);color:var(--text2);border:1px solid var(--border2);">
@@ -2165,6 +2174,75 @@ function spotifySeekClick(e) {
   spotifyCurrentTrack.progressMs = positionMs;
   applySpotifyState(spotifyCurrentTrack);
   spotifyApiFetch(`/me/player/seek?position_ms=${positionMs}`, { method: 'PUT' });
+}
+
+// ─── Spotify — apparaat kiezen (Spotify Connect) ────────
+
+function spotifyToggleDevicePicker() {
+  const panel = document.getElementById('spotify-device-panel');
+  const btn = document.getElementById('spotify-device-btn');
+  if (!panel) return;
+  const opening = !panel.classList.contains('open');
+  panel.classList.toggle('open', opening);
+  if (btn) btn.classList.toggle('active', opening);
+  if (opening) spotifyLoadDevices();
+}
+
+document.addEventListener('click', e => {
+  const panel = document.getElementById('spotify-device-panel');
+  const btn = document.getElementById('spotify-device-btn');
+  if (!panel || !panel.classList.contains('open')) return;
+  if (panel.contains(e.target) || (btn && btn.contains(e.target))) return;
+  panel.classList.remove('open');
+  if (btn) btn.classList.remove('active');
+});
+
+async function spotifyLoadDevices() {
+  const list = document.getElementById('spotify-device-list');
+  if (!list) return;
+  list.className = 'spotify-nothing';
+  list.style.padding = '10px 8px';
+  list.textContent = 'Laden...';
+  try {
+    const res = await spotifyApiFetch('/me/player/devices');
+    if (!res || !res.ok) { list.textContent = 'Kon apparaten niet ophalen'; return; }
+    const data = await res.json();
+    const devices = data.devices || [];
+    if (!devices.length) { list.textContent = 'Geen apparaten gevonden — start Spotify ergens op'; return; }
+    list.className = '';
+    list.style.padding = '';
+    list.innerHTML = devices.map(spotifyDeviceRow).join('');
+  } catch(e) {
+    list.textContent = 'Kon apparaten niet ophalen';
+  }
+}
+
+function spotifyDeviceIcon(type) {
+  const t = (type || '').toLowerCase();
+  if (t === 'computer') return '<svg viewBox="0 0 24 24"><path d="M4 4h16v12H4V4zm0 14h16v2H4v-2z"/></svg>';
+  if (t === 'smartphone') return '<svg viewBox="0 0 24 24"><path d="M7 2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zm5 18a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/></svg>';
+  return '<svg viewBox="0 0 24 24"><path d="M12 3a1 1 0 0 1 1 1v1.06A8.002 8.002 0 0 1 20 13a8 8 0 1 1-16 0 8.002 8.002 0 0 1 7-7.94V4a1 1 0 0 1 1-1zm0 6a4 4 0 1 0 0 8 4 4 0 0 0 0-8zm0 2.5a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3z"/></svg>';
+}
+
+function spotifyDeviceRow(d) {
+  return `<div class="spotify-device-item${d.is_active ? ' active' : ''}" onclick="spotifyTransferToDevice('${d.id}')">
+    ${spotifyDeviceIcon(d.type)}
+    <div class="spotify-device-item-name">${escapeHtml(d.name)}</div>
+    ${d.is_active ? '<div class="spotify-device-item-dot"></div>' : ''}
+  </div>`;
+}
+
+async function spotifyTransferToDevice(id) {
+  const panel = document.getElementById('spotify-device-panel');
+  const btn = document.getElementById('spotify-device-btn');
+  if (panel) panel.classList.remove('open');
+  if (btn) btn.classList.remove('active');
+  await spotifyApiFetch('/me/player', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ device_ids: [id], play: true }),
+  });
+  setTimeout(spotifyFetchNowPlaying, 600);
 }
 
 // ─── Spotify — zoeken ────────────────────────────────────
